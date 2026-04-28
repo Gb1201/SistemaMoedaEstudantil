@@ -1,0 +1,57 @@
+@startuml
+title Diagrama de Casos de Uso - Sistema de Moeda Estudantil
+
+left to right direction
+
+'======================
+' ATORES
+'======================
+actor Aluno
+actor Professor
+actor "Empresa Parceira" as Empresa
+
+'======================
+' SISTEMA
+'======================
+rectangle "Sistema de Moeda Estudantil" {
+
+  ' ALUNO
+  usecase "Realizar Cadastro" as UC1
+  usecase "Fazer Login" as UC2
+  usecase "Consultar Extrato" as UC3
+  usecase "Resgatar Vantagem" as UC4
+
+  ' PROFESSOR
+  usecase "Enviar Moedas" as UC5
+
+  ' EMPRESA
+  usecase "Cadastrar Vantagem" as UC6
+
+  ' SISTEMA AUTOMÁTICO
+  usecase "Notificar por Email" as UC7
+  usecase "Gerar Cupom" as UC8
+}
+
+'======================
+' RELACIONAMENTOS
+'======================
+
+Aluno --> UC1
+Aluno --> UC2
+Aluno --> UC3
+Aluno --> UC4
+
+Professor --> UC2
+Professor --> UC3
+Professor --> UC5
+
+Empresa --> UC1
+Empresa --> UC2
+Empresa --> UC6
+
+' INCLUDE (obrigatório)
+UC5 --> UC7 : <<include>>   ' enviar moedas notifica
+UC4 --> UC8 : <<include>>   ' resgate gera cupom
+UC4 --> UC7 : <<include>>   ' resgate também envia email
+
+@enduml

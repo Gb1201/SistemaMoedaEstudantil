@@ -1,0 +1,53 @@
+@startuml
+title Diagrama de Componentes - Sistema de Moeda Estudantil
+
+'======================
+' FRONT-END
+'======================
+package "Client Side (Front-end)" {
+
+  component "Web App (React)" as ReactApp
+  component "Interfaces de Usuário\n(Auth, Formulários, Extrato, Resgate)" as UI
+
+  ReactApp --> UI : renderiza / interage
+}
+
+'======================
+' BACK-END
+'======================
+package "Server Side (Back-end - MVC)" {
+
+  component "API Controller\n(REST)" as API
+  component "Service Layer\n(Regras de Negócio)" as Service
+  component "Repository Layer\n(JPA / Hibernate / DAO)" as Repo
+  component "Email Service" as Email
+
+  API --> Service : delega requisições
+  Service --> Repo : acessa dados
+  Service --> Email : envia notificações
+
+}
+
+'======================
+' DATABASE
+'======================
+package "Data Layer" {
+
+  component "PostgreSQL Database" as DB
+}
+
+'======================
+' CONEXÕES ENTRE CAMADAS
+'======================
+
+ReactApp --> API : HTTP/JSON (REST)
+
+Repo --> DB : CRUD / ORM
+
+'======================
+' OBSERVAÇÕES DE REGRAS
+'======================
+
+
+
+@enduml

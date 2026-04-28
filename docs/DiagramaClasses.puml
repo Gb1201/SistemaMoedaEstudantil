@@ -1,0 +1,79 @@
+@startuml
+title Diagrama de Classes - Sistema de Moeda Estudantil
+
+'======================
+' ENUM
+'======================
+enum CategoriaEnum {
+  Alimentacao
+  Educacao
+  Cursos
+  Brinde
+  Servicos
+  Entretenimento
+}
+
+'======================
+' CLASSES
+'======================
+
+class AlunoModel {
+  nome : String
+  email : String
+  cpf : String
+  rg : String
+  endereco : String
+  curso : String
+  senha : String
+}
+
+class InstituicaoModel {
+  nome : String
+  cnpj : String
+}
+
+class ProfessorModel {
+  nome : String
+  cpf : String
+  departamento : String
+  saldo : double
+}
+
+class VantagemModel {
+  nome : String
+  custo : double
+  descricao : String
+  foto : String
+}
+
+class EmpresaParceira {
+  nome : String
+  email : String
+  endereco : String
+  cnpj : String
+  senha : String
+}
+
+'======================
+' RELACIONAMENTOS
+'======================
+
+' Agregação: Aluno pertence a uma instituição (1 obrigatória)
+AlunoModel "1" o-- "1" InstituicaoModel : pertence
+
+' Professor também pertence a uma instituição
+ProfessorModel "1" --> "1" InstituicaoModel : vinculado
+
+' Professor pode ter vários alunos
+ProfessorModel "1" --> "0..*" AlunoModel : gerencia
+
+' Empresa parceira cadastra várias vantagens
+EmpresaParceira "1" --> "0..*" VantagemModel : oferece
+
+' Aluno pode resgatar várias vantagens
+AlunoModel "0..*" --> "0..*" VantagemModel : resgata
+
+' Ligação com ENUM (tipo do atributo)
+VantagemModel --> CategoriaEnum 
+
+@enduml
