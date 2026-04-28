@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 
+import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 
@@ -27,11 +28,82 @@ const pageTransition = {
   transition: { duration: 0.2 },
 };
 
+const STORAGE_KEYS = {
+  currentUser: "coinwise.currentUser",
+  currentPage: "coinwise.currentPage",
+};
+
+const routeToAuthView = {
+  "/home": "home",
+  "/login": "login",
+  "/register": "register",
+};
+
+const authViewToRoute = {
+  home: "/home",
+  login: "/login",
+  register: "/register",
+};
+
+const getStoredValue = (key, fallback) => {
+  if (typeof window === "undefined") return fallback;
+  const value = localStorage.getItem(key);
+  if (value === null) return fallback;
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+};
+
 export default function App() {
-  const [authView, setAuthView] = useState("login"); // "login" | "register"
-  const [currentUser, setCurrentUser] = useState(null);
-  const [currentPage, setCurrentPage] = useState(null);
+  const [authView, setAuthView] = useState(() => routeToAuthView[window.location.pathname] || "home"); // "home" | "login" | "register"
+  const [currentUser, setCurrentUser] = useState(() => getStoredValue(STORAGE_KEYS.currentUser, null));
+  const [currentPage, setCurrentPage] = useState(() => getStoredValue(STORAGE_KEYS.currentPage, null));
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    const syncAuthViewFromUrl = () => {
+      setAuthView(routeToAuthView[window.location.pathname] || "home");
+    };
+
+    window.addEventListener("popstate", syncAuthViewFromUrl);
+    return () => window.removeEventListener("popstate", syncAuthViewFromUrl);
+  }, []);
+
+  useEffect(() => {
+    if (currentUser) return;
+
+    const route = authViewToRoute[authView] || "/home";
+    if (window.location.pathname !== route) {
+      window.history.pushState({}, "", route);
+    }
+  }, [authView, currentUser]);
+
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(currentUser));
+      return;
+    }
+
+    localStorage.removeItem(STORAGE_KEYS.currentUser);
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (currentPage) {
+      localStorage.setItem(STORAGE_KEYS.currentPage, JSON.stringify(currentPage));
+      return;
+    }
+
+    localStorage.removeItem(STORAGE_KEYS.currentPage);
+  }, [currentPage]);
+
+  useEffect(() => {
+    if (currentUser && !currentPage) {
+      setCurrentPage(defaultPageByRole[currentUser.role]);
+    }
+  }, [currentPage, currentUser]);
 
   const handleLogin = (user) => {
     setCurrentUser(user);
@@ -41,7 +113,7 @@ export default function App() {
   const handleLogout = () => {
     setCurrentUser(null);
     setCurrentPage(null);
-    setAuthView("login");
+    setAuthView("home");
   };
 
   const navigate = (page) => setCurrentPage(page);
@@ -70,9 +142,19 @@ export default function App() {
   if (!currentUser) {
     return (
       <AnimatePresence mode="wait">
-        {authView === "login" ? (
+        {authView === "home" ? (
+          <motion.div key="home" {...pageTransition}>
+            <HomePage
+              onGoLogin={() => setAuthView("login")}
+              onGoRegister={() => setAuthView("register")}
+            />
+          </motion.div>
+        ) : authView === "login" ? (
           <motion.div key="login" {...pageTransition}>
-            <LoginPage onLogin={handleLogin} onGoRegister={() => setAuthView("register")} />
+            <LoginPage
+              onLogin={handleLogin}
+              onGoRegister={() => setAuthView("register")}
+            />
           </motion.div>
         ) : (
           <motion.div key="register" {...pageTransition}>
