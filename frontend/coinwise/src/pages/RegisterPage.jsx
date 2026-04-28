@@ -3,10 +3,51 @@ import { motion } from "framer-motion";
 
 export default function RegisterPage({ onGoLogin }) {
   const [role, setRole] = useState("student");
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "", ra: "", company: "", cnpj: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirm: "",
+    ra: "",
+    company: "",
+    cnpj: "",
+    cpf: "",
+    rg: "",
+    endereco: "",
+    instituicao: "",
+    curso: ""
+  });
   const [success, setSuccess] = useState(false);
 
   const handleChange = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  const formatCPF = (value) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+      .slice(0, 14);
+  };
+
+  const formatRG = (value) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{2})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1})$/, "$1-$2")
+      .slice(0, 12);
+  };
+
+  const handleCPFChange = (e) => {
+    const formatted = formatCPF(e.target.value);
+    setForm(f => ({ ...f, cpf: formatted }));
+  };
+
+  const handleRGChange = (e) => {
+    const formatted = formatRG(e.target.value);
+    setForm(f => ({ ...f, rg: formatted }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -41,7 +82,6 @@ export default function RegisterPage({ onGoLogin }) {
           <h3 className="text-gray-800 font-black text-2xl mb-1">Criar conta</h3>
           <p className="text-gray-500 text-sm mb-6">Junte-se ao sistema de moeda estudantil</p>
 
-          {/* Role selector */}
           <div className="grid grid-cols-2 gap-3 mb-6">
             {roleOptions.map(r => (
               <button
@@ -57,6 +97,7 @@ export default function RegisterPage({ onGoLogin }) {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+
             <div>
               <label className="text-gray-600 text-sm font-medium block mb-1.5">Nome completo</label>
               <input value={form.name} onChange={handleChange("name")} required placeholder="Seu nome"
@@ -69,13 +110,47 @@ export default function RegisterPage({ onGoLogin }) {
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900/30 focus:border-blue-900 transition-all" />
             </div>
 
+            {/* Campos só para aluno */}
             {role === "student" && (
-              <div>
-                <label className="text-gray-600 text-sm font-medium block mb-1.5">Registro Acadêmico (RA)</label>
-                <input value={form.ra} onChange={handleChange("ra")} placeholder="Ex: 2024001"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900/30 focus:border-blue-900 transition-all" />
-              </div>
+              <>
+                <div>
+                  <label className="text-gray-600 text-sm font-medium block mb-1.5">CPF</label>
+                  <input value={form.cpf} onChange={handleCPFChange} placeholder="000.000.000-00"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900/30 focus:border-blue-900 transition-all" />
+                </div>
+
+                <div>
+                  <label className="text-gray-600 text-sm font-medium block mb-1.5">RG</label>
+                  <input value={form.rg} onChange={handleRGChange} placeholder="00.000.000-0"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900/30 focus:border-blue-900 transition-all" />
+                </div>
+
+                <div>
+                  <label className="text-gray-600 text-sm font-medium block mb-1.5">Registro Acadêmico (RA)</label>
+                  <input value={form.ra} onChange={handleChange("ra")} placeholder="Ex: 2024001"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900/30 focus:border-blue-900 transition-all" />
+                </div>
+
+                <div>
+                  <label className="text-gray-600 text-sm font-medium block mb-1.5">Instituição de Ensino</label>
+                  <input value={form.instituicao} onChange={handleChange("instituicao")}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900/30 focus:border-blue-900 transition-all" />
+                </div>
+
+                <div>
+                  <label className="text-gray-600 text-sm font-medium block mb-1.5">Curso</label>
+                  <input value={form.curso} onChange={handleChange("curso")}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900/30 focus:border-blue-900 transition-all" />
+                </div>
+              </>
             )}
+
+            {/* Endereço (para ambos) */}
+            <div>
+              <label className="text-gray-600 text-sm font-medium block mb-1.5">Endereço</label>
+              <input value={form.endereco} onChange={handleChange("endereco")}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900/30 focus:border-blue-900 transition-all" />
+            </div>
 
             {role === "company" && (
               <div>

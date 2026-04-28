@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = {
   student: [
@@ -19,105 +19,181 @@ const navItems = {
   ],
 };
 
-const roleLabels = {
-  student: "Aluno",
-  teacher: "Professor",
-  company: "Empresa",
-};
+const roleLabels = { student: "Aluno", teacher: "Professor", company: "Empresa" };
 
-const roleColors = {
-  student: "from-blue-900 to-blue-800",
-  teacher: "from-purple-900 to-purple-800",
-  company: "from-teal-900 to-teal-800",
+const roleConfig = {
+  student: {
+    gradient: "from-[#0f172a] to-[#1e3a5f]",
+    accent: "bg-blue-500/20 text-blue-300 border-blue-500/20",
+    badge: "bg-blue-500/20 text-blue-300",
+  },
+  teacher: {
+    gradient: "from-[#1a0f2e] to-[#3b1f6b]",
+    accent: "bg-purple-500/20 text-purple-300 border-purple-500/20",
+    badge: "bg-purple-500/20 text-purple-300",
+  },
+  company: {
+    gradient: "from-[#0a1f1e] to-[#0d3b38]",
+    accent: "bg-teal-500/20 text-teal-300 border-teal-500/20",
+    badge: "bg-teal-500/20 text-teal-300",
+  },
 };
 
 export default function Sidebar({ currentUser, currentPage, onNavigate, onLogout, collapsed, onToggle }) {
   const items = navItems[currentUser.role] || [];
-  const roleColor = roleColors[currentUser.role];
+  const config = roleConfig[currentUser.role];
 
   return (
     <motion.aside
-      animate={{ width: collapsed ? 72 : 240 }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
-      className={`fixed left-0 top-0 h-full bg-gradient-to-b ${roleColor} z-40 flex flex-col shadow-2xl overflow-hidden`}
-      style={{ minWidth: collapsed ? 72 : 240 }}
+      animate={{ width: collapsed ? 72 : 248 }}
+      transition={{ duration: 0.25, ease: "easeInOut" }}
+      className={`fixed left-0 top-0 h-full bg-gradient-to-b ${config.gradient} z-40 flex flex-col overflow-hidden`}
+      style={{
+        minWidth: collapsed ? 72 : 248,
+        boxShadow: "4px 0 24px rgba(0,0,0,0.35)",
+        borderRight: "1px solid rgba(255,255,255,0.06)",
+      }}
     >
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-white/10">
-        <div className="w-9 h-9 rounded-xl bg-yellow-400 flex items-center justify-center text-blue-900 font-black text-lg flex-shrink-0 shadow-lg">
-          ◈
+      {/* Top: Logo + collapse toggle */}
+      <div className="flex items-center justify-between px-4 py-5 border-b border-white/8">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-yellow-400 flex items-center justify-center text-blue-900 font-black text-lg flex-shrink-0 shadow-lg shadow-yellow-400/20">
+            ◈
+          </div>
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.div
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.2 }}
+                className="min-w-0"
+              >
+                <p className="text-white font-bold text-base leading-tight tracking-tight">CoinWise</p>
+                <p className="text-white/40 text-[10px] leading-none mt-0.5">Moeda Estudantil</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        {!collapsed && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
-            <p className="text-white font-bold text-base leading-tight">CoinWise</p>
-            <p className="text-white/50 text-xs">Moeda Estudantil</p>
-          </motion.div>
+
+        <button
+          onClick={onToggle}
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-white/30 hover:text-white/70 hover:bg-white/8 transition-all flex-shrink-0"
+        >
+          <span className="text-xs">{collapsed ? "▶" : "◀"}</span>
+        </button>
+      </div>
+
+      {/* User card */}
+      <div className={`px-3 py-3 border-b border-white/8 ${collapsed ? "flex justify-center" : ""}`}>
+        {collapsed ? (
+          <div className="w-10 h-10 rounded-xl bg-yellow-400 flex items-center justify-center text-blue-900 font-bold text-sm shadow-md shadow-yellow-400/20">
+            {currentUser.avatar}
+          </div>
+        ) : (
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center gap-3 px-2 py-2 rounded-xl bg-white/5 border border-white/8"
+            >
+              <div className="w-9 h-9 rounded-xl bg-yellow-400 flex items-center justify-center text-blue-900 font-bold text-sm flex-shrink-0 shadow-md shadow-yellow-400/20">
+                {currentUser.avatar}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-white font-semibold text-sm truncate leading-tight">{currentUser.name}</p>
+                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${config.badge}`}>
+                  {roleLabels[currentUser.role]}
+                </span>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         )}
       </div>
 
-      {/* User info */}
-      {!collapsed && (
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.15 }}
-          className="px-4 py-4 border-b border-white/10"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center text-blue-900 font-bold text-sm flex-shrink-0">
-              {currentUser.avatar}
-            </div>
-            <div className="min-w-0">
-              <p className="text-white font-semibold text-sm truncate">{currentUser.name}</p>
-              <span className="text-xs bg-white/20 text-white/80 px-2 py-0.5 rounded-full">
-                {roleLabels[currentUser.role]}
-              </span>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Nav items */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      {/* Nav */}
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overflow-x-hidden">
+        {!collapsed && (
+          <p className="text-white/25 text-[10px] font-semibold uppercase tracking-widest px-3 mb-3">
+            Menu
+          </p>
+        )}
         {items.map((item, i) => {
           const isActive = currentPage === item.page;
           return (
             <motion.button
               key={item.page}
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -16 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 + i * 0.05 }}
-              whileHover={{ x: 4 }}
+              transition={{ delay: 0.05 + i * 0.04 }}
+              whileHover={{ x: collapsed ? 0 : 3 }}
               onClick={() => onNavigate(item.page)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
+              title={collapsed ? item.label : undefined}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative ${
                 isActive
-                  ? "bg-yellow-400 text-blue-900 shadow-lg shadow-yellow-400/20"
-                  : "text-white/70 hover:bg-white/10 hover:text-white"
-              }`}
+                  ? "bg-yellow-400 text-blue-900 shadow-lg shadow-yellow-400/15"
+                  : "text-white/60 hover:bg-white/8 hover:text-white"
+              } ${collapsed ? "justify-center" : ""}`}
             >
-              <span className={`text-lg flex-shrink-0 ${isActive ? "text-blue-900" : "text-white/60 group-hover:text-white"}`}>
+              <span className={`text-base flex-shrink-0 leading-none ${isActive ? "text-blue-900" : "text-white/50 group-hover:text-white"}`}>
                 {item.icon}
               </span>
-              {!collapsed && (
-                <span className="font-medium text-sm">{item.label}</span>
-              )}
+
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="font-medium text-sm whitespace-nowrap"
+                  >
+                    {item.label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+
               {!collapsed && isActive && (
-                <motion.div layoutId="activeIndicator" className="ml-auto w-1.5 h-1.5 bg-blue-900 rounded-full" />
+                <motion.div
+                  layoutId="sidebarDot"
+                  className="ml-auto w-1.5 h-1.5 bg-blue-900/60 rounded-full flex-shrink-0"
+                />
+              )}
+
+              {/* Active indicator bar */}
+              {isActive && (
+                <motion.div
+                  layoutId="activeBar"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-yellow-300 rounded-r-full"
+                />
               )}
             </motion.button>
           );
         })}
       </nav>
 
-      {/* Logout */}
-      <div className="px-3 py-4 border-t border-white/10">
+      {/* Bottom: logout */}
+      <div className="px-3 pb-5 pt-3 border-t border-white/8">
         <motion.button
-          whileHover={{ x: 4 }}
+          whileHover={{ x: collapsed ? 0 : 3 }}
           onClick={onLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/60 hover:bg-red-500/20 hover:text-red-300 transition-all duration-200"
+          title={collapsed ? "Sair" : undefined}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/40 hover:bg-red-500/15 hover:text-red-300 transition-all duration-200 group ${
+            collapsed ? "justify-center" : ""
+          }`}
         >
-          <span className="text-lg flex-shrink-0">⏎</span>
-          {!collapsed && <span className="font-medium text-sm">Sair</span>}
+          <span className="text-base flex-shrink-0 group-hover:text-red-300 transition-colors">⏎</span>
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="font-medium text-sm"
+              >
+                Sair
+              </motion.span>
+            )}
+          </AnimatePresence>
         </motion.button>
       </div>
     </motion.aside>
