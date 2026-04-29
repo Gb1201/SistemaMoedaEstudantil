@@ -1,0 +1,17 @@
+Como um professor vinculado a uma instituição, eu quero enviar moedas para um aluno, para reconhecer seu bom desempenho acadêmico.
+
+Regras de Negócio
+Vínculo Institucional: O professor só pode enviar moedas para alunos pertencentes à mesma instituição à qual está vinculado.
+Saldo Disponível: O professor não pode enviar mais moedas do que possui em seu saldo semestral disponível.
+Mensagem Obrigatória: O envio deve ser acompanhado de uma justificativa descrevendo o motivo do reconhecimento.
+Persistência: A transação deve ser registrada no extrato do professor (débito) e do aluno (crédito) imediatamente após o envio.
+Notificação: O aluno deve ser notificado por e-mail ao receber as moedas.
+
+
+
+Cenário de Teste
+Cenário: Envio de moedas realizado com sucesso
+Sou um professor logado com 200 moedas disponíveis vinculado à instituição "UFMG", e existe um aluno "João Silva" matriculado na mesma instituição, quando eu seleciono João Silva, informo 30 moedas e a mensagem 
+"Excelente participação em aula" e clico em "Enviar Moedas" então meu saldo deve ser atualizado para 170 moedas, o saldo de João deve aumentar em 30 moedas e ele deve receber um e-mail de notificação.
+
+
