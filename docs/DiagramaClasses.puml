@@ -1,5 +1,6 @@
 @startuml
-title Diagrama de Classes - Sistema de Moeda Estudantil
+title Sistema de Moeda Estudantil - Diagrama de Classes (Release 1)
+left to right direction
 
 '======================
 ' ENUM
@@ -14,66 +15,100 @@ enum CategoriaEnum {
 }
 
 '======================
-' CLASSES
+' HIERARQUIA DE USUARIO
 '======================
-
-class AlunoModel {
+class Usuario {
   nome : String
   email : String
-  cpf : String
-  rg : String
-  endereco : String
-  curso : String
   senha : String
 }
 
-class InstituicaoModel {
-  nome : String
+class PessoaFisica {
+  cpf : String
+  rg : String
+}
+
+class PessoaJuridica {
   cnpj : String
 }
 
-class ProfessorModel {
-  nome : String
-  cpf : String
+Usuario <|-- PessoaFisica
+Usuario <|-- PessoaJuridica
+
+'======================
+' CLASSES PRINCIPAIS
+'======================
+class Aluno {
+  endereco : String
+  curso : String
+  saldo : double
+}
+
+class Professor {
   departamento : String
   saldo : double
 }
 
-class VantagemModel {
+class EmpresaParceira {
+  endereco : String
+}
+
+PessoaFisica <|-- Aluno
+PessoaFisica <|-- Professor
+PessoaJuridica <|-- EmpresaParceira
+
+'======================
+' INSTITUICAO
+'======================
+class Instituicao {
+  nome : String
+  cnpj : String
+}
+
+Aluno "1" --> "1" Instituicao : pertence
+Professor "1" --> "1" Instituicao : vinculado
+
+'======================
+' TRANSACAO
+'======================
+class Transacao {
+  data : Date
+  valor : double
+  mensagem : String
+  tipo : String
+}
+
+Professor "1" --> "0..*" Transacao : origina
+Transacao "0..*" --> "1" Aluno : destinado a
+
+'======================
+' VANTAGEM
+'======================
+class Vantagem {
   nome : String
   custo : double
   descricao : String
   foto : String
 }
 
-class EmpresaParceira {
-  nome : String
-  email : String
-  endereco : String
-  cnpj : String
-  senha : String
+EmpresaParceira "1" --> "0..*" Vantagem : oferece
+Vantagem "0..*" --> "1" CategoriaEnum : categorizada
+
+'======================
+' RESGATE E CUPOM
+'======================
+class Resgate {
+  dataResgate : Date
+  codigoVerificacao : String
 }
 
-'======================
-' RELACIONAMENTOS
-'======================
+class Cupom {
+  codigo : String
+  dataGeracao : Date
+}
 
-' Agregação: Aluno pertence a uma instituição (1 obrigatória)
-AlunoModel "1" o-- "1" InstituicaoModel : pertence
-
-' Professor também pertence a uma instituição
-ProfessorModel "1" --> "1" InstituicaoModel : vinculado
-
-' Professor pode ter vários alunos
-ProfessorModel "1" --> "0..*" AlunoModel : gerencia
-
-' Empresa parceira cadastra várias vantagens
-EmpresaParceira "1" --> "0..*" VantagemModel : oferece
-
-' Aluno pode resgatar várias vantagens
-AlunoModel "0..*" --> "0..*" VantagemModel : resgata
-
-' Ligação com ENUM (tipo do atributo)
-VantagemModel --> CategoriaEnum 
+Aluno "1" --> "0..*" Resgate : realiza
+Resgate "0..*" --> "1" Vantagem : referente a
+Resgate "1" --> "1" Cupom : gera
 
 @enduml

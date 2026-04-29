@@ -5,11 +5,13 @@ title Diagrama de Componentes - Sistema de Moeda Estudantil
 ' FRONT-END
 '======================
 package "Client Side (Front-end)" {
-
   component "Web App (React)" as ReactApp
-  component "Interfaces de Usuário\n(Auth, Formulários, Extrato, Resgate)" as UI
 
-  ReactApp --> UI : renderiza / interage
+  note right of ReactApp
+    Telas: Login, Cadastro,
+    Extrato, Envio de Moedas,
+    Resgate de Vantagens
+  end note
 }
 
 '======================
@@ -17,37 +19,36 @@ package "Client Side (Front-end)" {
 '======================
 package "Server Side (Back-end - MVC)" {
 
-  component "API Controller\n(REST)" as API
+  component "API Controller (REST)" as API
+  component "Auth / Security (JWT)" as Auth
   component "Service Layer\n(Regras de Negócio)" as Service
-  component "Repository Layer\n(JPA / Hibernate / DAO)" as Repo
-  component "Email Service" as Email
+  component "Repository Layer\n(JPA / Hibernate)" as Repo
 
+  API --> Auth : valida token
   API --> Service : delega requisições
   Service --> Repo : acessa dados
-  Service --> Email : envia notificações
-
 }
 
 '======================
-' DATABASE
+' SERVIÇO EXTERNO
+'======================
+package "Serviços Externos" {
+  component "SMTP / Email Provider" as Email
+}
+
+Service --> Email : envia notificações\n(moedas recebidas, cupom)
+
+'======================
+' DATA LAYER
 '======================
 package "Data Layer" {
-
-  component "PostgreSQL Database" as DB
+  database "PostgreSQL" as DB
 }
 
 '======================
 ' CONEXÕES ENTRE CAMADAS
 '======================
-
-ReactApp --> API : HTTP/JSON (REST)
-
+ReactApp --> API : HTTP / JSON (REST)
 Repo --> DB : CRUD / ORM
-
-'======================
-' OBSERVAÇÕES DE REGRAS
-'======================
-
-
 
 @enduml

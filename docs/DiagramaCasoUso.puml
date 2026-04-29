@@ -9,6 +9,7 @@ left to right direction
 actor Aluno
 actor Professor
 actor "Empresa Parceira" as Empresa
+actor "Sistema (Automático)" as Sistema
 
 '======================
 ' SISTEMA
@@ -16,7 +17,7 @@ actor "Empresa Parceira" as Empresa
 rectangle "Sistema de Moeda Estudantil" {
 
   ' ALUNO
-  usecase "Realizar Cadastro" as UC1
+  usecase "Realizar Cadastro\n(Aluno)" as UC1
   usecase "Fazer Login" as UC2
   usecase "Consultar Extrato" as UC3
   usecase "Resgatar Vantagem" as UC4
@@ -25,11 +26,12 @@ rectangle "Sistema de Moeda Estudantil" {
   usecase "Enviar Moedas" as UC5
 
   ' EMPRESA
-  usecase "Cadastrar Vantagem" as UC6
+  usecase "Realizar Cadastro\n(Empresa Parceira)" as UC6
+  usecase "Cadastrar Vantagem" as UC7
 
   ' SISTEMA AUTOMÁTICO
-  usecase "Notificar por Email" as UC7
-  usecase "Gerar Cupom" as UC8
+  usecase "Notificar por Email" as UC8
+  usecase "Gerar Cupom" as UC9
 }
 
 '======================
@@ -45,13 +47,19 @@ Professor --> UC2
 Professor --> UC3
 Professor --> UC5
 
-Empresa --> UC1
-Empresa --> UC2
 Empresa --> UC6
+Empresa --> UC2
+Empresa --> UC7
 
-' INCLUDE (obrigatório)
-UC5 --> UC7 : <<include>>   ' enviar moedas notifica
-UC4 --> UC8 : <<include>>   ' resgate gera cupom
-UC4 --> UC7 : <<include>>   ' resgate também envia email
+' Professor é pré-cadastrado pela instituição — sem UC1
+
+' INCLUDE obrigatórios
+UC5 ..> UC8 : <<include>>
+UC4 ..> UC9 : <<include>>
+UC4 ..> UC8 : <<include>>
+UC6 ..> UC7 : <<include>>
+
+' Sistema notifica empresa no resgate
+Sistema --> UC8
 
 @enduml
