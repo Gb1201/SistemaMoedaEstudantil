@@ -1,0 +1,14 @@
+
+Como uma empresa parceira autenticada no sistema, eu quero cadastrar uma nova vantagem com nome, descrição, imagem e custo em moedas, para que os alunos possam visualizá-la e resgatá-la pelo catálogo de benefícios.
+
+Regras de Negócio:
+Autenticação Obrigatória: Somente empresas parceiras autenticadas podem cadastrar vantagens no sistema.
+Campos Obrigatórios: Nome, descrição, imagem e custo em moedas são obrigatórios para a conclusão do cadastro.
+Custo Válido: O custo em moedas deve ser um número inteiro maior que zero.
+Disponibilidade Imediata: A vantagem deve aparecer no catálogo dos alunos imediatamente após o cadastro.
+Vínculo com a Empresa: Cada vantagem deve estar associada à empresa que a criou, e somente ela pode editá-la ou desativá-la.
+
+
+Cenário: Cadastro de vantagem realizado com sucesso
+Sou uma empresa parceira logada com o nome "Café Central", quando eu preencho o formulário com nome "Café Grátis", descrição "Um café coado gratuito em qualquer unidade",
+custo de 50 moedas e faço upload de uma imagem e clico em "Cadastrar Vantagem" então a vantagem "Café Grátis" deve aparecer listada no catálogo de benefícios disponíveis para os alunos com o custo de 50 moedas.
