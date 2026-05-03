@@ -16,33 +16,33 @@ export function StudentTransactions({ currentUser }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ background: "linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)", minHeight: "100vh", padding: "1.5rem", margin: "-1.5rem", width: "calc(100% + 3rem)" }}>
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h2 className="text-gray-800 font-black text-2xl">Extrato</h2>
-        <p className="text-gray-400 text-sm mt-0.5">Histórico completo de movimentações</p>
+        <h2 className="text-white font-black text-2xl">Extrato</h2>
+        <p className="text-white/40 text-sm mt-0.5">Histórico completo de movimentações</p>
       </motion.div>
 
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Saldo atual", value: currentUser.balance, color: "text-yellow-600", bg: "bg-yellow-50" },
-          { label: "Total recebido", value: `+${totals.received}`, color: "text-green-600", bg: "bg-green-50" },
-          { label: "Total gasto", value: `-${totals.spent}`, color: "text-red-500", bg: "bg-red-50" },
+          { label: "Saldo atual", value: currentUser.balance, color: "text-yellow-400", bg: "bg-yellow-400/10" },
+          { label: "Total recebido", value: `+${totals.received}`, color: "text-green-400", bg: "bg-green-500/10" },
+          { label: "Total gasto", value: `-${totals.spent}`, color: "text-red-400", bg: "bg-red-500/10" },
         ].map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
             className={`${s.bg} rounded-2xl p-4 text-center border border-white shadow-sm`}>
             <p className={`font-black text-2xl ${s.color}`}>{s.value}</p>
-            <p className="text-gray-500 text-xs mt-1">{s.label}</p>
+            <p className="text-white/40 text-xs mt-1">{s.label}</p>
           </motion.div>
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+      <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(14px)" }}>
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-          <h3 className="text-gray-800 font-bold">Movimentações</h3>
+          <h3 className="text-white font-bold">Movimentações</h3>
           <div className="flex gap-2">
             {[["all", "Todos"], ["received", "Recebidos"], ["spent", "Gastos"]].map(([val, lbl]) => (
               <button key={val} onClick={() => setFilter(val)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${filter === val ? "bg-blue-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${filter === val ? "bg-blue-900 text-white" : "bg-white/8 text-white/50 hover:bg-white/12"}`}>
                 {lbl}
               </button>
             ))}
@@ -51,7 +51,7 @@ export function StudentTransactions({ currentUser }) {
         <div className="space-y-2">
           {filtered.map((tx, i) => <TransactionItem key={tx.id} tx={tx} index={i} />)}
           {filtered.length === 0 && (
-            <div className="text-center py-10 text-gray-400">
+            <div className="text-center py-10 text-white/30">
               <p className="text-4xl mb-2">📭</p>
               <p className="text-sm">Nenhuma transação encontrada</p>
             </div>
@@ -81,15 +81,15 @@ export function StudentRewards({ currentUser }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ background: "linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)", minHeight: "100vh", padding: "1.5rem", margin: "-1.5rem", width: "calc(100% + 3rem)" }}>
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h2 className="text-gray-800 font-black text-2xl">Vantagens</h2>
-        <p className="text-gray-400 text-sm mt-0.5">Troque suas moedas por benefícios reais</p>
+        <h2 className="text-white font-black text-2xl">Vantagens</h2>
+        <p className="text-white/40 text-sm mt-0.5">Troque suas moedas por benefícios reais</p>
       </motion.div>
 
       {success && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          className="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center gap-3">
+          className="bg-green-500/10 border border-green-200 rounded-2xl p-4 flex items-center gap-3">
           <span className="text-2xl">🎉</span>
           <div>
             <p className="text-green-700 font-bold text-sm">Resgate confirmado!</p>
@@ -111,7 +111,7 @@ export function StudentRewards({ currentUser }) {
       <div className="flex gap-2 flex-wrap">
         {categories.map(cat => (
           <button key={cat} onClick={() => setFilter(cat)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all capitalize ${filter === cat ? "bg-blue-900 text-white" : "bg-white text-gray-600 border border-gray-200 hover:border-blue-900"}`}>
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all capitalize ${filter === cat ? "bg-blue-900 text-white" : "bg-white/5 text-white/50 border border-white/10 hover:border-yellow-400/50"}`}>
             {cat === "all" ? "Todos" : cat}
           </button>
         ))}
@@ -133,16 +133,16 @@ export function StudentRewards({ currentUser }) {
         confirmColor="yellow"
       >
         {redeemTarget && (
-          <div className="bg-gray-50 rounded-xl p-4">
+          <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
             <div className="flex items-center gap-3">
               <span className="text-3xl">{redeemTarget.image}</span>
               <div>
-                <p className="text-gray-800 font-bold text-sm">{redeemTarget.name}</p>
-                <p className="text-gray-500 text-xs">{redeemTarget.company}</p>
+                <p className="text-white font-bold text-sm">{redeemTarget.name}</p>
+                <p className="text-white/40 text-xs">{redeemTarget.company}</p>
                 <p className="text-yellow-600 font-black text-lg mt-1">-{redeemTarget.cost} moedas</p>
               </div>
             </div>
-            <p className="text-gray-500 text-xs mt-3">Saldo após resgate: <strong className="text-gray-700">{currentUser.balance - redeemTarget.cost} moedas</strong></p>
+            <p className="text-white/40 text-xs mt-3">Saldo após resgate: <strong className="text-white/80">{currentUser.balance - redeemTarget.cost} moedas</strong></p>
           </div>
         )}
       </Modal>
@@ -155,16 +155,16 @@ export function StudentProfile({ currentUser }) {
   const [form, setForm] = useState({ name: currentUser.name, email: currentUser.email, course: currentUser.course, semester: currentUser.semester });
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div style={{ background: "linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)", minHeight: "100vh", padding: "1.5rem", margin: "-1.5rem", width: "calc(100% + 3rem)" }}><div className="space-y-6 max-w-2xl">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h2 className="text-gray-800 font-black text-2xl">Meu Perfil</h2>
-        <p className="text-gray-400 text-sm mt-0.5">Gerencie suas informações pessoais</p>
+        <h2 className="text-white font-black text-2xl">Meu Perfil</h2>
+        <p className="text-white/40 text-sm mt-0.5">Gerencie suas informações pessoais</p>
       </motion.div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="h-24 bg-gradient-to-r from-blue-900 to-blue-700 relative">
+      <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+        <div className="h-24 relative" style={{ background: "linear-gradient(135deg, rgba(250,204,21,0.15) 0%, rgba(30,58,95,0.8) 60%, rgba(15,23,42,0.9) 100%)" }}>
           <div className="absolute -bottom-10 left-6">
-            <div className="w-20 h-20 rounded-2xl bg-yellow-400 border-4 border-white flex items-center justify-center text-blue-900 font-black text-2xl shadow-lg">
+            <div className="w-20 h-20 rounded-2xl bg-yellow-400 flex items-center justify-center text-blue-900 font-black text-2xl shadow-lg" style={{ border: "4px solid rgba(15,23,42,0.8)" }}>
               {currentUser.avatar}
             </div>
           </div>
@@ -172,8 +172,8 @@ export function StudentProfile({ currentUser }) {
         <div className="pt-14 px-6 pb-6">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-gray-800 font-bold text-xl">{currentUser.name}</h3>
-              <p className="text-gray-400 text-sm">{currentUser.email}</p>
+              <h3 className="text-white font-bold text-xl">{currentUser.name}</h3>
+              <p className="text-white/40 text-sm">{currentUser.email}</p>
               <div className="flex gap-2 mt-2 flex-wrap">
                 <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full">Aluno</span>
                 <span className="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2.5 py-1 rounded-full">{currentUser.balance} moedas</span>
@@ -181,7 +181,7 @@ export function StudentProfile({ currentUser }) {
               </div>
             </div>
             <button onClick={() => setEditing(!editing)}
-              className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors">
+              className="px-4 py-2 rounded-xl border border-white/15 text-white/60 text-sm font-medium hover:bg-white/8 transition-colors">
               {editing ? "Cancelar" : "✏️ Editar"}
             </button>
           </div>
@@ -194,12 +194,12 @@ export function StudentProfile({ currentUser }) {
               { label: "Email", key: "email" },
             ].map(field => (
               <div key={field.key}>
-                <label className="text-gray-400 text-xs font-medium block mb-1">{field.label}</label>
+                <label className="text-white/40 text-xs font-medium block mb-1">{field.label}</label>
                 {editing ? (
                   <input value={form[field.key]} onChange={e => setForm(f => ({ ...f, [field.key]: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-gray-700 text-sm focus:outline-none focus:border-blue-900" />
+                    className="w-full px-3 py-2 rounded-xl border border-white/15 text-white/75 text-sm focus:outline-none focus:border-yellow-400/50" style={{ background: "rgba(255,255,255,0.05)", color: "white", borderColor: "rgba(255,255,255,0.15)" }} />
                 ) : (
-                  <p className="text-gray-700 font-medium text-sm">{form[field.key]}</p>
+                  <p className="text-white/80 font-medium text-sm">{form[field.key]}</p>
                 )}
               </div>
             ))}
@@ -207,12 +207,13 @@ export function StudentProfile({ currentUser }) {
 
           {editing && (
             <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setEditing(false)}
-              className="mt-4 px-6 py-2.5 bg-blue-900 text-white rounded-xl font-bold text-sm hover:bg-blue-800 transition-colors">
+              className="mt-4 px-6 py-2.5 bg-yellow-400 text-blue-900 rounded-xl font-bold text-sm hover:bg-yellow-300 transition-colors">
               Salvar alterações
             </motion.button>
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }

@@ -5,9 +5,9 @@ export function TransactionItem({ tx, index = 0 }) {
   const isSpent = tx.type === "spent";
 
   const typeConfig = {
-    received: { icon: "↓", color: "text-green-500", bg: "bg-green-50", border: "border-green-100", label: "Recebido", amountColor: "text-green-600" },
-    spent: { icon: "↑", color: "text-red-500", bg: "bg-red-50", border: "border-red-100", label: "Resgatado", amountColor: "text-red-500" },
-    sent: { icon: "→", color: "text-blue-500", bg: "bg-blue-50", border: "border-blue-100", label: "Enviado", amountColor: "text-blue-600" },
+    received: { icon: "↓", color: "#4ade80", bgStyle: { background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)" }, label: "Recebido", amountColor: "#4ade80" },
+    spent: { icon: "↑", color: "#f87171", bgStyle: { background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }, label: "Resgatado", amountColor: "#f87171" },
+    sent: { icon: "→", color: "#60a5fa", bgStyle: { background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.2)" }, label: "Enviado", amountColor: "#60a5fa" },
   };
 
   const config = typeConfig[tx.type] || typeConfig.received;
@@ -20,32 +20,32 @@ export function TransactionItem({ tx, index = 0 }) {
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.05 }}
       whileHover={{ x: 2 }}
-      className={`flex items-center gap-4 p-4 rounded-xl border ${config.border} ${config.bg}/30 hover:${config.bg} transition-all duration-200`}
+      style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "1rem", borderRadius: "0.75rem", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", transition: "all 0.2s" }}
     >
-      <div className={`w-10 h-10 rounded-xl ${config.bg} border ${config.border} flex items-center justify-center flex-shrink-0`}>
-        <span className={`${config.color} font-bold text-lg`}>{config.icon}</span>
+      <div style={{ width: 40, height: 40, borderRadius: "0.75rem", ...config.bgStyle, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <span style={{ color: config.color, fontWeight: "bold", fontSize: "1.125rem" }}>{config.icon}</span>
       </div>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-gray-700 font-semibold text-sm truncate">
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+          <p style={{ color: "rgba(255,255,255,0.85)", fontWeight: 600, fontSize: "0.875rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {tx.from || tx.to || "Sistema"}
           </p>
-          <span className={`text-xs px-2 py-0.5 rounded-full ${config.bg} ${config.color} font-medium border ${config.border}`}>
+          <span style={{ fontSize: "0.75rem", padding: "0.125rem 0.5rem", borderRadius: "9999px", ...config.bgStyle, color: config.color, fontWeight: 500 }}>
             {config.label}
           </span>
         </div>
         {tx.message && (
-          <p className="text-gray-400 text-xs mt-0.5 truncate">{tx.message}</p>
+          <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.75rem", marginTop: "0.125rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{tx.message}</p>
         )}
-        <p className="text-gray-300 text-xs mt-0.5">{formatted}</p>
+        <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.75rem", marginTop: "0.125rem" }}>{formatted}</p>
       </div>
 
-      <div className="text-right flex-shrink-0">
-        <p className={`font-black text-base ${config.amountColor}`}>
+      <div style={{ textAlign: "right", flexShrink: 0 }}>
+        <p style={{ fontWeight: 900, fontSize: "1rem", color: config.amountColor }}>
           {isReceived ? "+" : "-"}{tx.amount}
         </p>
-        <p className="text-gray-400 text-xs">moedas</p>
+        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem" }}>moedas</p>
       </div>
     </motion.div>
   );
@@ -60,7 +60,7 @@ export function RewardCard({ reward, onRedeem, index = 0 }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.08 }}
       whileHover={{ y: -4, boxShadow: "0 20px 40px rgba(0,0,0,0.08)" }}
-      className={`bg-white rounded-2xl border ${reward.available ? "border-gray-100" : "border-gray-100 opacity-60"} shadow-sm overflow-hidden transition-all duration-200`}
+      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "1rem", overflow: "hidden", transition: "all 0.2s", opacity: reward.available ? 1 : 0.6 }}
     >
       {/* Image area */}
       <div className="h-24 bg-gradient-to-br from-blue-900 to-blue-700 flex items-center justify-center relative">
@@ -76,15 +76,15 @@ export function RewardCard({ reward, onRedeem, index = 0 }) {
       </div>
 
       <div className="p-4">
-        <p className="text-gray-800 font-bold text-sm leading-tight">{reward.name}</p>
-        <p className="text-gray-500 text-xs mt-1 leading-snug line-clamp-2">{reward.description}</p>
-        <p className="text-gray-400 text-xs mt-1">{reward.company}</p>
+        <p style={{ color: "rgba(255,255,255,0.9)", fontWeight: 700, fontSize: "0.875rem", lineHeight: 1.3 }}>{reward.name}</p>
+        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", marginTop: "0.25rem", lineHeight: 1.4 }}>{reward.description}</p>
+        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", marginTop: "0.25rem" }}>{reward.company}</p>
 
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center gap-1.5">
-            <span className="text-yellow-500 text-base">◈</span>
-            <span className="text-gray-800 font-black text-lg">{reward.cost}</span>
-            <span className="text-gray-400 text-xs">moedas</span>
+            <span style={{ color: "#facc15", fontSize: "1rem" }}>◈</span>
+            <span style={{ color: "white", fontWeight: 900, fontSize: "1.125rem" }}>{reward.cost}</span>
+            <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem" }}>moedas</span>
           </div>
 
           {reward.available && (
@@ -93,11 +93,11 @@ export function RewardCard({ reward, onRedeem, index = 0 }) {
               whileTap={{ scale: 0.95 }}
               onClick={() => onRedeem && onRedeem(reward)}
               disabled={!canAfford}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
-                canAfford
-                  ? "bg-yellow-400 text-blue-900 hover:bg-yellow-300 shadow-sm shadow-yellow-200"
-                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
-              }`}
+              className="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200"
+              style={canAfford
+                ? { background: "#facc15", color: "#1e3a5f" }
+                : { background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.25)", cursor: "not-allowed" }
+              }
             >
               {canAfford ? "Resgatar" : "Saldo insuf."}
             </motion.button>
@@ -105,7 +105,7 @@ export function RewardCard({ reward, onRedeem, index = 0 }) {
         </div>
 
         {reward.totalRedeemed !== undefined && (
-          <p className="text-gray-300 text-xs mt-2">{reward.totalRedeemed} resgates</p>
+          <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.75rem", marginTop: "0.5rem" }}>{reward.totalRedeemed} resgates</p>
         )}
       </div>
     </motion.div>

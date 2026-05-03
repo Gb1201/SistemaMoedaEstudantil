@@ -24,18 +24,18 @@ const roleLabels = { student: "Aluno", teacher: "Professor", company: "Empresa" 
 const roleConfig = {
   student: {
     gradient: "from-[#0f172a] to-[#1e3a5f]",
-    accent: "bg-blue-500/20 text-blue-300 border-blue-500/20",
-    badge: "bg-blue-500/20 text-blue-300",
+    accent: "bg-yellow-400/15 text-yellow-300 border-yellow-400/20",
+    badge: "bg-yellow-400/15 text-yellow-300",
   },
   teacher: {
-    gradient: "from-[#1a0f2e] to-[#3b1f6b]",
-    accent: "bg-purple-500/20 text-purple-300 border-purple-500/20",
-    badge: "bg-purple-500/20 text-purple-300",
+    gradient: "from-[#0f172a] to-[#2d1f5e]",
+    accent: "bg-yellow-400/15 text-yellow-300 border-yellow-400/20",
+    badge: "bg-violet-500/25 text-violet-300",
   },
   company: {
-    gradient: "from-[#0a1f1e] to-[#0d3b38]",
-    accent: "bg-teal-500/20 text-teal-300 border-teal-500/20",
-    badge: "bg-teal-500/20 text-teal-300",
+    gradient: "from-[#0f172a] to-[#0d3530]",
+    accent: "bg-yellow-400/15 text-yellow-300 border-yellow-400/20",
+    badge: "bg-emerald-500/25 text-emerald-300",
   },
 };
 

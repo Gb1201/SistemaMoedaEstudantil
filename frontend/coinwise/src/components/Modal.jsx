@@ -27,18 +27,18 @@ export default function Modal({ open, onClose, onConfirm, title, description, co
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: "spring", damping: 20, stiffness: 300 }}
             onClick={e => e.stopPropagation()}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+            className="rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" style={{ background: "linear-gradient(160deg, #0f172a 0%, #1a2f50 100%)", border: "1px solid rgba(255,255,255,0.1)" }}
           >
             {/* Header */}
             <div className="px-6 pt-6 pb-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="text-gray-800 font-bold text-lg">{title}</h3>
-                  {description && <p className="text-gray-500 text-sm mt-1">{description}</p>}
+                  <h3 className="text-white font-bold text-lg">{title}</h3>
+                  {description && <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.875rem", marginTop: "0.25rem" }}>{description}</p>}
                 </div>
                 <button
                   onClick={onClose}
-                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors ml-4 flex-shrink-0"
+                  className="w-8 h-8 rounded-full flex items-center justify-center transition-colors ml-4 flex-shrink-0" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)" }}
                 >
                   ✕
                 </button>
@@ -55,7 +55,7 @@ export default function Modal({ open, onClose, onConfirm, title, description, co
               <div className="px-6 pb-6 flex gap-3">
                 <button
                   onClick={onClose}
-                  className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold text-sm hover:bg-gray-50 transition-colors"
+                  className="flex-1 py-2.5 rounded-xl font-semibold text-sm transition-colors" style={{ border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.5)", background: "transparent" }}
                 >
                   Cancelar
                 </button>

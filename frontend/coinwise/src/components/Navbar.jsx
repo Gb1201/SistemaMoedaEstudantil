@@ -11,7 +11,6 @@ export default function Navbar({ currentUser, onToggleSidebar, collapsed }) {
   const typeIcon = { received: "↓", reward: "🎁", spent: "↑" };
   const typeColor = { received: "text-green-600", reward: "text-yellow-600", spent: "text-red-500" };
 
-  // ✅ Detecta mobile corretamente
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
@@ -21,27 +20,30 @@ export default function Navbar({ currentUser, onToggleSidebar, collapsed }) {
 
   return (
     <header
-      className="fixed top-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-sm"
+      className="fixed top-0 right-0 z-30 backdrop-blur-md shadow-sm"
       style={{
         left: isMobile ? 0 : (collapsed ? 72 : 240),
         transition: "left 0.3s ease",
+        backgroundColor: "rgba(10,20,40,0.92)",
+        borderBottom: "1px solid rgba(255,255,255,0.08)",
       }}
     >
       <div className="flex items-center justify-between px-4 md:px-6 h-16">
+        
         {/* LEFT */}
         <div className="flex items-center gap-3 md:gap-4">
           <button
             onClick={onToggleSidebar}
-            className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-500"
+            className="p-2 rounded-xl transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}
           >
             <span className="text-xl">☰</span>
           </button>
 
           <div>
-            <h1 className="text-gray-800 font-bold text-sm md:text-base leading-tight">
+            <h1 className="text-white font-bold text-sm md:text-base leading-tight">
               Bem-vindo, {currentUser.name.split(" ")[0]}! 👋
             </h1>
-            <p className="text-gray-400 text-[10px] md:text-xs">
+            <p className="text-white/40 text-[10px] md:text-xs">
               {new Date().toLocaleDateString("pt-BR", {
                 weekday: "long",
                 day: "numeric",
@@ -53,14 +55,15 @@ export default function Navbar({ currentUser, onToggleSidebar, collapsed }) {
 
         {/* RIGHT */}
         <div className="flex items-center gap-2 md:gap-3">
+          
           {/* 🔔 Notifications */}
           <div className="relative">
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowNotifs(!showNotifs)}
-              className="relative p-2 rounded-xl hover:bg-gray-100 transition-colors"
+              className="relative p-2 rounded-xl transition-colors" style={{ color: "rgba(255,255,255,0.6)" }}
             >
-              <span className="text-lg md:text-xl text-gray-600">🔔</span>
+              <span className="text-lg md:text-xl">🔔</span>
 
               {unread > 0 && (
                 <motion.span
@@ -80,10 +83,11 @@ export default function Navbar({ currentUser, onToggleSidebar, collapsed }) {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-12 w-72 md:w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50"
+                  className="absolute right-0 top-12 w-72 md:w-80 rounded-2xl shadow-2xl overflow-hidden z-50"
+                  style={{ background: "linear-gradient(160deg, #0f172a 0%, #1a2f50 100%)", border: "1px solid rgba(255,255,255,0.1)" }}
                 >
-                  <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                    <p className="font-bold text-gray-800 text-sm">Notificações</p>
+                  <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                    <p className="font-bold text-white text-sm">Notificações</p>
 
                     {unread > 0 && (
                       <span className="bg-orange-100 text-orange-600 text-xs font-semibold px-2 py-0.5 rounded-full">
@@ -92,14 +96,14 @@ export default function Navbar({ currentUser, onToggleSidebar, collapsed }) {
                     )}
                   </div>
 
-                  <div className="divide-y divide-gray-50 max-h-72 overflow-y-auto">
+                  <div className="max-h-72 overflow-y-auto" style={{ borderTop: "none" }}>
                     {mockNotifications.map(n => (
                       <motion.div
                         key={n.id}
                         initial={{ opacity: 0, x: 10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className={`px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer ${
-                          !n.read ? "bg-blue-50/50" : ""
+                        className={`px-4 py-3 transition-colors cursor-pointer ${
+                          !n.read ? "bg-white/5" : ""
                         }`}
                       >
                         <div className="flex items-start gap-3">
@@ -108,8 +112,8 @@ export default function Navbar({ currentUser, onToggleSidebar, collapsed }) {
                           </span>
 
                           <div>
-                            <p className="text-gray-700 text-xs leading-snug">{n.message}</p>
-                            <p className="text-gray-400 text-xs mt-1">{n.time}</p>
+                            <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "0.75rem", lineHeight: 1.4 }}>{n.message}</p>
+                            <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", marginTop: "0.25rem" }}>{n.time}</p>
                           </div>
 
                           {!n.read && (
@@ -125,13 +129,13 @@ export default function Navbar({ currentUser, onToggleSidebar, collapsed }) {
           </div>
 
           {/* 👤 Avatar */}
-          <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-2 md:px-3 py-1.5 border border-gray-100">
+          <div className="flex items-center gap-2 rounded-xl px-2 md:px-3 py-1.5" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }}>
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-900 to-blue-700 flex items-center justify-center text-yellow-400 font-bold text-xs">
               {currentUser.avatar}
             </div>
 
             <div className="hidden sm:block">
-              <p className="text-gray-700 font-semibold text-xs">
+              <p className="text-white/80 font-semibold text-xs">
                 {currentUser.name.split(" ")[0]}
               </p>
             </div>
