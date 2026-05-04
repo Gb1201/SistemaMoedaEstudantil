@@ -37,6 +37,12 @@ export const alunosApi = {
 
   /** DELETE /alunos/:id — Remove um aluno pelo ID */
   deletar: (id) => request(`/alunos/${id}`, { method: "DELETE" }),
+
+  login: (dados) =>
+    request("/alunos/login", {
+      method: "POST",
+      body: JSON.stringify(dados),
+    }),
 };
 
 // ── Empresas ──────────────────────────────────────────────────────────────────

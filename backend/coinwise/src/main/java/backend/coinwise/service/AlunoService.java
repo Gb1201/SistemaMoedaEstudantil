@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import backend.coinwise.dtos.LoginRequest;
 import backend.coinwise.model.Aluno;
 import backend.coinwise.repository.AlunoRepository;
 
@@ -61,5 +62,16 @@ public class AlunoService {
 
 
         alunorepor.delete(alunoExistente); // deleta o aluno do banco de dados 
+    }
+
+
+    public Aluno login(LoginRequest login){
+        Aluno aluno = alunorepor.findByEmail(login.getEmail());
+
+        if(aluno == null || !aluno.getSenha().equals(login.getSenha())){
+            throw new IllegalArgumentException("Email ou senha inválidos");
+        }
+
+        return aluno;
     }
 }

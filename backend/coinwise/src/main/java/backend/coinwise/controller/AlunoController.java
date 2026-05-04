@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import backend.coinwise.dtos.LoginRequest;
 import backend.coinwise.model.Aluno;
 import backend.coinwise.service.AlunoService;
 
@@ -60,5 +61,12 @@ public class AlunoController {
         alunoService.deletarAluno(id);
         return ResponseEntity.noContent().build();
     } 
+
+
+    @PostMapping("/login")
+    public ResponseEntity<Aluno> login(@RequestBody LoginRequest login){
+        Aluno alunoLogado = alunoService.login(login);
+        return ResponseEntity.ok(alunoLogado);
+    }
 
 }

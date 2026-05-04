@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { mockUsers } from "../data/mockData";
-
-const allUsers = [...mockUsers.students, ...mockUsers.teachers, ...mockUsers.companies];
+import { alunosApi } from "../api/api";
 
 const FONT = "'Sora', 'Nunito', sans-serif";
 
@@ -41,30 +39,19 @@ export default function LoginPage({ onLogin, onGoRegister }) {
     e.preventDefault();
     setLoading(true);
     setError("");
-    await new Promise((r) => setTimeout(r, 800));
-    const user = allUsers.find((u) => u.email === email);
-    if (user && password === "123456") {
+    try {
+      const raw = await alunosApi.login({ email, senha: password });
+
+      // A API de alunos não retorna "perfil", então fixamos role: "student"
+      const user = { ...raw, role: "student", name: raw.nome };
+
       onLogin(user);
-    } else {
-      setError("Email ou senha inválidos. Use a senha: 123456");
+    } catch (err) {
+      setError(err.message || "Email ou senha inválidos. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
-
-  const quickLogin = (role) => {
-    const map = {
-      student: mockUsers.students[0],
-      teacher: mockUsers.teachers[0],
-      company: mockUsers.companies[0],
-    };
-    onLogin(map[role]);
-  };
-
-  const quickOptions = [
-    { role: "student", label: "Aluno", icon: "👨‍🎓" },
-    { role: "teacher", label: "Professor", icon: "👨‍🏫" },
-    { role: "company", label: "Empresa", icon: "🏢" },
-  ];
 
   return (
     <>
@@ -409,42 +396,6 @@ export default function LoginPage({ onLogin, onGoRegister }) {
                   )}
                 </motion.button>
               </form>
-
-              {/* Divider */}
-              <div style={{
-                display: "flex", alignItems: "center", gap: "0.75rem",
-                margin: "1.5rem 0 1rem",
-              }}>
-                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
-                <span style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.7rem", fontFamily: FONT, whiteSpace: "nowrap" }}>
-                  acesso rápido
-                </span>
-                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
-              </div>
-
-              {/* Quick login */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.625rem" }}>
-                {quickOptions.map((q) => (
-                  <button
-                    key={q.role}
-                    onClick={() => quickLogin(q.role)}
-                    className="quick-btn"
-                    style={{
-                      padding: "0.75rem 0.5rem",
-                      borderRadius: "0.875rem",
-                      border: "1.5px solid rgba(255,255,255,0.1)",
-                      background: "rgba(255,255,255,0.04)",
-                      cursor: "pointer", textAlign: "center",
-                      fontFamily: FONT,
-                    }}
-                  >
-                    <p style={{ fontSize: "1.3rem", marginBottom: "0.3rem" }}>{q.icon}</p>
-                    <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.72rem", fontWeight: 600 }}>
-                      {q.label}
-                    </p>
-                  </button>
-                ))}
-              </div>
 
               {/* Register link */}
               <p style={{

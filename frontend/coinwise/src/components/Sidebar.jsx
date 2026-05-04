@@ -39,17 +39,29 @@ const roleConfig = {
   },
 };
 
+// Fallback para roles desconhecidos — evita crash se a API retornar algo inesperado
+const defaultConfig = {
+  gradient: "from-[#0f172a] to-[#1e3a5f]",
+  accent: "bg-yellow-400/15 text-yellow-300 border-yellow-400/20",
+  badge: "bg-white/15 text-white/60",
+};
+
 export default function Sidebar({ currentUser, currentPage, onNavigate, onLogout, collapsed, onToggle }) {
-  const items = navItems[currentUser.role] || [];
-  const config = roleConfig[currentUser.role];
+  const role = currentUser?.role;
+  const items = navItems[role] ?? [];
+  const config = roleConfig[role] ?? defaultConfig;
+
+  // Avatar: usa initial do nome como fallback se não vier da API
+  const avatarLabel = currentUser?.avatar || currentUser?.nome?.[0] || currentUser?.name?.[0] || "?";
+  const displayName  = currentUser?.name  || currentUser?.nome  || "Usuário";
 
   return (
     <motion.aside
-      animate={{ width: collapsed ? 72 : 248 }}
+      animate={{ width: collapsed ? 72 : 220 }}
       transition={{ duration: 0.25, ease: "easeInOut" }}
       className={`fixed left-0 top-0 h-full bg-gradient-to-b ${config.gradient} z-40 flex flex-col overflow-hidden`}
       style={{
-        minWidth: collapsed ? 72 : 248,
+        minWidth: collapsed ? 72 : 220,
         boxShadow: "4px 0 24px rgba(0,0,0,0.35)",
         borderRight: "1px solid rgba(255,255,255,0.06)",
       }}
@@ -88,7 +100,7 @@ export default function Sidebar({ currentUser, currentPage, onNavigate, onLogout
       <div className={`px-3 py-3 border-b border-white/8 ${collapsed ? "flex justify-center" : ""}`}>
         {collapsed ? (
           <div className="w-10 h-10 rounded-xl bg-yellow-400 flex items-center justify-center text-blue-900 font-bold text-sm shadow-md shadow-yellow-400/20">
-            {currentUser.avatar}
+            {avatarLabel}
           </div>
         ) : (
           <AnimatePresence>
@@ -98,12 +110,12 @@ export default function Sidebar({ currentUser, currentPage, onNavigate, onLogout
               className="flex items-center gap-3 px-2 py-2 rounded-xl bg-white/5 border border-white/8"
             >
               <div className="w-9 h-9 rounded-xl bg-yellow-400 flex items-center justify-center text-blue-900 font-bold text-sm flex-shrink-0 shadow-md shadow-yellow-400/20">
-                {currentUser.avatar}
+                {avatarLabel}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-white font-semibold text-sm truncate leading-tight">{currentUser.name}</p>
+                <p className="text-white font-semibold text-sm truncate leading-tight">{displayName}</p>
                 <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${config.badge}`}>
-                  {roleLabels[currentUser.role]}
+                  {roleLabels[role] ?? role ?? "Usuário"}
                 </span>
               </div>
             </motion.div>
@@ -159,7 +171,6 @@ export default function Sidebar({ currentUser, currentPage, onNavigate, onLogout
                 />
               )}
 
-              {/* Active indicator bar */}
               {isActive && (
                 <motion.div
                   layoutId="activeBar"
