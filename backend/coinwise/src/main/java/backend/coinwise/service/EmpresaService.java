@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import backend.coinwise.dtos.LoginRequest;
 import backend.coinwise.model.EmpresaParceira;
 import backend.coinwise.repository.EmpresaRepository;
 
@@ -77,6 +78,17 @@ public class EmpresaService {
         //aualiza a variavel
         empresaBD.delete(empresaExistente);
         
+    }
+
+
+    public EmpresaParceira login(LoginRequest login){
+        EmpresaParceira empresa = empresaBD.findByEmail(login.getEmail());
+
+        if(empresa == null || !empresa.getSenha().equals(login.getSenha())){
+            throw new IllegalArgumentException("Email ou senha inválidos");
+        }
+
+        return empresa;
     }
     
 }

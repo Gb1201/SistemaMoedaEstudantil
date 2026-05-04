@@ -13,7 +13,7 @@ import { StudentTransactions, StudentRewards, StudentProfile } from "./pages/Stu
 
 import { TeacherDashboard, SendCoinsPage, TeacherTransactions } from "./pages/TeacherPages";
 
-import { CompanyDashboard, CreateRewardPage, CompanyRewardsList } from "./pages/CompanyPages";
+import { CompanyDashboard, CreateRewardPage, CompanyRewardsList, CompanyProfilePage } from "./pages/CompanyPages";
 
 const defaultPageByRole = {
   student: "student-dashboard",
@@ -82,6 +82,17 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(() => getStoredUser());
   const [currentPage, setCurrentPage] = useState(() => getStoredValue(STORAGE_KEYS.currentPage, null));
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth : 1024
+  );
+  useEffect(() => {
+    const onResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  // No mobile a sidebar fica sobreposta (overlay), não empurra o conteúdo
+  const isMobile = windowWidth < 768;
+  const sidebarWidth = isMobile ? 0 : (sidebarCollapsed ? 72 : 220);
 
   useEffect(() => {
     const syncAuthViewFromUrl = () => {
@@ -139,6 +150,10 @@ export default function App() {
 
   const navigate = (page) => setCurrentPage(page);
 
+  const handleUpdateUser = (updatedUser) => {
+    setCurrentUser(updatedUser);
+  };
+
   const renderPage = () => {
     const props = { currentUser, onNavigate: navigate };
     switch (currentPage) {
@@ -152,6 +167,7 @@ export default function App() {
       case "company-dashboard":     return <CompanyDashboard {...props} />;
       case "create-reward":         return <CreateRewardPage {...props} />;
       case "company-rewards":       return <CompanyRewardsList {...props} />;
+      case "company-profile":       return <CompanyProfilePage {...props} onUpdateUser={handleUpdateUser} />;
       default: return null;
     }
   };
@@ -181,18 +197,6 @@ export default function App() {
       </AnimatePresence>
     );
   }
-
-  const [windowWidth, setWindowWidth] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth : 1024
-  );
-  useEffect(() => {
-    const onResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-  // No mobile a sidebar fica sobreposta (overlay), não empurra o conteúdo
-  const isMobile = windowWidth < 768;
-  const sidebarWidth = isMobile ? 0 : (sidebarCollapsed ? 72 : 220);
 
   return (
     <div className="min-h-screen font-sans" style={{ background: "#0f172a" }}>

@@ -16,6 +16,7 @@ const navItems = {
     { icon: "⊞", label: "Dashboard", page: "company-dashboard" },
     { icon: "+", label: "Nova Vantagem", page: "create-reward" },
     { icon: "≡", label: "Minhas Vantagens", page: "company-rewards" },
+    { icon: "◉", label: "Perfil", page: "company-profile" },
   ],
 };
 

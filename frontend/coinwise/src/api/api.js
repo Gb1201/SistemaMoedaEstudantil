@@ -70,4 +70,10 @@ export const empresasApi = {
 
   /** DELETE /empresas/:id — Remove uma empresa pelo ID */
   deletar: (id) => request(`/empresas/${id}`, { method: "DELETE" }),
+
+  login: (dados) =>
+    request("/empresas/login", {
+      method: "POST",
+      body: JSON.stringify(dados),
+    }),
 };

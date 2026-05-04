@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Modal from "../components/Modal";
 import { mockRewards } from "../data/mockData";
+import { empresasApi } from "../api/api";
 
 // ── Design System ─────────────────────────────────────────────────────────────
 const F = "'Sora','Nunito',sans-serif";
@@ -508,6 +509,236 @@ export function CreateRewardPage({ currentUser }) {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CompanyProfilePage
+// ═══════════════════════════════════════════════════════════════════════════════
+export function CompanyProfilePage({ currentUser, onUpdateUser }) {
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState({
+    nome: currentUser.name || "",
+    email: currentUser.email || "",
+    cnpj: currentUser.cnpj || "",
+    endereco: currentUser.endereco || "",
+    senha: "",
+  });
+
+  const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
+  const hasChanges =
+    form.nome !== (currentUser.name || "") ||
+    form.email !== (currentUser.email || "") ||
+    form.cnpj !== (currentUser.cnpj || "") ||
+    form.endereco !== (currentUser.endereco || "") ||
+    form.senha !== "";
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const payload = {
+        nome: form.nome,
+        email: form.email,
+        cnpj: form.cnpj,
+        endereco: form.endereco,
+        ...(form.senha ? { senha: form.senha } : {}),
+      };
+      await empresasApi.atualizar(currentUser.id, payload);
+      onUpdateUser?.({ ...currentUser, name: form.nome, email: form.email, cnpj: form.cnpj, endereco: form.endereco });
+      setSuccess(true);
+      setEditing(false);
+      setForm(f => ({ ...f, senha: "" }));
+      setTimeout(() => setSuccess(false), 3500);
+    } catch (err) {
+      alert(err.message || "Erro ao salvar.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setForm({
+      nome: currentUser.name || "",
+      email: currentUser.email || "",
+      cnpj: currentUser.cnpj || "",
+      endereco: currentUser.endereco || "",
+      senha: "",
+    });
+    setEditing(false);
+  };
+
+  const fields = [
+    { key: "nome",     label: "Nome da empresa",  placeholder: "Nome da empresa",      type: "text",     required: true },
+    { key: "email",    label: "E-mail",            placeholder: "contato@empresa.com",  type: "email",    required: true },
+    { key: "cnpj",     label: "CNPJ",              placeholder: "00.000.000/0001-00",   type: "text",     required: false },
+    { key: "endereco", label: "Endereço",          placeholder: "Rua, número, cidade",  type: "text",     required: false },
+  ];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", fontFamily: F, background: "linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)", minHeight: "100vh", padding: "1.5rem", margin: "-1.5rem" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&display=swap');
+        .pf-input:focus { border-color:rgba(250,204,21,.55)!important; background:rgba(255,255,255,.08)!important; box-shadow:0 0 0 3px rgba(250,204,21,.1)!important; outline:none; }
+        .pf-input::placeholder { color:rgba(255,255,255,0.22); }
+        .pf-input:disabled { opacity:0.45; cursor:not-allowed; }
+        .edit-btn:hover { border-color:rgba(250,204,21,.5)!important; color:#facc15!important; }
+        .eye-btn:hover { color:rgba(255,255,255,.7)!important; }
+        @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+      `}</style>
+
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
+        <PageHeader eyebrow="Empresa" title="Perfil da Empresa" sub="Gerencie as informações da sua conta" />
+        {!editing && (
+          <motion.button
+            {...fade(0.06)}
+            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+            onClick={() => setEditing(true)}
+            className="edit-btn"
+            style={{
+              padding: "0.7rem 1.25rem", borderRadius: "0.875rem",
+              border: "1.5px solid rgba(255,255,255,0.15)",
+              background: "transparent", color: "rgba(255,255,255,0.55)",
+              fontWeight: 700, fontSize: "0.875rem",
+              cursor: "pointer", fontFamily: F, transition: "all 0.18s",
+              display: "flex", alignItems: "center", gap: "6px",
+            }}
+          >✏️ Editar perfil</motion.button>
+        )}
+      </div>
+
+      {/* Success toast */}
+      <AnimatePresence>
+        {success && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8 }}
+            style={{
+              display: "flex", alignItems: "center", gap: "12px",
+              padding: "1rem 1.25rem", borderRadius: "1rem",
+              background: "rgba(52,211,153,0.1)",
+              border: "1px solid rgba(52,211,153,0.3)", fontFamily: F,
+            }}
+          >
+            <span style={{ fontSize: "1.4rem" }}>✅</span>
+            <div>
+              <p style={{ color: "rgba(52,211,153,0.9)", fontWeight: 700, fontSize: "0.875rem", margin: 0 }}>Perfil atualizado!</p>
+              <p style={{ color: "rgba(52,211,153,0.55)", fontSize: "0.78rem", margin: 0 }}>Suas informações foram salvas com sucesso.</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Card */}
+      <motion.div {...fade(0.08)} style={{ ...G.card, padding: "1.75rem", maxWidth: 560 }}>
+        <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+
+          {/* Campos principais */}
+          {fields.map(({ key, label, placeholder, type, required }) => (
+            <div key={key}>
+              <label style={lStyle}>{label}{required ? " *" : ""}</label>
+              <input
+                type={type}
+                value={form[key]}
+                onChange={set(key)}
+                required={required}
+                disabled={!editing}
+                placeholder={placeholder}
+                className="pf-input"
+                style={iStyle}
+              />
+            </div>
+          ))}
+
+          {/* Senha */}
+          <div>
+            <label style={lStyle}>Nova senha</label>
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                value={form.senha}
+                onChange={set("senha")}
+                disabled={!editing}
+                placeholder={editing ? "Deixe em branco para não alterar" : "••••••••"}
+                className="pf-input"
+                style={{ ...iStyle, paddingRight: "3rem" }}
+              />
+              {editing && (
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="eye-btn"
+                  style={{
+                    position: "absolute", right: "0.875rem", top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none", border: "none",
+                    color: "rgba(255,255,255,0.35)", cursor: "pointer",
+                    fontSize: "1rem", transition: "color 0.18s",
+                  }}
+                >{showPassword ? "🙈" : "👁️"}</button>
+              )}
+            </div>
+          </div>
+
+          {/* Botões */}
+          <AnimatePresence>
+            {editing && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 4 }}
+                style={{ display: "flex", gap: "0.75rem", marginTop: "0.25rem" }}
+              >
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  style={{
+                    flex: 1, padding: "0.875rem", borderRadius: "0.875rem",
+                    border: "1.5px solid rgba(255,255,255,0.15)",
+                    background: "transparent", color: "rgba(255,255,255,0.5)",
+                    fontWeight: 600, fontSize: "0.875rem",
+                    cursor: "pointer", fontFamily: F,
+                  }}
+                >Cancelar</button>
+                <motion.button
+                  type="submit"
+                  disabled={saving || !hasChanges}
+                  whileHover={hasChanges && !saving ? { scale: 1.02, boxShadow: "0 0 24px rgba(250,204,21,0.25)" } : {}}
+                  whileTap={hasChanges && !saving ? { scale: 0.98 } : {}}
+                  style={{
+                    flex: 2, padding: "0.875rem",
+                    borderRadius: "0.875rem", border: "none",
+                    background: hasChanges && !saving
+                      ? "linear-gradient(135deg, #facc15, #f59e0b)"
+                      : "rgba(255,255,255,0.08)",
+                    color: hasChanges && !saving ? "#1e3a5f" : "rgba(255,255,255,0.25)",
+                    fontWeight: 800, fontSize: "0.9rem",
+                    cursor: hasChanges && !saving ? "pointer" : "not-allowed",
+                    fontFamily: F, transition: "all 0.2s",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                  }}
+                >
+                  {saving ? (
+                    <>
+                      <svg style={{ animation: "spin 0.8s linear infinite", width: 15, height: 15 }} viewBox="0 0 24 24" fill="none">
+                        <circle opacity={0.25} cx="12" cy="12" r="10" stroke="#1e3a5f" strokeWidth="4" />
+                        <path opacity={0.75} fill="#1e3a5f" d="M4 12a8 8 0 018-8v8z" />
+                      </svg>
+                      Salvando...
+                    </>
+                  ) : "Salvar alterações →"}
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </form>
+      </motion.div>
     </div>
   );
 }

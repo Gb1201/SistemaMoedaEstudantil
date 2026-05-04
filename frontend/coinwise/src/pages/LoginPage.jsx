@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { alunosApi } from "../api/api";
+import { alunosApi, empresasApi } from "../api/api";
 
 const FONT = "'Sora', 'Nunito', sans-serif";
 
@@ -34,18 +34,20 @@ export default function LoginPage({ onLogin, onGoRegister }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
+  const [userType, setUserType] = useState("student"); // "student" | "company"
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     try {
-      const raw = await alunosApi.login({ email, senha: password });
-
-      // A API de alunos não retorna "perfil", então fixamos role: "student"
-      const user = { ...raw, role: "student", name: raw.nome };
-
-      onLogin(user);
+      if (userType === "company") {
+        const raw = await empresasApi.login({ email, senha: password });
+        onLogin({ ...raw, role: "company", name: raw.nome });
+      } else {
+        const raw = await alunosApi.login({ email, senha: password });
+        onLogin({ ...raw, role: "student", name: raw.nome });
+      }
     } catch (err) {
       setError(err.message || "Email ou senha inválidos. Tente novamente.");
     } finally {
@@ -290,6 +292,40 @@ export default function LoginPage({ onLogin, onGoRegister }) {
                 <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.875rem" }}>
                   Acesse sua conta para continuar
                 </p>
+              </div>
+
+              {/* Toggle tipo de usuário */}
+              <div style={{
+                display: "flex", gap: "0.5rem",
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: "0.875rem",
+                padding: "0.3rem",
+                marginBottom: "1rem",
+              }}>
+                {[
+                  { value: "student", label: "👨‍🎓 Aluno" },
+                  { value: "company", label: "🏢 Empresa" },
+                ].map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => { setUserType(value); setError(""); }}
+                    style={{
+                      flex: 1, padding: "0.55rem",
+                      borderRadius: "0.625rem", border: "none",
+                      background: userType === value
+                        ? "linear-gradient(135deg, #facc15, #f59e0b)"
+                        : "transparent",
+                      color: userType === value ? "#1e3a5f" : "rgba(255,255,255,0.35)",
+                      fontWeight: 700, fontSize: "0.82rem",
+                      cursor: "pointer", fontFamily: FONT,
+                      transition: "all 0.18s",
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
 
               {/* Form */}

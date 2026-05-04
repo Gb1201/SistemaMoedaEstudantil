@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import backend.coinwise.dtos.LoginRequest;
 import backend.coinwise.model.EmpresaParceira;
 import backend.coinwise.service.EmpresaService;
 
@@ -53,5 +55,10 @@ public class EmpresaController {
         empresaService.deletarEmpresa(id);
         return ResponseEntity.noContent().build();
     } 
+
+    @PostMapping("/login")
+    public ResponseEntity<EmpresaParceira> login(@RequestBody LoginRequest login){
+        return ResponseEntity.ok(empresaService.login(login));
+    }
 
 }
