@@ -38,3 +38,30 @@ export const alunosApi = {
   /** DELETE /alunos/:id — Remove um aluno pelo ID */
   deletar: (id) => request(`/alunos/${id}`, { method: "DELETE" }),
 };
+
+// ── Empresas ──────────────────────────────────────────────────────────────────
+
+export const empresasApi = {
+  /** POST /empresas — Cria uma nova empresa */
+  criar: (dados) =>
+    request("/empresas", {
+      method: "POST",
+      body: JSON.stringify(dados),
+    }),
+
+  /** GET /empresas — Lista todas as empresas */
+  listar: () => request("/empresas"),
+
+  /** GET /empresas/:id — Busca uma empresa pelo ID */
+  buscarPorId: (id) => request(`/empresas/${id}`),
+
+  /** PUT /empresas/:id — Atualiza uma empresa pelo ID */
+  atualizar: (id, dados) =>
+    request(`/empresas/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(dados),
+    }),
+
+  /** DELETE /empresas/:id — Remove uma empresa pelo ID */
+  deletar: (id) => request(`/empresas/${id}`, { method: "DELETE" }),
+};

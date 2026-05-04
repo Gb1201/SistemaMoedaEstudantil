@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { alunosApi } from "../api/api";
+import { alunosApi, empresasApi } from "../api/api";
 
 /* ─── Shared styles ─────────────────────────────────────────── */
 const FONT = "'Sora', 'Nunito', sans-serif";
@@ -314,7 +314,7 @@ export default function RegisterPage({ onGoLogin }) {
           };
 
     try {
-      await alunosApi.criar(payload);
+      await (role === "student" ? alunosApi.criar(payload) : empresasApi.criar(payload));
       setModal({
         type: "success",
         message: "Sua conta foi criada com sucesso. Clique abaixo para acessar o sistema.",
