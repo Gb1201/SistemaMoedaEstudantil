@@ -72,7 +72,7 @@ function VirtualCard({ balance, name, subject, label = "SALDO DISPONÍVEL" }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative" }}>
           <div>
             <p style={{ color: "rgba(250,204,21,0.6)", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", fontFamily: F }}>
-              CoinWise
+              CoinClass
             </p>
             <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.68rem", letterSpacing: "0.08em", fontFamily: F, marginTop: 2 }}>
               {subject || "Plataforma Escolar"}

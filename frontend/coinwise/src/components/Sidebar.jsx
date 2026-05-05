@@ -82,7 +82,7 @@ export default function Sidebar({ currentUser, currentPage, onNavigate, onLogout
                 transition={{ duration: 0.2 }}
                 className="min-w-0"
               >
-                <p className="text-white font-bold text-base leading-tight tracking-tight">CoinWise</p>
+                <p className="text-white font-bold text-base leading-tight tracking-tight">CoinClass</p>
                 <p className="text-white/40 text-[10px] leading-none mt-0.5">Moeda Estudantil</p>
               </motion.div>
             )}

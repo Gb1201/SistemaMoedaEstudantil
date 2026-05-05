@@ -56,7 +56,7 @@ const steps = [
   {
     num: "02",
     title: "Professores recompensam",
-    desc: "Educadores distribuem CoinWise aos alunos por mérito, participação e atitudes positivas.",
+    desc: "Educadores distribuem CoinClass aos alunos por mérito, participação e atitudes positivas.",
   },
   {
     num: "03",
@@ -98,7 +98,7 @@ function Logo({ size = "md" }) {
           }`}
           style={{ fontFamily: "'Sora', 'Nunito', sans-serif" }}
         >
-          CoinWise
+          CoinClass
         </p>
         <p className="text-yellow-400/60 text-[10px] leading-none mt-0.5 font-medium tracking-widest uppercase">
           Moeda Estudantil
@@ -147,7 +147,7 @@ function DashboardMockup() {
             <div className="w-3 h-3 rounded-full bg-green-400/50" />
           </div>
           <div className="ml-3 flex-1 bg-white/8 rounded-md px-3 py-1 text-white/25 text-xs font-mono">
-            app.coinwise.com/dashboard
+            app.coinclass.com/dashboard
           </div>
         </div>
 
@@ -261,7 +261,7 @@ function AppPreview() {
           <div className="w-7 h-7 rounded-lg bg-yellow-400 flex items-center justify-center text-blue-900 font-black text-xs">
             ◈
           </div>
-          <span className="text-white text-sm font-bold">CoinWise</span>
+          <span className="text-white text-sm font-bold">CoinClass</span>
         </div>
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-xs">
@@ -526,7 +526,7 @@ export default function HomePage({ onGoLogin, onGoRegister }) {
               <span className="text-white/50">em um só lugar</span>
             </h2>
             <p className="text-white/45 mt-4 max-w-xl mx-auto leading-relaxed" style={{ fontSize: "1rem" }}>
-              O CoinWise foi pensado para conectar o esforço dos alunos a recompensas concretas,
+              O CoinClass foi pensado para conectar o esforço dos alunos a recompensas concretas,
               tornando a educação mais motivadora para todos.
             </p>
           </motion.div>
@@ -686,7 +686,7 @@ export default function HomePage({ onGoLogin, onGoRegister }) {
             </h2>
 
             <p className="text-white/45 text-base leading-relaxed max-w-xl mx-auto">
-              Junte-se a centenas de escolas que já usam o CoinWise para motivar alunos e criar
+              Junte-se a centenas de escolas que já usam o CoinClass para motivar alunos e criar
               uma cultura de mérito e reconhecimento.
             </p>
 
@@ -758,7 +758,7 @@ export default function HomePage({ onGoLogin, onGoRegister }) {
               },
               {
                 title: "Contato",
-                links: ["contato@coinwise.com", "Fale Conosco", "Privacidade", "Termos de Uso"],
+                links: ["contato@coinclass.com", "Fale Conosco", "Privacidade", "Termos de Uso"],
               },
             ].map((col) => (
               <div key={col.title}>
@@ -780,7 +780,7 @@ export default function HomePage({ onGoLogin, onGoRegister }) {
           </div>
 
           <div className="border-t border-white/6 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-white/25 text-xs">© 2024 CoinWise. Todos os direitos reservados.</p>
+            <p className="text-white/25 text-xs">© 2026 CoinClass. Todos os direitos reservados.</p>
             <div className="flex items-center gap-5">
               {["Instagram", "LinkedIn", "Twitter"].map((s) => (
                 <a key={s} href="#" className="text-white/25 hover:text-white/55 text-xs transition-colors">

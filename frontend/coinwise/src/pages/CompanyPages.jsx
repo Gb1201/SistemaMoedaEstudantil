@@ -69,7 +69,7 @@ function CompanyCard({ user }) {
         {/* Top */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative" }}>
           <div>
-            <p style={{ color: "rgba(52,211,153,0.65)", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", fontFamily: F }}>CoinWise</p>
+            <p style={{ color: "rgba(52,211,153,0.65)", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", fontFamily: F }}>CoinClass</p>
             <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.68rem", letterSpacing: "0.06em", fontFamily: F, marginTop: 2 }}>Empresa Parceira</p>
           </div>
           <div style={{

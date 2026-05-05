@@ -144,7 +144,7 @@ export default function LoginPage({ onLogin, onGoRegister }) {
               boxShadow: "0 8px 20px rgba(250,204,21,0.25)",
             }}>◈</div>
             <div>
-              <p style={{ color: "white", fontWeight: 800, fontSize: "1.1rem", lineHeight: 1 }}>CoinWise</p>
+              <p style={{ color: "white", fontWeight: 800, fontSize: "1.1rem", lineHeight: 1 }}>CoinClass</p>
               <p style={{ color: "rgba(250,204,21,0.5)", fontSize: "0.62rem", letterSpacing: "0.12em", textTransform: "uppercase", marginTop: 3 }}>
                 Moeda Estudantil
               </p>
@@ -231,7 +231,7 @@ export default function LoginPage({ onLogin, onGoRegister }) {
 
           {/* Footer */}
           <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.75rem" }}>
-            © 2025 CoinWise. Todos os direitos reservados.
+            © 2026 CoinClass. Todos os direitos reservados.
           </p>
         </div>
 
@@ -265,7 +265,7 @@ export default function LoginPage({ onLogin, onGoRegister }) {
                 display: "flex", alignItems: "center", justifyContent: "center",
                 color: "#1e3a5f", fontWeight: 900, fontSize: "1.1rem",
               }}>◈</div>
-              <span style={{ color: "white", fontWeight: 800, fontSize: "1rem" }}>CoinWise</span>
+              <span style={{ color: "white", fontWeight: 800, fontSize: "1rem" }}>CoinClass</span>
             </div>
 
             {/* Glass card */}

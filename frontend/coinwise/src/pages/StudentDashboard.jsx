@@ -80,7 +80,7 @@ export default function StudentDashboard({ currentUser, onNavigate }) {
               <p style={{ color: "white", fontWeight: 900, fontSize: "clamp(2.5rem,6vw,3.5rem)", lineHeight: 1, letterSpacing: "-0.03em", margin: 0 }}>
                 {balance.toLocaleString("pt-BR")}
               </p>
-              <p style={{ color: "rgba(250,204,21,0.7)", fontSize: "0.9rem", fontWeight: 600, marginTop: "0.35rem" }}>CoinWise ◈</p>
+              <p style={{ color: "rgba(250,204,21,0.7)", fontSize: "0.9rem", fontWeight: 600, marginTop: "0.35rem" }}>CoinClass ◈</p>
             </div>
           </div>
 
@@ -147,7 +147,7 @@ export default function StudentDashboard({ currentUser, onNavigate }) {
             <p style={{ color: "white", fontWeight: 900, fontSize: "3rem", lineHeight: 1, letterSpacing: "-0.04em", margin: "0 0 0.25rem" }}>
               {balance.toLocaleString("pt-BR")}
             </p>
-            <p style={{ color: "#facc15", fontWeight: 700, fontSize: "0.875rem", marginBottom: "0.5rem" }}>◈ CoinWise</p>
+            <p style={{ color: "#facc15", fontWeight: 700, fontSize: "0.875rem", marginBottom: "0.5rem" }}>◈ CoinClass</p>
             <div style={{ height: 1, background: "rgba(255,255,255,0.08)", margin: "0.75rem 0" }} />
             <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.75rem", lineHeight: 1.5 }}>
               Use suas moedas para resgatar vantagens exclusivas
