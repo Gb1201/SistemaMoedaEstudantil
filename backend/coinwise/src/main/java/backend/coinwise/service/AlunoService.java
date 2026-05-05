@@ -1,9 +1,11 @@
 package backend.coinwise.service;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import backend.coinwise.dtos.AlunoDTO;
 import backend.coinwise.dtos.LoginRequest;
 import backend.coinwise.model.Aluno;
 import backend.coinwise.repository.AlunoRepository;
@@ -24,8 +26,15 @@ public class AlunoService {
     }
     
     //método para listar todos alunos- R
-    public List<Aluno> listarAlunos(){
-        return alunorepor.findAll(); // retorna todos alunos do banco de dados
+    public List<AlunoDTO> listarAlunos(){
+        return alunorepor.findAll()
+            .stream()
+            .map(aluno -> new AlunoDTO(
+                aluno.getNome(),
+                aluno.getCurso(),
+                aluno.getRa()
+            ))
+            .collect(Collectors.toList());
     }
 
     //metodo para buscar um aluno por id- R

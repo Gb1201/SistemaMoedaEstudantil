@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import backend.coinwise.dtos.EmpresaDTO;
 import backend.coinwise.dtos.LoginRequest;
 import backend.coinwise.model.EmpresaParceira;
 import backend.coinwise.service.EmpresaService;
@@ -27,11 +28,9 @@ public class EmpresaController {
 
     //GET
     @GetMapping
-    public ResponseEntity<List<EmpresaParceira>> listarEmpresasSalvas(){
-        List<EmpresaParceira> empresas= empresaService.listarEmpresas();
-
+    public ResponseEntity<List<EmpresaDTO>> listarEmpresasSalvas(){
+        List<EmpresaDTO> empresas = empresaService.listarEmpresas();
         return ResponseEntity.ok(empresas);
-
     }
 
     // GET

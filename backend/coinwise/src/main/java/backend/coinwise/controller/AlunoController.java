@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import backend.coinwise.dtos.AlunoDTO;
 import backend.coinwise.dtos.LoginRequest;
 import backend.coinwise.model.Aluno;
 import backend.coinwise.service.AlunoService;
@@ -33,9 +34,9 @@ public class AlunoController {
     } //melhor boa pratica
     
     //endpoint para listar os alunos
-    @GetMapping
-    public ResponseEntity<List<Aluno>> listarAlunos(){
-        List<Aluno> listaAlunos= alunoService.listarAlunos();
+   @GetMapping
+    public ResponseEntity<List<AlunoDTO>> listarAlunos(){
+        List<AlunoDTO> listaAlunos = alunoService.listarAlunos();
         return ResponseEntity.ok(listaAlunos);
     }
 

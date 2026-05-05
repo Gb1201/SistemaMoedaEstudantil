@@ -17,12 +17,12 @@ export default function Navbar({ currentUser, onToggleSidebar, collapsed }) {
 
   return (
     <header
-      className="fixed top-0 right-0 z-30 backdrop-blur-md shadow-sm"
+      className="fixed top-0 right-0 z-30 backdrop-blur-md"
       style={{
         left: isMobile ? 0 : (collapsed ? 72 : 248),
         transition: "left 0.25s ease",
-        backgroundColor: "rgba(10,20,40,0.92)",
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
+        backgroundColor: "rgba(15,23,42,0.4)",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
       }}
     >
       <div className="flex items-center justify-between px-4 md:px-6 h-16">
@@ -54,7 +54,7 @@ export default function Navbar({ currentUser, onToggleSidebar, collapsed }) {
         {/* RIGHT */}
         <div className="flex items-center gap-2 md:gap-3">
 
-          {/* 🔔 Notifications — sem mock, só o sino por enquanto */}
+          {/* 🔔 Notifications */}
           <div className="relative">
             <motion.button
               whileTap={{ scale: 0.95 }}

@@ -50,8 +50,8 @@ const features = [
 const steps = [
   {
     num: "01",
-    title: "Escola se cadastra",
-    desc: "A instituição cria sua conta e configura as regras da moeda estudantil.",
+    title: "Alunos se cadastram",
+    desc: "Os Alunos criam sua conta e acessam o perfl",
   },
   {
     num: "02",
@@ -70,7 +70,54 @@ const steps = [
   },
 ];
 
-const navLinks = ["Para Alunos", "Para Professores", "Para Empresas", "Como Funciona"];
+const profiles = [
+  {
+    id: "alunos",
+    emoji: "🎓",
+    tag: "Para Alunos",
+    title: "Seu esforço vale mais do que uma nota.",
+    slogan: "Ganhe, gerencie e aproveite suas moedas.",
+    desc: "Com o CoinClass, cada participação em aula, entrega de projeto ou atitude positiva vira moeda real. Acumule créditos, acompanhe sua evolução e troque por benefícios exclusivos de empresas parceiras.",
+    highlights: ["Carteira digital própria", "Histórico de ganhos e resgates", "Dasboard Interativo"],
+    color: "from-yellow-400/20 to-yellow-400/5",
+    border: "border-yellow-400/25",
+    accent: "text-yellow-400",
+    accentBg: "bg-yellow-400/15",
+  },
+  {
+    id: "professores",
+    emoji: "🧑‍🏫",
+    tag: "Para Professores",
+    title: "Reconheça quem se dedica, de verdade.",
+    slogan: "Motivar ficou muito mais fácil.",
+    desc: "Distribua moedas com poucos cliques e veja o engajamento da sua turma crescer. O CoinClass transforma o reconhecimento em ferramenta pedagógica, ajudando você a criar uma cultura de esforço e valorização.",
+    highlights: ["Distribuição de moedas por aluno", "Relatórios de Transações em tempo real", "Histórico completo de recompensas"],
+    color: "from-blue-400/20 to-blue-400/5",
+    border: "border-blue-400/25",
+    accent: "text-blue-300",
+    accentBg: "bg-blue-400/15",
+  },
+  {
+    id: "empresas",
+    emoji: "🏢",
+    tag: "Para Empresas",
+    title: "Conecte sua marca ao futuro.",
+    slogan: "Visibilidade real para quem importa.",
+    desc: "Cadastre sua empresa, ofereça descontos e prêmios exclusivos e alcance estudantes engajados de todo o país. Uma parceria que gera valor para os dois lados, e constrói relacionamentos duradouros com o público jovem.",
+    highlights: ["Vitrine de benefícios para milhares de alunos", , "Cadastro simples e sem burocracia"],
+    color: "from-emerald-400/20 to-emerald-400/5",
+    border: "border-emerald-400/25",
+    accent: "text-emerald-400",
+    accentBg: "bg-emerald-400/15",
+  },
+];
+
+const navLinks = [
+  { label: "Para Alunos", href: "#alunos" },
+  { label: "Para Professores", href: "#professores" },
+  { label: "Para Empresas", href: "#empresas" },
+  { label: "Como Funciona", href: "#como-funciona" },
+];
 
 const stats = [
   { value: "12k+", label: "Alunos ativos" },
@@ -406,11 +453,15 @@ export default function HomePage({ onGoLogin, onGoRegister }) {
           <nav className="hidden md:flex items-center gap-7">
             {navLinks.map((link) => (
               <a
-                key={link}
-                href="#"
-                className="text-white/55 hover:text-white text-sm font-medium transition-colors relative group"
+                key={link.label}
+                href={link.href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.querySelector(link.href)?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="text-white/55 hover:text-white text-sm font-medium transition-colors relative group cursor-pointer"
               >
-                {link}
+                {link.label}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 rounded-full group-hover:w-full transition-all duration-200" />
               </a>
             ))}
@@ -562,8 +613,103 @@ export default function HomePage({ onGoLogin, onGoRegister }) {
         </div>
       </section>
 
+      {/* ═══ PROFILES ═════════════════════════════════════════ */}
+      <section id="perfis" className="py-20 lg:py-24 border-t border-white/6" style={{ scrollMarginTop: "72px" }}>
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div {...fadeUp(0)} className="text-center mb-14">
+            <span className="section-label" style={{ justifyContent: "center" }}>
+              Para cada perfil
+            </span>
+            <h2
+              className="text-white font-black leading-tight"
+              style={{ fontSize: "clamp(1.8rem, 4vw, 2.75rem)" }}
+            >
+              Um ecossistema feito
+              <br />
+              <span className="text-white/50">para todos vocês</span>
+            </h2>
+            <p className="text-white/45 mt-4 max-w-xl mx-auto leading-relaxed" style={{ fontSize: "1rem" }}>
+              O CoinClass conecta alunos, professores e empresas em uma só plataforma, cada um
+              com seu espaço, suas ferramentas e seus benefícios.
+            </p>
+          </motion.div>
+
+          <div className="space-y-6">
+            {profiles.map((p, i) => (
+              <motion.div
+                key={p.id}
+                id={p.id}
+                style={{ scrollMarginTop: "72px" }}
+                {...fadeUp(i * 0.1)}
+                className={`rounded-2xl bg-gradient-to-br ${p.color} border ${p.border} p-7 hover:border-opacity-50 transition-all`}
+              >
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "auto 1fr auto",
+                    gap: "1.5rem",
+                    alignItems: "center",
+                  }}
+                  className="profile-row"
+                >
+                  {/* Icon + tag */}
+                  <div className="flex flex-col items-center gap-2 text-center" style={{ minWidth: "80px" }}>
+                    <div
+                      className={`w-14 h-14 rounded-2xl ${p.accentBg} flex items-center justify-center text-3xl border ${p.border}`}
+                    >
+                      {p.emoji}
+                    </div>
+                    <span
+                      className={`text-[10px] font-bold uppercase tracking-widest ${p.accent} whitespace-nowrap`}
+                    >
+                      {p.tag}
+                    </span>
+                  </div>
+
+                  {/* Main content */}
+                  <div>
+                    <h3
+                      className="text-white font-black leading-snug mb-1"
+                      style={{ fontSize: "clamp(1.05rem, 2.5vw, 1.3rem)" }}
+                    >
+                      {p.title}
+                    </h3>
+                    <p className={`text-xs font-semibold mb-3 ${p.accent}`}>{p.slogan}</p>
+                    <p className="text-white/55 text-sm leading-relaxed max-w-2xl">{p.desc}</p>
+                  </div>
+
+                  {/* Highlights */}
+                  <div className="hidden lg:flex flex-col gap-2" style={{ minWidth: "240px" }}>
+                    {p.highlights.map((h) => (
+                      <div key={h} className="flex items-center gap-2.5">
+                        <span
+                          className={`w-5 h-5 rounded-full ${p.accentBg} border ${p.border} flex items-center justify-center ${p.accent} text-[10px] flex-shrink-0 font-bold`}
+                        >
+                          ✓
+                        </span>
+                        <span className="text-white/60 text-xs">{h}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Mobile highlights */}
+                <div className="lg:hidden mt-4 flex flex-wrap gap-2">
+                  {p.highlights.map((h) => (
+                    <div key={h} className="flex items-center gap-2">
+                      <span className={`w-4 h-4 rounded-full ${p.accentBg} border ${p.border} flex items-center justify-center ${p.accent} text-[9px] flex-shrink-0 font-bold`}>✓</span>
+                      <span className="text-white/55 text-xs">{h}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ═══ HOW IT WORKS ═════════════════════════════════════ */}
-      <section className="py-20 lg:py-24 border-t border-white/6">
+      <section id="como-funciona" className="py-20 lg:py-24 border-t border-white/6" style={{ scrollMarginTop: "72px" }}>
         <div className="max-w-6xl mx-auto px-6">
           <motion.div {...fadeUp(0)} className="text-center mb-14">
             <span className="section-label" style={{ justifyContent: "center" }}>

@@ -1,10 +1,12 @@
 package backend.coinwise.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import backend.coinwise.dtos.EmpresaDTO;
 import backend.coinwise.dtos.LoginRequest;
 import backend.coinwise.model.EmpresaParceira;
 import backend.coinwise.repository.EmpresaRepository;
@@ -34,10 +36,14 @@ public class EmpresaService {
     }
 
     //método para listar todas empresas parceiras- R
-    public List<EmpresaParceira> listarEmpresas(){
-        List<EmpresaParceira> empresasSalvas= empresaBD.findAll();
-
-        return empresasSalvas;
+    public List<EmpresaDTO> listarEmpresas(){
+        return empresaBD.findAll()
+            .stream()
+            .map(emp -> new EmpresaDTO(
+                emp.getNome(),
+                emp.getEndereco()
+            ))
+            .collect(Collectors.toList());
     }
 
     // método para buscar uma empresa através do id

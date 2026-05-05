@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { mockUsers, mockTeacherTransactions } from "../data/mockData";
+import { mockTeacherTransactions } from "../data/mockData";
+import { alunosApi } from "../api/api";
 
 // ── Design System ─────────────────────────────────────────────────────────────
 const F = "'Sora','Nunito',sans-serif";
@@ -176,13 +177,208 @@ function StatPill({ icon, label, value, delay }) {
   );
 }
 
+// ── Student Card (carrossel) ──────────────────────────────────────────────────
+function StudentCard({ aluno, index }) {
+  const colors = [
+    { bg: "rgba(250,204,21,0.08)", border: "rgba(250,204,21,0.22)", accent: "#facc15", badge: "rgba(250,204,21,0.15)" },
+    { bg: "rgba(96,165,250,0.08)", border: "rgba(96,165,250,0.22)", accent: "#60a5fa", badge: "rgba(96,165,250,0.15)" },
+    { bg: "rgba(52,211,153,0.08)", border: "rgba(52,211,153,0.22)", accent: "#34d399", badge: "rgba(52,211,153,0.15)" },
+    { bg: "rgba(167,139,250,0.08)", border: "rgba(167,139,250,0.22)", accent: "#a78bfa", badge: "rgba(167,139,250,0.15)" },
+    { bg: "rgba(251,146,60,0.08)", border: "rgba(251,146,60,0.22)", accent: "#fb923c", badge: "rgba(251,146,60,0.15)" },
+  ];
+  const c = colors[index % colors.length];
+  const initials = aluno.nome?.split(" ").map(p => p[0]).slice(0, 2).join("").toUpperCase() || "?";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -6, boxShadow: `0 20px 40px rgba(0,0,0,0.4), 0 0 0 1px ${c.border}` }}
+      style={{
+        flexShrink: 0,
+        width: 200,
+        background: c.bg,
+        border: `1px solid ${c.border}`,
+        borderRadius: "1.25rem",
+        padding: "1.25rem",
+        cursor: "default",
+        position: "relative",
+        overflow: "hidden",
+        transition: "box-shadow 0.25s",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+      }}
+    >
+      {/* Decorative blob */}
+      <div style={{
+        position: "absolute", top: -24, right: -24,
+        width: 80, height: 80, borderRadius: "50%",
+        background: c.accent, opacity: 0.07, filter: "blur(2px)",
+        pointerEvents: "none",
+      }} />
+
+      {/* Avatar */}
+      <div style={{
+        width: 48, height: 48, borderRadius: "0.875rem",
+        background: c.badge,
+        border: `1.5px solid ${c.border}`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        color: c.accent, fontWeight: 900, fontSize: "1rem",
+        fontFamily: F, marginBottom: "1rem",
+        position: "relative",
+      }}>{initials}</div>
+
+      {/* Nome */}
+      <p style={{
+        color: "rgba(255,255,255,0.9)", fontWeight: 700,
+        fontSize: "0.85rem", fontFamily: F,
+        marginBottom: "0.3rem", lineHeight: 1.3,
+        overflow: "hidden", display: "-webkit-box",
+        WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+      }}>{aluno.nome}</p>
+
+      {/* Curso */}
+      <p style={{
+        color: "rgba(255,255,255,0.38)", fontSize: "0.7rem",
+        fontFamily: F, marginBottom: "0.875rem",
+        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+      }}>{aluno.curso}</p>
+
+      {/* RA badge */}
+      <div style={{
+        display: "inline-flex", alignItems: "center", gap: "5px",
+        padding: "0.3rem 0.625rem",
+        borderRadius: "2rem",
+        background: c.badge,
+        border: `1px solid ${c.border}`,
+      }}>
+        <span style={{ color: c.accent, fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.1em", fontFamily: F }}>RA</span>
+        <span style={{ color: "rgba(255,255,255,0.65)", fontSize: "0.7rem", fontWeight: 700, fontFamily: F }}>{aluno.ra}</span>
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Students Carousel ─────────────────────────────────────────────────────────
+function StudentsCarousel() {
+  const [alunos, setAlunos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const trackRef = useRef(null);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(false);
+
+  useEffect(() => {
+    alunosApi.listar()
+      .then(data => setAlunos(Array.isArray(data) ? data : []))
+      .catch(err => setError(err.message || "Erro ao carregar alunos"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const updateArrows = () => {
+    const el = trackRef.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 8);
+    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 8);
+  };
+
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    updateArrows();
+    el.addEventListener("scroll", updateArrows, { passive: true });
+    window.addEventListener("resize", updateArrows);
+    return () => { el.removeEventListener("scroll", updateArrows); window.removeEventListener("resize", updateArrows); };
+  }, [alunos]);
+
+  const scroll = (dir) => {
+    trackRef.current?.scrollBy({ left: dir * 440, behavior: "smooth" });
+  };
+
+  return (
+    <motion.div {...fade(0.26)} style={{ ...G.card, padding: "1.5rem" }}>
+      <style>{`
+        .carousel-track { scrollbar-width:none; }
+        .carousel-track::-webkit-scrollbar { display:none; }
+        .arr-btn { transition: all 0.18s; }
+        .arr-btn:hover { background:rgba(250,204,21,0.2)!important; border-color:rgba(250,204,21,0.4)!important; color:#facc15!important; }
+        .arr-btn:disabled { opacity:0.2!important; cursor:not-allowed!important; }
+      `}</style>
+
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
+        <div>
+          <p style={{ color: "white", fontWeight: 800, fontSize: "1rem", margin: 0, fontFamily: F }}>Alunos da turma</p>
+          <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", marginTop: 2, fontFamily: F }}>
+            {loading ? "Carregando..." : error ? "Erro ao carregar" : `${alunos.length} aluno${alunos.length !== 1 ? "s" : ""} encontrado${alunos.length !== 1 ? "s" : ""}`}
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          {["←", "→"].map((arrow, i) => (
+            <button
+              key={arrow}
+              onClick={() => scroll(i === 0 ? -1 : 1)}
+              disabled={i === 0 ? !canLeft : !canRight}
+              className="arr-btn"
+              style={{
+                width: 34, height: 34, borderRadius: "0.625rem",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                color: "rgba(255,255,255,0.5)",
+                cursor: "pointer", fontFamily: F,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: "0.9rem",
+              }}
+            >{arrow}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Track */}
+      {loading ? (
+        <div style={{ display: "flex", gap: "1rem", overflow: "hidden" }}>
+          {[...Array(4)].map((_, i) => (
+            <div key={i} style={{
+              flexShrink: 0, width: 200, height: 160,
+              borderRadius: "1.25rem",
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              animation: "pulse 1.5s ease-in-out infinite",
+              animationDelay: `${i * 0.15}s`,
+            }} />
+          ))}
+          <style>{`@keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.8} }`}</style>
+        </div>
+      ) : error ? (
+        <div style={{ textAlign: "center", padding: "2rem 0", color: "rgba(255,255,255,0.3)", fontFamily: F }}>
+          <p style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>⚠️</p>
+          <p style={{ fontSize: "0.85rem" }}>{error}</p>
+        </div>
+      ) : alunos.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "2rem 0", color: "rgba(255,255,255,0.3)", fontFamily: F }}>
+          <p style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>👨‍🎓</p>
+          <p style={{ fontSize: "0.85rem" }}>Nenhum aluno encontrado</p>
+        </div>
+      ) : (
+        <div
+          ref={trackRef}
+          className="carousel-track"
+          style={{ display: "flex", gap: "1rem", overflowX: "auto", paddingBottom: "0.5rem" }}
+        >
+          {alunos.map((aluno, i) => (
+            <StudentCard key={aluno.ra || i} aluno={aluno} index={i} />
+          ))}
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // TeacherDashboard
 // ═══════════════════════════════════════════════════════════════════════════════
 export function TeacherDashboard({ currentUser, onNavigate }) {
-  const totalSent = mockTeacherTransactions.reduce((s, t) => s + t.amount, 0);
-  const avg = Math.round(totalSent / (mockTeacherTransactions.length || 1));
-
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", fontFamily: F, background: "linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)", minHeight: "100vh", padding: "1.5rem", margin: "-1.5rem", width: "calc(100% + 3rem)" }}>
       <style>{`
@@ -196,38 +392,11 @@ export function TeacherDashboard({ currentUser, onNavigate }) {
 
       <PageHeader eyebrow="Professor" title={`Olá, ${currentUser.name.split(" ")[0]} 👋`} sub={`${currentUser.subject || "Disciplina"} · ${mockTeacherTransactions.length} reconhecimentos feitos`} />
 
-      {/* Card + Stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }} className="t-top-grid">
-        <style>{`.t-top-grid{@media(max-width:760px){grid-template-columns:1fr!important}}`}</style>
-        <VirtualCard balance={currentUser.balance} name={currentUser.name} subject={currentUser.subject} label="MOEDAS DISPONÍVEIS" />
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "1fr 1fr", gap: "1rem" }}>
-          <StatPill icon="◈" label="Distribuídas" value={totalSent} delay={0.1} />
-          <StatPill icon="👨‍🎓" label="Premiados" value={mockTeacherTransactions.length} delay={0.14} />
-          <StatPill icon="📊" label="Média / envio" value={avg} delay={0.18} />
-          <motion.button
-            {...fade(0.22)}
-            whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(250,204,21,0.3)" }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => onNavigate("send-coins")}
-            style={{
-              background: "linear-gradient(135deg, #facc15, #f59e0b)",
-              border: "none", borderRadius: "1.25rem",
-              color: "#1e3a5f", fontWeight: 900, fontSize: "0.9rem",
-              cursor: "pointer", fontFamily: F,
-              display: "flex", flexDirection: "column",
-              alignItems: "center", justifyContent: "center", gap: "0.4rem",
-              boxShadow: "0 8px 24px rgba(250,204,21,0.2)",
-            }}
-          >
-            <span style={{ fontSize: "1.6rem" }}>◈</span>
-            Enviar Moedas
-          </motion.button>
-        </div>
-      </div>
+      {/* Virtual Card */}
+      <VirtualCard balance={currentUser.balance} name={currentUser.name} subject={currentUser.subject} label="MOEDAS DISPONÍVEIS" />
 
       {/* Main grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "1.25rem" }} className="t-main-grid">
-        <style>{`.t-main-grid{@media(max-width:860px){grid-template-columns:1fr!important}}`}</style>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
 
         {/* Recent sends */}
         <motion.div {...fade(0.18)} style={{ ...G.card, padding: "1.5rem" }}>
@@ -251,40 +420,8 @@ export function TeacherDashboard({ currentUser, onNavigate }) {
           </div>
         </motion.div>
 
-        {/* Students list */}
-        <motion.div {...fade(0.22)} style={{ ...G.card, padding: "1.25rem" }}>
-          <p style={{ color: "rgba(255,255,255,0.38)", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "1rem", fontFamily: F }}>
-            Seus alunos
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-            {mockUsers.students.slice(0, 5).map((s, i) => (
-              <motion.div
-                key={s.id}
-                {...fade(0.22 + i * 0.05)}
-                style={{
-                  display: "flex", alignItems: "center", gap: "10px",
-                  padding: "0.65rem 0.75rem",
-                  borderRadius: "0.75rem",
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                }}
-              >
-                <div style={{
-                  width: 34, height: 34, borderRadius: "0.625rem", flexShrink: 0,
-                  background: "rgba(250,204,21,0.12)",
-                  border: "1px solid rgba(250,204,21,0.2)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  color: "#facc15", fontWeight: 800, fontSize: "0.8rem", fontFamily: F,
-                }}>{s.avatar}</div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ color: "rgba(255,255,255,0.8)", fontWeight: 600, fontSize: "0.78rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: F }}>{s.name}</p>
-                  <p style={{ color: "rgba(255,255,255,0.28)", fontSize: "0.68rem", fontFamily: F }}>{s.course}</p>
-                </div>
-                <span style={{ color: "#facc15", fontWeight: 800, fontSize: "0.75rem", flexShrink: 0, fontFamily: F }}>{s.balance} ◈</span>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+        {/* Students Carousel — dados reais da API */}
+        <StudentsCarousel />
       </div>
     </div>
   );
@@ -300,9 +437,20 @@ export function SendCoinsPage({ currentUser }) {
   const [search, setSearch] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [alunos, setAlunos] = useState([]);
+  const [loadingAlunos, setLoadingAlunos] = useState(true);
+  const [errorAlunos, setErrorAlunos] = useState(null);
 
-  const filtered = mockUsers.students.filter(s =>
-    s.name.toLowerCase().includes(search.toLowerCase()) || s.ra.includes(search)
+  useEffect(() => {
+    alunosApi.listar()
+      .then(data => setAlunos(Array.isArray(data) ? data : []))
+      .catch(err => setErrorAlunos(err.message || "Erro ao carregar alunos"))
+      .finally(() => setLoadingAlunos(false));
+  }, []);
+
+  const filtered = alunos.filter(s =>
+    (s.nome || s.name || "").toLowerCase().includes(search.toLowerCase()) ||
+    (s.ra || "").includes(search)
   );
 
   const canSubmit = selectedStudent && amount && message;
@@ -414,36 +562,52 @@ export function SendCoinsPage({ currentUser }) {
                 style={{ ...iStyle, marginBottom: "0.625rem" }}
               />
               <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem", maxHeight: 200, overflowY: "auto" }}>
-                {filtered.map(s => (
-                  <button
-                    type="button" key={s.id}
-                    onClick={() => setSelectedStudent(s)}
-                    className={`s-row${selectedStudent?.id === s.id ? " selected" : ""}`}
-                    style={{
-                      display: "flex", alignItems: "center", gap: "10px",
-                      padding: "0.65rem 0.875rem",
-                      borderRadius: "0.75rem",
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1.5px solid rgba(255,255,255,0.08)",
-                      cursor: "pointer", textAlign: "left",
-                      transition: "all 0.15s", fontFamily: F,
-                    }}
-                  >
-                    <div style={{
-                      width: 34, height: 34, borderRadius: "0.625rem", flexShrink: 0,
-                      background: selectedStudent?.id === s.id ? "rgba(250,204,21,0.2)" : "rgba(255,255,255,0.07)",
-                      border: `1px solid ${selectedStudent?.id === s.id ? "rgba(250,204,21,0.4)" : "rgba(255,255,255,0.1)"}`,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      color: selectedStudent?.id === s.id ? "#facc15" : "rgba(255,255,255,0.5)",
-                      fontWeight: 800, fontSize: "0.8rem", fontFamily: F,
-                    }}>{s.avatar}</div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ color: "rgba(255,255,255,0.85)", fontWeight: 600, fontSize: "0.82rem", margin: 0, fontFamily: F }}>{s.name}</p>
-                      <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", fontFamily: F }}>{s.course} · RA: {s.ra}</p>
-                    </div>
-                    <span style={{ color: "#facc15", fontWeight: 800, fontSize: "0.75rem", flexShrink: 0, fontFamily: F }}>{s.balance} ◈</span>
-                  </button>
-                ))}
+                {loadingAlunos ? (
+                  <div style={{ padding: "1rem", textAlign: "center", color: "rgba(255,255,255,0.3)", fontSize: "0.82rem", fontFamily: F }}>
+                    Carregando alunos...
+                  </div>
+                ) : errorAlunos ? (
+                  <div style={{ padding: "1rem", textAlign: "center", color: "#f87171", fontSize: "0.82rem", fontFamily: F }}>
+                    ⚠️ {errorAlunos}
+                  </div>
+                ) : filtered.length === 0 ? (
+                  <div style={{ padding: "1rem", textAlign: "center", color: "rgba(255,255,255,0.3)", fontSize: "0.82rem", fontFamily: F }}>
+                    Nenhum aluno encontrado
+                  </div>
+                ) : filtered.map(s => {
+                  const nome = s.nome || s.name || "";
+                  const initials = nome.split(" ").map(p => p[0]).slice(0, 2).join("").toUpperCase() || "?";
+                  const isSelected = selectedStudent?.ra === s.ra;
+                  return (
+                    <button
+                      type="button" key={s.ra || s.id}
+                      onClick={() => setSelectedStudent(s)}
+                      className={`s-row${isSelected ? " selected" : ""}`}
+                      style={{
+                        display: "flex", alignItems: "center", gap: "10px",
+                        padding: "0.65rem 0.875rem",
+                        borderRadius: "0.75rem",
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1.5px solid rgba(255,255,255,0.08)",
+                        cursor: "pointer", textAlign: "left",
+                        transition: "all 0.15s", fontFamily: F,
+                      }}
+                    >
+                      <div style={{
+                        width: 34, height: 34, borderRadius: "0.625rem", flexShrink: 0,
+                        background: isSelected ? "rgba(250,204,21,0.2)" : "rgba(255,255,255,0.07)",
+                        border: `1px solid ${isSelected ? "rgba(250,204,21,0.4)" : "rgba(255,255,255,0.1)"}`,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        color: isSelected ? "#facc15" : "rgba(255,255,255,0.5)",
+                        fontWeight: 800, fontSize: "0.8rem", fontFamily: F,
+                      }}>{initials}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ color: "rgba(255,255,255,0.85)", fontWeight: 600, fontSize: "0.82rem", margin: 0, fontFamily: F }}>{nome}</p>
+                        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", fontFamily: F }}>{s.curso || s.course} · RA: {s.ra}</p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -553,9 +717,9 @@ export function SendCoinsPage({ currentUser }) {
                     border: "1px solid rgba(250,204,21,0.3)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     color: "#facc15", fontWeight: 800, fontFamily: F,
-                  }}>{selectedStudent.avatar}</div>
+                  }}>{(selectedStudent.nome || selectedStudent.name || "").split(" ").map(p => p[0]).slice(0,2).join("").toUpperCase()}</div>
                   <div>
-                    <p style={{ color: "white", fontWeight: 700, fontSize: "0.85rem", fontFamily: F, margin: 0 }}>{selectedStudent.name}</p>
+                    <p style={{ color: "white", fontWeight: 700, fontSize: "0.85rem", fontFamily: F, margin: 0 }}>{selectedStudent.nome || selectedStudent.name}</p>
                     <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.72rem", fontFamily: F }}>RA: {selectedStudent.ra}</p>
                   </div>
                 </div>
@@ -618,10 +782,10 @@ export function SendCoinsPage({ currentUser }) {
 
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "0.875rem 1rem", borderRadius: "0.875rem", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                  <div style={{ width: 38, height: 38, borderRadius: "0.625rem", background: "rgba(250,204,21,0.15)", border: "1px solid rgba(250,204,21,0.3)", display: "flex", alignItems: "center", justifyContent: "center", color: "#facc15", fontWeight: 800, fontFamily: F }}>{selectedStudent.avatar}</div>
+                  <div style={{ width: 38, height: 38, borderRadius: "0.625rem", background: "rgba(250,204,21,0.15)", border: "1px solid rgba(250,204,21,0.3)", display: "flex", alignItems: "center", justifyContent: "center", color: "#facc15", fontWeight: 800, fontFamily: F }}>{(selectedStudent.nome || selectedStudent.name || "").split(" ").map(p => p[0]).slice(0,2).join("").toUpperCase()}</div>
                   <div>
-                    <p style={{ color: "white", fontWeight: 700, fontSize: "0.85rem", margin: 0 }}>Para: {selectedStudent.name}</p>
-                    <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.72rem" }}>{selectedStudent.course}</p>
+                    <p style={{ color: "white", fontWeight: 700, fontSize: "0.85rem", margin: 0 }}>Para: {selectedStudent.nome || selectedStudent.name}</p>
+                    <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.72rem" }}>{selectedStudent.curso || selectedStudent.course}</p>
                   </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.625rem" }}>

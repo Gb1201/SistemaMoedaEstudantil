@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { alunosApi, empresasApi } from "../api/api";
+import { mockUsers } from "../data/mockData";
 
 const FONT = "'Sora', 'Nunito', sans-serif";
 
@@ -34,19 +35,24 @@ export default function LoginPage({ onLogin, onGoRegister }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
-  const [userType, setUserType] = useState("student"); // "student" | "company"
+  const [userType, setUserType] = useState("student"); // "student" | "teacher" | "company"
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     try {
-      if (userType === "company") {
+      if (userType === "teacher") {
+        // Login local via mockData
+        const found = mockUsers.teachers.find(t => t.email === email);
+        if (!found) throw new Error("Professor não encontrado. Verifique o email.");
+        onLogin({ ...found, role: "teacher", name: found.name });
+      } else if (userType === "company") {
         const raw = await empresasApi.login({ email, senha: password });
         onLogin({ ...raw, role: "company", name: raw.nome });
       } else {
         const raw = await alunosApi.login({ email, senha: password });
-        onLogin({ ...raw, role: "student", name: raw.nome });
+        onLogin({ ...raw, id: raw.id, role: "student", name: raw.nome });
       }
     } catch (err) {
       setError(err.message || "Email ou senha inválidos. Tente novamente.");
@@ -305,6 +311,7 @@ export default function LoginPage({ onLogin, onGoRegister }) {
               }}>
                 {[
                   { value: "student", label: "👨‍🎓 Aluno" },
+                  { value: "teacher", label: "👨‍🏫 Professor" },
                   { value: "company", label: "🏢 Empresa" },
                 ].map(({ value, label }) => (
                   <button

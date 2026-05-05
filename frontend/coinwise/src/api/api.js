@@ -32,6 +32,12 @@ export const alunosApi = {
   /** GET /alunos — Lista todos os alunos */
   listar: () => request("/alunos"),
 
+  atualizar: (id, dados) =>
+    request(`/alunos/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(dados),
+    }),
+
   /** GET /alunos/:id — Busca um aluno pelo ID */
   buscarPorId: (id) => request(`/alunos/${id}`),
 

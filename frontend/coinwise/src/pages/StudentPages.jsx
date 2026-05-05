@@ -4,6 +4,7 @@ import { TransactionItem } from "../components/TransactionItem";
 import { RewardCard } from "../components/TransactionItem";
 import Modal from "../components/Modal";
 import { mockTransactions, mockRewards } from "../data/mockData";
+import { alunosApi } from "../api/api";
 
 export function StudentTransactions({ currentUser }) {
   const [filter, setFilter] = useState("all");
@@ -152,68 +153,174 @@ export function StudentRewards({ currentUser }) {
 
 export function StudentProfile({ currentUser }) {
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ name: currentUser.name, email: currentUser.email, course: currentUser.course, semester: currentUser.semester });
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [form, setForm] = useState({
+    nome:        currentUser.nome        || currentUser.name        || "",
+    email:       currentUser.email                                  || "",
+    senha:       "",
+    endereco:    currentUser.endereco    || currentUser.address     || "",
+    curso:       currentUser.curso       || currentUser.course      || "",
+    cpf:         currentUser.cpf                                    || "",
+    rg:          currentUser.rg                                     || "",
+    ra:          currentUser.ra                                     || "",
+    instituicao: currentUser.instituicao || currentUser.institution || "",
+  });
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const payload = { ...form };
+      if (!payload.senha) delete payload.senha;
+      await alunosApi.atualizar(currentUser.id, payload);
+      setSaveSuccess(true);
+      setEditing(false);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      setSaveError(err.message || "Erro ao salvar alterações");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const F = "'Sora','Nunito',sans-serif";
+  const inputStyle = {
+    width: "100%", padding: "0.65rem 0.875rem",
+    borderRadius: "0.75rem",
+    border: "1.5px solid rgba(255,255,255,0.12)",
+    background: "rgba(255,255,255,0.05)",
+    color: "white", fontSize: "0.82rem",
+    fontFamily: F, outline: "none",
+    transition: "border-color 0.2s, background 0.2s, box-shadow 0.2s",
+  };
+
+  const initials = form.nome
+    .split(" ").map(p => p[0]).filter(Boolean).slice(0, 2).join("").toUpperCase() || "?";
+
+  const fields = [
+    { label: "Nome completo", key: "nome",        type: "text",     col: 2 },
+    { label: "Email",         key: "email",       type: "email",    col: 2 },
+    { label: "Nova senha",    key: "senha",       type: "password", col: 2, placeholder: "Deixe em branco para não alterar" },
+    { label: "Curso",         key: "curso",       type: "text",     col: 1 },
+    { label: "Instituição",   key: "instituicao", type: "text",     col: 1 },
+    { label: "RA",            key: "ra",          type: "text",     col: 1 },
+    { label: "CPF",           key: "cpf",         type: "text",     col: 1 },
+    { label: "RG",            key: "rg",          type: "text",     col: 1 },
+    { label: "Endereço",      key: "endereco",    type: "text",     col: 2 },
+  ];
 
   return (
-    <div style={{ background: "linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)", minHeight: "100vh", padding: "1.5rem", margin: "-1.5rem", width: "calc(100% + 3rem)" }}><div className="space-y-6 max-w-2xl">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h2 className="text-white font-black text-2xl">Meu Perfil</h2>
-        <p className="text-white/40 text-sm mt-0.5">Gerencie suas informações pessoais</p>
-      </motion.div>
+    <div style={{ background: "linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)", minHeight: "100vh", padding: "1.5rem", margin: "-1.5rem", width: "calc(100% + 3rem)" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&display=swap');
+        .prof-input:focus { border-color:rgba(250,204,21,.55)!important; background:rgba(255,255,255,.08)!important; box-shadow:0 0 0 3px rgba(250,204,21,.1)!important; }
+        .prof-input::placeholder { color:rgba(255,255,255,0.22); }
+      `}</style>
+      <div className="space-y-6 max-w-2xl">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+          <h2 className="text-white font-black text-2xl">Meu Perfil</h2>
+          <p className="text-white/40 text-sm mt-0.5">Gerencie suas informações pessoais</p>
+        </motion.div>
 
-      <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
-        <div className="h-24 relative" style={{ background: "linear-gradient(135deg, rgba(250,204,21,0.15) 0%, rgba(30,58,95,0.8) 60%, rgba(15,23,42,0.9) 100%)" }}>
-          <div className="absolute -bottom-10 left-6">
-            <div className="w-20 h-20 rounded-2xl bg-yellow-400 flex items-center justify-center text-blue-900 font-black text-2xl shadow-lg" style={{ border: "4px solid rgba(15,23,42,0.8)" }}>
-              {currentUser.avatar}
-            </div>
-          </div>
-        </div>
-        <div className="pt-14 px-6 pb-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <h3 className="text-white font-bold text-xl">{currentUser.name}</h3>
-              <p className="text-white/40 text-sm">{currentUser.email}</p>
-              <div className="flex gap-2 mt-2 flex-wrap">
-                <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full">Aluno</span>
-                <span className="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2.5 py-1 rounded-full">{currentUser.balance} moedas</span>
-                <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">RA: {currentUser.ra}</span>
+        {saveSuccess && (
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl p-4 flex items-center gap-3"
+            style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)" }}>
+            <span className="text-xl">✅</span>
+            <p style={{ color: "#4ade80", fontWeight: 600, fontSize: "0.875rem", fontFamily: F, margin: 0 }}>Perfil atualizado com sucesso!</p>
+          </motion.div>
+        )}
+        {saveError && (
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl p-4 flex items-center gap-3"
+            style={{ background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.3)" }}>
+            <span className="text-xl">⚠️</span>
+            <p style={{ color: "#f87171", fontWeight: 600, fontSize: "0.875rem", fontFamily: F, margin: 0 }}>{saveError}</p>
+          </motion.div>
+        )}
+
+        <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+          {/* Cover */}
+          <div className="h-24 relative" style={{ background: "linear-gradient(135deg, rgba(250,204,21,0.15) 0%, rgba(30,58,95,0.8) 60%, rgba(15,23,42,0.9) 100%)" }}>
+            <div className="absolute -bottom-10 left-6">
+              <div className="w-20 h-20 rounded-2xl bg-yellow-400 flex items-center justify-center text-blue-900 font-black text-2xl shadow-lg"
+                style={{ border: "4px solid rgba(15,23,42,0.8)", fontFamily: F }}>
+                {initials}
               </div>
             </div>
-            <button onClick={() => setEditing(!editing)}
-              className="px-4 py-2 rounded-xl border border-white/15 text-white/60 text-sm font-medium hover:bg-white/8 transition-colors">
-              {editing ? "Cancelar" : "✏️ Editar"}
-            </button>
           </div>
 
-          <div className="mt-6 grid grid-cols-2 gap-4">
-            {[
-              { label: "Curso", key: "course" },
-              { label: "Semestre", key: "semester" },
-              { label: "Nome completo", key: "name" },
-              { label: "Email", key: "email" },
-            ].map(field => (
-              <div key={field.key}>
-                <label className="text-white/40 text-xs font-medium block mb-1">{field.label}</label>
-                {editing ? (
-                  <input value={form[field.key]} onChange={e => setForm(f => ({ ...f, [field.key]: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl border border-white/15 text-white/75 text-sm focus:outline-none focus:border-yellow-400/50" style={{ background: "rgba(255,255,255,0.05)", color: "white", borderColor: "rgba(255,255,255,0.15)" }} />
-                ) : (
-                  <p className="text-white/80 font-medium text-sm">{form[field.key]}</p>
-                )}
+          {/* Body */}
+          <div className="pt-14 px-6 pb-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-white font-bold text-xl" style={{ fontFamily: F }}>{form.nome || "—"}</h3>
+                <p className="text-white/40 text-sm">{form.email}</p>
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full">Aluno</span>
+                  <span className="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2.5 py-1 rounded-full">{currentUser.balance} moedas</span>
+                  {form.ra && <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">RA: {form.ra}</span>}
+                </div>
               </div>
-            ))}
-          </div>
+              <button
+                onClick={() => { setEditing(!editing); setSaveError(null); }}
+                className="px-4 py-2 rounded-xl border border-white/15 text-white/60 text-sm font-medium hover:bg-white/8 transition-colors"
+                style={{ fontFamily: F }}>
+                {editing ? "Cancelar" : "✏️ Editar"}
+              </button>
+            </div>
 
-          {editing && (
-            <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setEditing(false)}
-              className="mt-4 px-6 py-2.5 bg-yellow-400 text-blue-900 rounded-xl font-bold text-sm hover:bg-yellow-300 transition-colors">
-              Salvar alterações
-            </motion.button>
-          )}
+            {/* Fields grid */}
+            <div className="mt-6" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              {fields.map(field => (
+                <div key={field.key} style={{ gridColumn: field.col === 2 ? "1 / -1" : "auto" }}>
+                  <label style={{ color: "rgba(255,255,255,0.38)", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: "0.4rem", fontFamily: F }}>
+                    {field.label}
+                  </label>
+                  {editing ? (
+                    <input
+                      type={field.type}
+                      value={form[field.key]}
+                      placeholder={field.placeholder || ""}
+                      onChange={e => setForm(f => ({ ...f, [field.key]: e.target.value }))}
+                      className="prof-input"
+                      style={inputStyle}
+                    />
+                  ) : (
+                    <p style={{ color: field.key === "senha" ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.8)", fontWeight: 600, fontSize: "0.85rem", fontFamily: F, margin: 0 }}>
+                      {field.key === "senha"
+                        ? "••••••••"
+                        : form[field.key] || <span style={{ color: "rgba(255,255,255,0.2)", fontStyle: "italic", fontWeight: 400 }}>Não informado</span>}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Save button */}
+            {editing && (
+              <motion.button
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                onClick={handleSave}
+                disabled={saving}
+                style={{
+                  marginTop: "1.5rem",
+                  padding: "0.75rem 2rem",
+                  borderRadius: "0.875rem", border: "none",
+                  background: saving ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, #facc15, #f59e0b)",
+                  color: saving ? "rgba(255,255,255,0.3)" : "#1e3a5f",
+                  fontWeight: 800, fontSize: "0.9rem",
+                  cursor: saving ? "not-allowed" : "pointer",
+                  fontFamily: F, transition: "all 0.2s",
+                }}>
+                {saving ? "Salvando..." : "Salvar alterações →"}
+              </motion.button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </div>
   );
 }
