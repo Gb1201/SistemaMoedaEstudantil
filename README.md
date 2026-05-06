@@ -1,4 +1,4 @@
-# 🏷️ CoinWise 👨‍💻
+# 🏷️ CoinClass 
 
 > Sistema de mérito estudantil com moedas virtuais para incentivar desempenho acadêmico.
 
@@ -6,12 +6,12 @@
 
 ## 📝 Sobre o Projeto
 
-O **CoinWise** é uma plataforma web desenvolvida para gerenciar um sistema de mérito acadêmico baseado em moedas virtuais.  
+O **CoinClass** é uma plataforma web desenvolvida para gerenciar um sistema de mérito acadêmico baseado em moedas virtuais.  
 
 O sistema permite que alunos acumulem moedas por desempenho e possam trocá-las por benefícios oferecidos por empresas parceiras.
 
 ### 🎯 Problema que resolve
-Muitas instituições enfrentam dificuldade em incentivar o engajamento dos alunos. O CoinWise propõe uma solução gamificada para aumentar motivação e desempenho.
+Muitas instituições enfrentam dificuldade em incentivar o engajamento dos alunos. O CoinClass propõe uma solução gamificada para aumentar motivação e desempenho.
 
 ### 🧠 Contexto
 Projeto acadêmico desenvolvido no curso de **Engenharia de Software**.
@@ -87,23 +87,62 @@ Responsável pela persistência das informações.
 
 ---
 
+---
+
+## 🗄️ Estratégia de Acesso ao Banco de Dados
+
+O **CoinClass** utiliza **ORM (Object-Relational Mapping)** como estratégia principal de acesso ao banco de dados, implementado através do **JPA (Java Persistence API)** em conjunto com o **Hibernate** como provedor padrão do Spring Boot.
+
+### 🔹 O que é ORM?
+
+ORM é uma técnica que permite mapear objetos Java diretamente para tabelas do banco de dados relacional, eliminando a necessidade de escrever SQL manualmente para operações básicas de CRUD. O mapeamento é feito por meio de **anotações** nas classes de modelo.
+
+### 🔹 Implementação no projeto
+
+As entidades do sistema são mapeadas com anotações JPA:
+
+```java
+@Entity
+@Table(name = "alunos")
+public class Aluno {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //variavel
+
+    @Column(nullable = false)
+    //variavel
+
+    @Column(unique = true, nullable = false)
+    //variavel
+
+    // getters e setters
+}
+```
+
+O acesso ao banco é feito por meio de **Repositories**, utilizando a interface `JpaRepository` do Spring Data:
+
+```java
+@Repository
+public interface AlunoRepository extends JpaRepository<Aluno, Long> {
+}
+```
+
+### 🔹 Vantagens adotadas
+
+| Benefício | Descrição |
+|-----------|-----------|
+| **Produtividade** | Operações CRUD geradas automaticamente pelo Spring Data JPA |
+| **Portabilidade** | Independência do banco de dados (troca de PostgreSQL para outro DB com mínima alteração) |
+| **Manutenibilidade** | Código orientado a objetos, sem SQL espalhado pela aplicação |
+| **Segurança** | Proteção automática contra SQL Injection via queries parametrizadas |
+
+### 🔹 Fluxo de dados
+
 ## 🧬 Modelo de Dados (Resumo)
-
-### Entidades principais:
-
-- **Aluno**
-  - nome, email, cpf, rg, endereco, curso
-  - relacionamento com Instituição
-
-- **Professor**
-  - nome, cpf, departamento
-  - relacionamento com Instituição
-
-- **Instituição**
-  - nome
-
-- **Empresa**
-  - nome, cnpj
+<div align="center">
+  <img src="docs/SistemaMoeda(2).png" alt="Diagrama do Modelo de Dados - CoinClass" width="800px">
+</div>
 
 ---
 
