@@ -58,15 +58,15 @@ PessoaFisica <|-- Professor
 PessoaJuridica <|-- EmpresaParceira
 
 '======================
-' INSTITUICAO
+' INSTITUICAO (AGREGAÇÃO)
 '======================
 class Instituicao {
   nome : String
   cnpj : String
 }
 
-Aluno "1" --> "1" Instituicao : pertence
-Professor "1" --> "1" Instituicao : vinculado
+Instituicao "1" o-- "0..*" Aluno : possui
+Instituicao "1" o-- "0..*" Professor : possui
 
 '======================
 ' TRANSACAO
@@ -82,7 +82,7 @@ Professor "1" --> "0..*" Transacao : origina
 Transacao "0..*" --> "1" Aluno : destinado a
 
 '======================
-' VANTAGEM
+' VANTAGEM (AGREGAÇÃO)
 '======================
 class Vantagem {
   nome : String
@@ -91,11 +91,11 @@ class Vantagem {
   foto : String
 }
 
-EmpresaParceira "1" --> "0..*" Vantagem : oferece
+EmpresaParceira "1" o-- "0..*" Vantagem : oferece
 Vantagem "0..*" --> "1" CategoriaEnum : categorizada
 
 '======================
-' RESGATE E CUPOM
+' RESGATE E CUPOM (COMPOSIÇÃO)
 '======================
 class Resgate {
   dataResgate : Date
@@ -109,6 +109,6 @@ class Cupom {
 
 Aluno "1" --> "0..*" Resgate : realiza
 Resgate "0..*" --> "1" Vantagem : referente a
-Resgate "1" --> "1" Cupom : gera
+Resgate "1" *-- "1" Cupom : gera
 
 @enduml
