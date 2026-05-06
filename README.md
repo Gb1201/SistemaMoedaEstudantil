@@ -6,12 +6,12 @@
 
 ## 📝 Sobre o Projeto
 
-O **CoinWise** é uma plataforma web desenvolvida para gerenciar um sistema de mérito acadêmico baseado em moedas virtuais.  
+O **CoinClass** é uma plataforma web desenvolvida para gerenciar um sistema de mérito acadêmico baseado em moedas virtuais.  
 
 O sistema permite que alunos acumulem moedas por desempenho e possam trocá-las por benefícios oferecidos por empresas parceiras.
 
 ### 🎯 Problema que resolve
-Muitas instituições enfrentam dificuldade em incentivar o engajamento dos alunos. O CoinWise propõe uma solução gamificada para aumentar motivação e desempenho.
+Muitas instituições enfrentam dificuldade em incentivar o engajamento dos alunos. O CoinClass propõe uma solução gamificada para aumentar motivação e desempenho.
 
 ### 🧠 Contexto
 Projeto acadêmico desenvolvido no curso de **Engenharia de Software**.
