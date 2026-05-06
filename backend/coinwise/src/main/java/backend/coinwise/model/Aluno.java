@@ -12,6 +12,7 @@ public class Aluno extends Usuario {
     private String cpf;
     private String rg;
     private String ra;
+    private Double saldo;
     
     @Enumerated(EnumType.STRING)
     private instituicao instituicao;
@@ -44,6 +45,14 @@ public class Aluno extends Usuario {
     public void setInstituicao(instituicao instituicao) {
         this.instituicao = instituicao;
     }
+    public Double getSaldo() {
+        return saldo;
+    }
+    public void setSaldo(Double saldo) {
+        this.saldo = saldo;
+    }
+
+    
 
     
 

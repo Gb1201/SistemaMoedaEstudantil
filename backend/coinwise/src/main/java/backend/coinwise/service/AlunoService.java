@@ -22,6 +22,8 @@ public class AlunoService {
             throw new IllegalArgumentException("Todos os campos devem ser preenchidos");
         }
 
+        aluno.setSaldo(0.0); // todo aluno comeca com 0
+
         return alunorepor.save(aluno); // salva no banco de Dados
     }
     
@@ -30,6 +32,7 @@ public class AlunoService {
         return alunorepor.findAll()
             .stream()
             .map(aluno -> new AlunoDTO(
+                aluno.getId(),
                 aluno.getNome(),
                 aluno.getCurso(),
                 aluno.getRa()

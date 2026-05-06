@@ -1,4 +1,6 @@
 package backend.coinwise.model;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.*; // Envolve toda anotacoes Spring 
 
 @Entity
@@ -8,8 +10,9 @@ public class Usuario {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // avisa pro banco que o id é auto increment
-    private long id; // gera automaticamnete um id para cada usuario criado
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty("id")  // força a serialização do campo
+    private long id;
 
 
     private String nome;

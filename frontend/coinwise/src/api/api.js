@@ -49,6 +49,8 @@ export const alunosApi = {
       method: "POST",
       body: JSON.stringify(dados),
     }),
+
+    extratoAluno: (alunoId) => request(`/professor/extrato/aluno/${alunoId}`),
 };
 
 // ── Empresas ──────────────────────────────────────────────────────────────────
@@ -82,4 +84,29 @@ export const empresasApi = {
       method: "POST",
       body: JSON.stringify(dados),
     }),
+};
+
+
+// ── Professores ───────────────────────────────────────────────────────────────
+
+export const professoresApi = {
+  /** POST /professor/login */
+  login: (dados) =>
+    request("/professor/login", {
+      method: "POST",
+      body: JSON.stringify(dados),
+    }),
+
+  /** POST /professor/enviar-moedas */
+  enviarMoedas: (dados) =>
+    request("/professor/enviar-moedas", {
+      method: "POST",
+      body: JSON.stringify(dados),
+    }),
+
+  /** GET /professor/extrato/:id */
+  extrato: (professorId) => request(`/professor/extrato/${professorId}`),
+
+  /** GET /professor/extrato/aluno/:id */
+  extratoAluno: (alunoId) => request(`/professor/extrato/aluno/${alunoId}`),
 };

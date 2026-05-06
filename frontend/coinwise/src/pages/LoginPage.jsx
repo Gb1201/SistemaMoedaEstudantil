@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { alunosApi, empresasApi } from "../api/api";
+import { alunosApi, empresasApi, professoresApi } from "../api/api";
 import { mockUsers } from "../data/mockData";
 
 const FONT = "'Sora', 'Nunito', sans-serif";
@@ -43,16 +43,19 @@ export default function LoginPage({ onLogin, onGoRegister }) {
     setError("");
     try {
       if (userType === "teacher") {
-        // Login local via mockData
-        const found = mockUsers.teachers.find(t => t.email === email);
-        if (!found) throw new Error("Professor não encontrado. Verifique o email.");
-        onLogin({ ...found, role: "teacher", name: found.name });
+        const raw = await professoresApi.login({ email, senha: password });
+        onLogin({ 
+          ...raw, 
+          role: "teacher", 
+          name: raw.nome,
+          balance: raw.saldo 
+        });
       } else if (userType === "company") {
         const raw = await empresasApi.login({ email, senha: password });
         onLogin({ ...raw, role: "company", name: raw.nome });
       } else {
         const raw = await alunosApi.login({ email, senha: password });
-        onLogin({ ...raw, id: raw.id, role: "student", name: raw.nome });
+        onLogin({ ...raw, id: raw.id, role: "student", name: raw.nome, balance: raw.saldo});
       }
     } catch (err) {
       setError(err.message || "Email ou senha inválidos. Tente novamente.");
