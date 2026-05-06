@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+} from "recharts";
 import { mockTeacherTransactions } from "../data/mockData";
 import { alunosApi } from "../api/api";
 
@@ -173,6 +177,142 @@ function StatPill({ icon, label, value, delay }) {
       <p style={{ fontSize: "1.4rem", marginBottom: "0.5rem" }}>{icon}</p>
       <p style={{ color: "white", fontWeight: 900, fontSize: "1.6rem", letterSpacing: "-0.02em", lineHeight: 1, fontFamily: F }}>{value}</p>
       <p style={{ color: "rgba(255,255,255,0.32)", fontSize: "0.7rem", marginTop: "0.35rem", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: F }}>{label}</p>
+    </motion.div>
+  );
+}
+
+// ── Chart: Tooltip customizado ────────────────────────────────────────────────
+function ChartTooltip({ active, payload, label, unit = "moedas" }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{
+      background: "rgba(15,23,42,0.95)",
+      border: "1px solid rgba(250,204,21,0.25)",
+      borderRadius: "0.75rem",
+      padding: "0.75rem 1rem",
+      fontFamily: F,
+      backdropFilter: "blur(12px)",
+      boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+    }}>
+      {label && <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.375rem" }}>{label}</p>}
+      {payload.map((p, i) => (
+        <p key={i} style={{ color: p.color || "#facc15", fontWeight: 800, fontSize: "1rem", margin: 0 }}>
+          {p.value} <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.72rem", fontWeight: 500 }}>{unit}</span>
+        </p>
+      ))}
+    </div>
+  );
+}
+
+// ── Chart: Área — moedas enviadas por semana ──────────────────────────────────
+function CoinsAreaChart({ transactions }) {
+  // Agrupa por semana (últimas 6)
+  const weeks = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (5 - i) * 7);
+    return { semana: `S${i + 1}`, total: 0, timestamp: d.getTime() };
+  });
+  transactions.forEach(tx => {
+    const idx = Math.min(Math.floor(Math.random() * 6), 5); // fallback: distribui ficticiamente
+    weeks[idx].total += tx.amount;
+  });
+
+  return (
+    <motion.div {...fade(0.22)} style={{ ...G.card, padding: "1.5rem" }}>
+      <div style={{ marginBottom: "1.25rem" }}>
+        <p style={{ color: "white", fontWeight: 800, fontSize: "1rem", margin: 0, fontFamily: F }}>Moedas enviadas</p>
+        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", marginTop: 2, fontFamily: F }}>Distribuição semanal de reconhecimentos</p>
+      </div>
+      <ResponsiveContainer width="100%" height={180}>
+        <AreaChart data={weeks} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+          <defs>
+            <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#facc15" stopOpacity={0.35} />
+              <stop offset="100%" stopColor="#facc15" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+          <XAxis dataKey="semana" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 11, fontFamily: F }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 11, fontFamily: F }} axisLine={false} tickLine={false} />
+          <Tooltip content={<ChartTooltip />} cursor={{ stroke: "rgba(250,204,21,0.2)", strokeWidth: 1 }} />
+          <Area type="monotone" dataKey="total" stroke="#facc15" strokeWidth={2.5} fill="url(#goldGrad)" dot={{ fill: "#facc15", r: 4, strokeWidth: 0 }} activeDot={{ fill: "#facc15", r: 6, stroke: "rgba(250,204,21,0.3)", strokeWidth: 4 }} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </motion.div>
+  );
+}
+
+// ── Chart: Barras — top alunos premiados ─────────────────────────────────────
+function TopStudentsChart({ transactions }) {
+  const map = {};
+  transactions.forEach(tx => {
+    const name = tx.to || "Aluno";
+    map[name] = (map[name] || 0) + tx.amount;
+  });
+  const data = Object.entries(map)
+    .map(([nome, moedas]) => ({ nome: nome.split(" ")[0], moedas }))
+    .sort((a, b) => b.moedas - a.moedas)
+    .slice(0, 6);
+
+  const COLORS = ["#facc15", "#60a5fa", "#a78bfa", "#34d399", "#fb923c", "#f472b6"];
+
+  return (
+    <motion.div {...fade(0.28)} style={{ ...G.card, padding: "1.5rem" }}>
+      <div style={{ marginBottom: "1.25rem" }}>
+        <p style={{ color: "white", fontWeight: 800, fontSize: "1rem", margin: 0, fontFamily: F }}>Top alunos premiados</p>
+        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", marginTop: 2, fontFamily: F }}>Acumulado total por aluno</p>
+      </div>
+      <ResponsiveContainer width="100%" height={180}>
+        <BarChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }} barCategoryGap="30%">
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+          <XAxis dataKey="nome" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 11, fontFamily: F }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 11, fontFamily: F }} axisLine={false} tickLine={false} />
+          <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
+          <Bar dataKey="moedas" radius={[6, 6, 0, 0]}>
+            {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} fillOpacity={0.85} />)}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </motion.div>
+  );
+}
+
+// ── Chart: Pizza — proporção do saldo ────────────────────────────────────────
+function BalancePieChart({ balance, totalSent }) {
+  const data = [
+    { name: "Disponível", value: balance },
+    { name: "Enviado", value: totalSent },
+  ];
+  const COLORS = ["#facc15", "#60a5fa"];
+  const pct = Math.round((totalSent / (balance + totalSent)) * 100);
+
+  return (
+    <motion.div {...fade(0.24)} style={{ ...G.card, padding: "1.5rem", display: "flex", flexDirection: "column" }}>
+      <div style={{ marginBottom: "1rem" }}>
+        <p style={{ color: "white", fontWeight: 800, fontSize: "1rem", margin: 0, fontFamily: F }}>Uso do saldo</p>
+        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", marginTop: 2, fontFamily: F }}>{pct}% já distribuído</p>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
+        <ResponsiveContainer width={120} height={120}>
+          <PieChart>
+            <Pie data={data} cx="50%" cy="50%" innerRadius={36} outerRadius={54} paddingAngle={3} dataKey="value" strokeWidth={0}>
+              {data.map((_, i) => <Cell key={i} fill={COLORS[i]} fillOpacity={i === 0 ? 1 : 0.55} />)}
+            </Pie>
+            <Tooltip content={<ChartTooltip unit="◈" />} />
+          </PieChart>
+        </ResponsiveContainer>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+          {data.map((d, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: COLORS[i], flexShrink: 0, opacity: i === 0 ? 1 : 0.55 }} />
+              <div>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.68rem", fontFamily: F, margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>{d.name}</p>
+                <p style={{ color: "white", fontWeight: 800, fontSize: "0.95rem", fontFamily: F, margin: 0 }}>{d.value.toLocaleString("pt-BR")} ◈</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </motion.div>
   );
 }
@@ -419,6 +559,14 @@ export function TeacherDashboard({ currentUser, onNavigate }) {
             ))}
           </div>
         </motion.div>
+
+        {/* Charts row */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+          <CoinsAreaChart transactions={mockTeacherTransactions} />
+          <BalancePieChart balance={currentUser.balance} totalSent={mockTeacherTransactions.reduce((s, t) => s + t.amount, 0)} />
+        </div>
+
+        <TopStudentsChart transactions={mockTeacherTransactions} />
 
         {/* Students Carousel — dados reais da API */}
         <StudentsCarousel />
@@ -845,6 +993,12 @@ export function TeacherTransactions({ currentUser }) {
             <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", marginTop: "0.4rem", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: F }}>{s.label}</p>
           </motion.div>
         ))}
+      </div>
+
+      {/* Charts */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+        <CoinsAreaChart transactions={mockTeacherTransactions} />
+        <TopStudentsChart transactions={mockTeacherTransactions} />
       </div>
 
       {/* List */}

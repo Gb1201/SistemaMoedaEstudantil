@@ -1,5 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  AreaChart, Area, BarChart, Bar, RadialBarChart, RadialBar,
+  PieChart, Pie, Cell,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+} from "recharts";
 import Modal from "../components/Modal";
 import { mockRewards } from "../data/mockData";
 import { empresasApi } from "../api/api";
@@ -154,6 +159,137 @@ function RewardRow({ reward, index }) {
   );
 }
 
+// ── Chart Tooltip ─────────────────────────────────────────────────────────────
+function ChartTooltip({ active, payload, label, unit = "" }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{
+      background: "rgba(6,20,16,0.97)",
+      border: "1px solid rgba(52,211,153,0.25)",
+      borderRadius: "0.75rem",
+      padding: "0.75rem 1rem",
+      fontFamily: F,
+      backdropFilter: "blur(12px)",
+      boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+    }}>
+      {label && <p style={{ color: "rgba(255,255,255,0.38)", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.375rem" }}>{label}</p>}
+      {payload.map((p, i) => (
+        <p key={i} style={{ color: p.color || "rgba(52,211,153,0.9)", fontWeight: 800, fontSize: "1rem", margin: 0 }}>
+          {p.value}{unit && <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.72rem", fontWeight: 500 }}> {unit}</span>}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+// ── Chart: Resgates por semana (área) ─────────────────────────────────────────
+function RedeemAreaChart({ rewards }) {
+  // Distribui resgates ficticiamente pelas últimas 6 semanas
+  const total = rewards.reduce((s, r) => s + r.totalRedeemed, 0);
+  const base = Math.floor(total / 6);
+  const weeks = Array.from({ length: 6 }, (_, i) => ({
+    semana: `S${i + 1}`,
+    resgates: base + Math.round((Math.sin(i * 1.2) * base * 0.4)),
+  }));
+
+  return (
+    <motion.div {...fade(0.24)} style={{ ...G.card, padding: "1.5rem" }}>
+      <div style={{ marginBottom: "1.25rem" }}>
+        <p style={{ color: "white", fontWeight: 800, fontSize: "1rem", margin: 0, fontFamily: F }}>Resgates semanais</p>
+        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", marginTop: 2, fontFamily: F }}>Evolução dos resgates nas últimas semanas</p>
+      </div>
+      <ResponsiveContainer width="100%" height={170}>
+        <AreaChart data={weeks} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+          <defs>
+            <linearGradient id="greenGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#34d399" stopOpacity={0.35} />
+              <stop offset="100%" stopColor="#34d399" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+          <XAxis dataKey="semana" tick={{ fill: "rgba(255,255,255,0.28)", fontSize: 11, fontFamily: F }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: "rgba(255,255,255,0.28)", fontSize: 11, fontFamily: F }} axisLine={false} tickLine={false} />
+          <Tooltip content={<ChartTooltip unit="resgates" />} cursor={{ stroke: "rgba(52,211,153,0.2)", strokeWidth: 1 }} />
+          <Area type="monotone" dataKey="resgates" stroke="rgba(52,211,153,0.85)" strokeWidth={2.5} fill="url(#greenGrad)"
+            dot={{ fill: "rgba(52,211,153,0.9)", r: 4, strokeWidth: 0 }}
+            activeDot={{ fill: "#34d399", r: 6, stroke: "rgba(52,211,153,0.3)", strokeWidth: 4 }} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </motion.div>
+  );
+}
+
+// ── Chart: Top vantagens (barras horizontais) ─────────────────────────────────
+function TopRewardsChart({ rewards }) {
+  const data = [...rewards]
+    .sort((a, b) => b.totalRedeemed - a.totalRedeemed)
+    .slice(0, 5)
+    .map(r => ({ nome: r.name.length > 14 ? r.name.slice(0, 13) + "…" : r.name, resgates: r.totalRedeemed }));
+
+  const COLORS = ["rgba(52,211,153,0.9)", "#facc15", "#60a5fa", "#a78bfa", "#fb923c"];
+
+  return (
+    <motion.div {...fade(0.28)} style={{ ...G.card, padding: "1.5rem" }}>
+      <div style={{ marginBottom: "1.25rem" }}>
+        <p style={{ color: "white", fontWeight: 800, fontSize: "1rem", margin: 0, fontFamily: F }}>Top vantagens</p>
+        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", marginTop: 2, fontFamily: F }}>Mais resgatadas pelos alunos</p>
+      </div>
+      <ResponsiveContainer width="100%" height={170}>
+        <BarChart data={data} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }} barCategoryGap="22%">
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
+          <XAxis type="number" tick={{ fill: "rgba(255,255,255,0.28)", fontSize: 11, fontFamily: F }} axisLine={false} tickLine={false} />
+          <YAxis type="category" dataKey="nome" width={90} tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11, fontFamily: F }} axisLine={false} tickLine={false} />
+          <Tooltip content={<ChartTooltip unit="resgates" />} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+          <Bar dataKey="resgates" radius={[0, 6, 6, 0]}>
+            {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} fillOpacity={0.85} />)}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </motion.div>
+  );
+}
+
+// ── Chart: Pizza ativo vs esgotado ────────────────────────────────────────────
+function StatusPieChart({ rewards }) {
+  const active = rewards.filter(r => r.available).length;
+  const inactive = rewards.length - active;
+  const data = [
+    { name: "Ativas", value: active },
+    { name: "Esgotadas", value: inactive },
+  ];
+  const COLORS = ["rgba(52,211,153,0.9)", "rgba(255,255,255,0.12)"];
+
+  return (
+    <motion.div {...fade(0.26)} style={{ ...G.card, padding: "1.5rem", display: "flex", flexDirection: "column" }}>
+      <div style={{ marginBottom: "1rem" }}>
+        <p style={{ color: "white", fontWeight: 800, fontSize: "1rem", margin: 0, fontFamily: F }}>Status das vantagens</p>
+        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", marginTop: 2, fontFamily: F }}>{active} de {rewards.length} ativas</p>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
+        <ResponsiveContainer width={110} height={110}>
+          <PieChart>
+            <Pie data={data} cx="50%" cy="50%" innerRadius={33} outerRadius={50} paddingAngle={3} dataKey="value" strokeWidth={0}>
+              {data.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
+            </Pie>
+            <Tooltip content={<ChartTooltip unit="vantagens" />} />
+          </PieChart>
+        </ResponsiveContainer>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+          {data.map((d, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: COLORS[i], flexShrink: 0 }} />
+              <div>
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.68rem", fontFamily: F, margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>{d.name}</p>
+                <p style={{ color: "white", fontWeight: 800, fontSize: "0.95rem", fontFamily: F, margin: 0 }}>{d.value}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // CompanyDashboard
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -231,6 +367,13 @@ export function CompanyDashboard({ currentUser, onNavigate }) {
           )}
         </div>
       </motion.div>
+
+      {/* Charts */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+        <RedeemAreaChart rewards={myRewards} />
+        <StatusPieChart rewards={myRewards.length ? myRewards : [{ available: true }, { available: false }]} />
+      </div>
+      <TopRewardsChart rewards={myRewards} />
     </div>
   );
 }
@@ -795,42 +938,50 @@ export function CompanyRewardsList({ currentUser, onNavigate }) {
 
       {/* Grid */}
       {filtered.length > 0 ? (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: "1rem" }}>
-          {filtered.map((reward, i) => (
-            <motion.div
-              key={reward.id}
-              {...fade(i * 0.06)}
-              className="rw-card"
-              style={{
-                ...G.card, padding: "1.25rem",
-                transition: "all 0.2s",
-                cursor: "default",
-              }}
-            >
-              <div style={{
-                width: 48, height: 48, borderRadius: "0.875rem",
-                background: "rgba(52,211,153,0.1)",
-                border: "1px solid rgba(52,211,153,0.2)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "1.4rem", marginBottom: "1rem",
-              }}>{reward.image}</div>
-              <p style={{ color: "white", fontWeight: 700, fontSize: "0.9rem", fontFamily: F, marginBottom: "0.25rem" }}>{reward.name}</p>
-              <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", fontFamily: F, marginBottom: "0.875rem" }}>{reward.totalRedeemed} resgates</p>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <p style={{ color: "#facc15", fontWeight: 800, fontSize: "1rem", fontFamily: F }}>{reward.cost} ◈</p>
-                <span style={{
-                  padding: "0.25rem 0.7rem", borderRadius: "2rem",
-                  background: reward.available ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.06)",
-                  border: `1px solid ${reward.available ? "rgba(52,211,153,0.3)" : "rgba(255,255,255,0.1)"}`,
-                  color: reward.available ? "rgba(52,211,153,0.9)" : "rgba(255,255,255,0.3)",
-                  fontSize: "0.68rem", fontWeight: 700,
-                }}>
-                  {reward.available ? "Ativo" : "Esgotado"}
-                </span>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        <>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: "1rem" }}>
+            {filtered.map((reward, i) => (
+              <motion.div
+                key={reward.id}
+                {...fade(i * 0.06)}
+                className="rw-card"
+                style={{
+                  ...G.card, padding: "1.25rem",
+                  transition: "all 0.2s",
+                  cursor: "default",
+                }}
+              >
+                <div style={{
+                  width: 48, height: 48, borderRadius: "0.875rem",
+                  background: "rgba(52,211,153,0.1)",
+                  border: "1px solid rgba(52,211,153,0.2)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "1.4rem", marginBottom: "1rem",
+                }}>{reward.image}</div>
+                <p style={{ color: "white", fontWeight: 700, fontSize: "0.9rem", fontFamily: F, marginBottom: "0.25rem" }}>{reward.name}</p>
+                <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", fontFamily: F, marginBottom: "0.875rem" }}>{reward.totalRedeemed} resgates</p>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <p style={{ color: "#facc15", fontWeight: 800, fontSize: "1rem", fontFamily: F }}>{reward.cost} ◈</p>
+                  <span style={{
+                    padding: "0.25rem 0.7rem", borderRadius: "2rem",
+                    background: reward.available ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.06)",
+                    border: `1px solid ${reward.available ? "rgba(52,211,153,0.3)" : "rgba(255,255,255,0.1)"}`,
+                    color: reward.available ? "rgba(52,211,153,0.9)" : "rgba(255,255,255,0.3)",
+                    fontSize: "0.68rem", fontWeight: 700,
+                  }}>
+                    {reward.available ? "Ativo" : "Esgotado"}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Charts */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+            <RedeemAreaChart rewards={myRewards} />
+            <TopRewardsChart rewards={myRewards} />
+          </div>
+        </>
       ) : (
         <motion.div {...fade(0.1)} style={{ textAlign: "center", padding: "4rem 0", color: "rgba(255,255,255,0.25)", fontFamily: F }}>
           <p style={{ fontSize: "3rem", marginBottom: "0.75rem" }}>🎁</p>
