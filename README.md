@@ -137,12 +137,34 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
 | **Manutenibilidade** | Código orientado a objetos, sem SQL espalhado pela aplicação |
 | **Segurança** | Proteção automática contra SQL Injection via queries parametrizadas |
 
-### 🔹 Fluxo de dados
+## 🔹 Fluxo de dados
 
-## 🧬 Modelo de Dados (Resumo)
+#### 🧬 Modelo de Dados(DER)
 <div align="center">
-  <img src="docs/SistemaMoeda(2).png" alt="Diagrama do Modelo de Dados - CoinClass" width="800px">
+  <img src="docs/SistemaMoeda (2).png" alt="Diagrama do Modelo de Dados - CoinClass" width="800px">
 </div>
+
+---
+
+## 🏗 Diagramas
+
+#### 🔹 Diagrama de Classes
+<div align="center">
+  <img src="docs/DiagramaClasses.png" alt="Diagrama de Classes - CoinClass" width="800px">
+</div>
+
+
+#### 🔹 Diagrama de Componentes
+<div align="center">
+  <img src="docs/DiagramaComponentes.png" alt="Diagrama de Componentes - CoinClass" width="800px">
+</div>
+
+
+#### 🔹 Diagrama Caso de Uso
+<div align="center">
+  <img src="docs/DiagramaCasoUso.png" alt="Diagrama de Caso de USo - CoinClass" width="800px">
+</div>
+
 
 ---
 
