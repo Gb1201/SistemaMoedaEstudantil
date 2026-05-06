@@ -1,4 +1,4 @@
-# 🏷️ CoinWise 👨‍💻
+# 🏷️ CoinClass 
 
 > Sistema de mérito estudantil com moedas virtuais para incentivar desempenho acadêmico.
 
