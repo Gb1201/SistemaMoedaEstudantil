@@ -1,4 +1,6 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { alunosApi } from "../api/api";
 
 const FONT = "'Sora', 'Nunito', sans-serif";
 
@@ -13,6 +15,268 @@ const stagger = (i) => ({
   animate: { opacity: 1, x: 0 },
   transition: { duration: 0.45, delay: 0.28 + i * 0.08, ease: [0.22, 1, 0.36, 1] },
 });
+
+// ── Podium Ranking ─────────────────────────────────────────────────────────────
+function PodiumRanking({ currentUserId }) {
+  const [alunos, setAlunos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    alunosApi.listar()
+      .then(data => {
+        if (Array.isArray(data)) {
+          const sorted = [...data]
+            .sort((a, b) => (b.balance ?? b.saldo ?? 0) - (a.balance ?? a.saldo ?? 0))
+            .slice(0, 3);
+          setAlunos(sorted);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        setLoading(false);
+        setTimeout(() => setRevealed(true), 100);
+      });
+  }, []);
+
+  // Reorder para pódio: 2º, 1º, 3º
+  const podiumOrder = alunos.length === 3
+    ? [alunos[1], alunos[0], alunos[2]]
+    : alunos;
+
+  const podiumConfig = [
+    { place: 2, height: 80,  color: "#94a3b8", glow: "rgba(148,163,184,0.3)", medal: "🥈", barDelay: 0.2 },
+    { place: 1, height: 130, color: "#facc15", glow: "rgba(250,204,21,0.5)",  medal: "🥇", barDelay: 0.0 },
+    { place: 3, height: 55,  color: "#fb923c", glow: "rgba(251,146,60,0.3)",  medal: "🥉", barDelay: 0.35 },
+  ];
+
+  const getInitials = (nome = "") =>
+    nome.split(" ").map(p => p[0]).filter(Boolean).slice(0, 2).join("").toUpperCase() || "?";
+
+  const isCurrentUser = (aluno) =>
+    aluno?.id === currentUserId || aluno?.ra === currentUserId;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.55, delay: 0.32, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        background: "rgba(255,255,255,0.03)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: "1.25rem",
+        padding: "1.5rem 1.25rem 1.25rem",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
+        overflow: "hidden",
+        position: "relative",
+      }}
+    >
+      {/* Background glow */}
+      <div style={{ position: "absolute", top: -40, left: "50%", transform: "translateX(-50%)", width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(250,204,21,0.06) 0%, transparent 70%)", pointerEvents: "none" }} />
+
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem", position: "relative" }}>
+        <div>
+          <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.63rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", margin: "0 0 0.2rem", fontFamily: FONT }}>
+            🏆 Ranking
+          </p>
+          <p style={{ color: "white", fontWeight: 800, fontSize: "0.95rem", margin: 0, fontFamily: FONT }}>
+            Top alunos
+          </p>
+        </div>
+        <div style={{ background: "rgba(250,204,21,0.1)", border: "1px solid rgba(250,204,21,0.2)", borderRadius: "2rem", padding: "0.25rem 0.75rem" }}>
+          <p style={{ color: "rgba(250,204,21,0.8)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", margin: 0, fontFamily: FONT }}>
+            Por moedas ◈
+          </p>
+        </div>
+      </div>
+
+      {loading ? (
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: "1rem", height: 180, paddingBottom: "1rem" }}>
+          {[80, 130, 55].map((h, i) => (
+            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
+              <div style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.06)", animation: "pulse 1.5s ease-in-out infinite", animationDelay: `${i * 0.15}s` }} />
+              <div style={{ width: 88, borderRadius: "0.625rem 0.625rem 0 0", background: "rgba(255,255,255,0.04)", height: h, animation: "pulse 1.5s ease-in-out infinite", animationDelay: `${i * 0.15}s` }} />
+            </div>
+          ))}
+          <style>{`@keyframes pulse{0%,100%{opacity:.3}50%{opacity:.7}}`}</style>
+        </div>
+      ) : alunos.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "2rem 0", color: "rgba(255,255,255,0.25)", fontFamily: FONT, fontSize: "0.85rem" }}>
+          Nenhum dado disponível ainda
+        </div>
+      ) : (
+        <>
+          {/* Pódio */}
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: "0.75rem", marginBottom: "1rem" }}>
+            {podiumOrder.map((aluno, idx) => {
+              if (!aluno) return null;
+              const cfg = podiumConfig[idx];
+              const saldo = aluno.balance ?? aluno.saldo ?? 0;
+              const isSelf = isCurrentUser(aluno);
+
+              return (
+                <div key={aluno.id || idx} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", flex: 1 }}>
+
+                  {/* Medal */}
+                  <motion.div
+                    initial={{ scale: 0, rotate: -20 }}
+                    animate={revealed ? { scale: 1, rotate: 0 } : { scale: 0, rotate: -20 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 18, delay: cfg.barDelay + 0.1 }}
+                    style={{ fontSize: "1.4rem", lineHeight: 1 }}
+                  >
+                    {cfg.medal}
+                  </motion.div>
+
+                  {/* Avatar */}
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={revealed ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20, delay: cfg.barDelay + 0.15 }}
+                    style={{ position: "relative" }}
+                  >
+                    <div style={{
+                      width: cfg.place === 1 ? 52 : 44,
+                      height: cfg.place === 1 ? 52 : 44,
+                      borderRadius: "50%",
+                      background: `linear-gradient(135deg, ${cfg.color}33, ${cfg.color}11)`,
+                      border: `2.5px solid ${cfg.color}`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: cfg.color,
+                      fontWeight: 900,
+                      fontSize: cfg.place === 1 ? "1rem" : "0.85rem",
+                      fontFamily: FONT,
+                      boxShadow: `0 0 16px ${cfg.glow}`,
+                      position: "relative",
+                    }}>
+                      {getInitials(aluno.nome)}
+                    </div>
+                    {/* "Você" badge */}
+                    {isSelf && (
+                      <div style={{
+                        position: "absolute", bottom: -6, left: "50%", transform: "translateX(-50%)",
+                        background: "#facc15", color: "#0f172a",
+                        fontSize: "0.48rem", fontWeight: 900, letterSpacing: "0.05em",
+                        padding: "1px 5px", borderRadius: "999px",
+                        whiteSpace: "nowrap", fontFamily: FONT,
+                      }}>
+                        VOCÊ
+                      </div>
+                    )}
+                  </motion.div>
+
+                  {/* Nome */}
+                  <p style={{
+                    color: isSelf ? "#facc15" : "rgba(255,255,255,0.7)",
+                    fontSize: "0.68rem",
+                    fontWeight: isSelf ? 800 : 600,
+                    fontFamily: FONT,
+                    textAlign: "center",
+                    margin: 0,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    maxWidth: 90,
+                  }}>
+                    {aluno.nome?.split(" ")[0] || "—"}
+                  </p>
+
+                  {/* Barra do pódio */}
+                  <div style={{ width: "100%", position: "relative" }}>
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={revealed ? { height: cfg.height } : { height: 0 }}
+                      transition={{ duration: 0.7, delay: cfg.barDelay + 0.3, ease: [0.22, 1, 0.36, 1] }}
+                      style={{
+                        width: "100%",
+                        borderRadius: "0.5rem 0.5rem 0 0",
+                        background: isSelf
+                          ? `linear-gradient(180deg, ${cfg.color} 0%, ${cfg.color}88 100%)`
+                          : `linear-gradient(180deg, ${cfg.color}99 0%, ${cfg.color}44 100%)`,
+                        boxShadow: isSelf ? `0 -4px 20px ${cfg.glow}` : "none",
+                        display: "flex",
+                        alignItems: "flex-start",
+                        justifyContent: "center",
+                        paddingTop: "0.5rem",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {/* Número da posição */}
+                      <p style={{
+                        color: cfg.place === 1 ? "#0f172a" : "rgba(255,255,255,0.6)",
+                        fontWeight: 900,
+                        fontSize: "0.75rem",
+                        fontFamily: FONT,
+                        margin: 0,
+                      }}>
+                        #{cfg.place}
+                      </p>
+                    </motion.div>
+                  </div>
+
+                  {/* Saldo */}
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={revealed ? { opacity: 1 } : { opacity: 0 }}
+                    transition={{ delay: cfg.barDelay + 0.7 }}
+                    style={{
+                      color: cfg.color,
+                      fontWeight: 800,
+                      fontSize: "0.78rem",
+                      fontFamily: FONT,
+                      margin: 0,
+                      textAlign: "center",
+                    }}
+                  >
+                    {saldo.toLocaleString("pt-BR")} ◈
+                  </motion.p>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Base do pódio */}
+          <div style={{ height: 3, borderRadius: 2, background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)", margin: "0 0 0.75rem" }} />
+
+          {/* Posições 4+ (lista simples) */}
+          {alunos.slice(3, 6).length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+              {alunos.slice(3, 6).map((aluno, i) => {
+                const saldo = aluno.balance ?? aluno.saldo ?? 0;
+                const isSelf = isCurrentUser(aluno);
+                return (
+                  <motion.div
+                    key={aluno.id || i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={revealed ? { opacity: 1, x: 0 } : { opacity: 0, x: -10 }}
+                    transition={{ delay: 0.8 + i * 0.08 }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "0.625rem",
+                      padding: "0.5rem 0.75rem",
+                      borderRadius: "0.75rem",
+                      background: isSelf ? "rgba(250,204,21,0.07)" : "rgba(255,255,255,0.03)",
+                      border: `1px solid ${isSelf ? "rgba(250,204,21,0.2)" : "rgba(255,255,255,0.06)"}`,
+                    }}
+                  >
+                    <p style={{ color: "rgba(255,255,255,0.3)", fontWeight: 700, fontSize: "0.68rem", fontFamily: FONT, width: 18, textAlign: "center", margin: 0 }}>#{i + 4}</p>
+                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(255,255,255,0.07)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.5)", fontWeight: 800, fontSize: "0.65rem", fontFamily: FONT, flexShrink: 0 }}>
+                      {getInitials(aluno.nome)}
+                    </div>
+                    <p style={{ color: isSelf ? "#facc15" : "rgba(255,255,255,0.6)", fontWeight: 600, fontSize: "0.75rem", fontFamily: FONT, flex: 1, margin: 0 }}>
+                      {aluno.nome?.split(" ")[0]} {isSelf && <span style={{ fontSize: "0.6rem", opacity: 0.7 }}>(você)</span>}
+                    </p>
+                    <p style={{ color: "rgba(255,255,255,0.4)", fontWeight: 700, fontSize: "0.72rem", fontFamily: FONT, margin: 0 }}>{saldo.toLocaleString("pt-BR")} ◈</p>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
+    </motion.div>
+  );
+}
 
 export default function StudentDashboard({ currentUser, onNavigate }) {
   const firstName   = (currentUser.name || currentUser.nome || "Aluno").split(" ")[0];
@@ -347,6 +611,9 @@ export default function StudentDashboard({ currentUser, onNavigate }) {
           ))}
         </div>
       </motion.div>
+      {/* ── Ranking ── */}
+      <PodiumRanking currentUserId={currentUser?.id ?? currentUser?.ra} />
+
     </div>
   );
 }

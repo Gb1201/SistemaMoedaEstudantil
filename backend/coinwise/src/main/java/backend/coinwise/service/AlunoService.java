@@ -35,7 +35,8 @@ public class AlunoService {
                 aluno.getId(),
                 aluno.getNome(),
                 aluno.getCurso(),
-                aluno.getRa()
+                aluno.getRa(),
+                aluno.getSaldo()
             ))
             .collect(Collectors.toList());
     }

@@ -5,12 +5,14 @@ public class AlunoDTO {
     private String nome;
     private String curso;
     private String ra;
+    private Double saldo;
 
-    public AlunoDTO(Long id, String nome, String curso, String ra){
+    public AlunoDTO(Long id, String nome, String curso, String ra, Double saldo){
         this.id= id;
         this.nome = nome;
         this.curso = curso;
         this.ra = ra;
+        this.saldo=saldo;
     }
 
     // getters
@@ -37,6 +39,16 @@ public class AlunoDTO {
     public void setRa(String ra) {
         this.ra = ra;
     }
+
+    public Double getSaldo() {
+        return saldo;
+    }
+
+    public void setSaldo(Double saldo) {
+        this.saldo = saldo;
+    }
+
+    
     
 
     
