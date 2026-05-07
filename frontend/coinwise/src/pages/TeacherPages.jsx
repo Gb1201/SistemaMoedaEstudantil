@@ -444,7 +444,7 @@ export function TeacherDashboard({ currentUser, onNavigate }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 // SendCoinsPage
 // ═══════════════════════════════════════════════════════════════════════════════
-export function SendCoinsPage({ currentUser }) {
+export function SendCoinsPage({ currentUser, onUpdateUser }) {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
@@ -489,6 +489,15 @@ export function SendCoinsPage({ currentUser }) {
         motivo: message,
         
       });
+      // ✅ Atualiza o saldo no estado global imediatamente após o envio
+      if (onUpdateUser) {
+        const novoSaldo = (currentUser?.balance ?? currentUser?.saldo ?? 0) - Number(amount);
+        onUpdateUser({
+          ...currentUser,
+          balance: novoSaldo,
+          saldo: novoSaldo,
+        });
+      }
       setConfirmOpen(false);
       setSuccess(true);
       setSelectedStudent(null);

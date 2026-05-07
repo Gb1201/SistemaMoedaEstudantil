@@ -3,6 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const FONT = "'Sora', 'Nunito', sans-serif";
 
+// ✅ Valores sincronizados com Sidebar.jsx (W_COLLAPSED = 68, W_OPEN = 232)
+const W_OPEN = 232;
+const W_COLLAPSED = 68;
+
 export default function Navbar({ currentUser, onToggleSidebar, collapsed }) {
   const [showNotifs, setShowNotifs]   = useState(false);
   const [isMobile,   setIsMobile]     = useState(false);
@@ -77,8 +81,9 @@ export default function Navbar({ currentUser, onToggleSidebar, collapsed }) {
         style={{
           position: "fixed",
           top: 0, right: 0, zIndex: 30,
-          left: isMobile ? 0 : (collapsed ? 72 : 248),
-          transition: "left 0.25s ease, backdrop-filter 0.25s, background 0.25s",
+          // ✅ Corrigido: usando W_COLLAPSED=68 e W_OPEN=232 (igual ao Sidebar.jsx)
+          left: isMobile ? 0 : (collapsed ? W_COLLAPSED : W_OPEN),
+          transition: "left 0.25s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.25s, background 0.25s",
           backgroundColor: scrolled
             ? "rgba(6,14,28,0.85)"
             : "rgba(6,14,28,0.5)",

@@ -77,6 +77,10 @@ const getStoredValue = (key, fallback) => {
   }
 };
 
+// ✅ Valores sincronizados com Sidebar.jsx (W_COLLAPSED = 68, W_OPEN = 232)
+const W_OPEN = 232;
+const W_COLLAPSED = 68;
+
 export default function App() {
   const [authView, setAuthView] = useState(() => routeToAuthView[window.location.pathname] || "home");
   const [currentUser, setCurrentUser] = useState(() => getStoredUser());
@@ -85,14 +89,18 @@ export default function App() {
   const [windowWidth, setWindowWidth] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth : 1024
   );
+
   useEffect(() => {
     const onResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
+
   // No mobile a sidebar fica sobreposta (overlay), não empurra o conteúdo
   const isMobile = windowWidth < 768;
-  const sidebarWidth = isMobile ? 0 : (sidebarCollapsed ? 72 : 220);
+
+  // ✅ Corrigido: usando W_COLLAPSED=68 e W_OPEN=232 (igual ao Sidebar.jsx)
+  const sidebarWidth = isMobile ? 0 : (sidebarCollapsed ? W_COLLAPSED : W_OPEN);
 
   useEffect(() => {
     const syncAuthViewFromUrl = () => {
@@ -162,7 +170,7 @@ export default function App() {
       case "student-rewards":       return <StudentRewards {...props} />;
       case "student-profile":       return <StudentProfile {...props} />;
       case "teacher-dashboard":     return <TeacherDashboard {...props} />;
-      case "send-coins":            return <SendCoinsPage {...props} />;
+      case "send-coins":            return <SendCoinsPage {...props} onUpdateUser={handleUpdateUser} />;
       case "teacher-transactions":  return <TeacherTransactions {...props} />;
       case "company-dashboard":     return <CompanyDashboard {...props} />;
       case "create-reward":         return <CreateRewardPage {...props} />;
@@ -214,8 +222,16 @@ export default function App() {
         collapsed={sidebarCollapsed}
       />
       <main
-        className="pt-16 min-h-screen transition-all duration-300"
-        style={{ marginLeft: sidebarWidth, minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}
+        className="pt-16 min-h-screen"
+        style={{
+          marginLeft: sidebarWidth,
+          // ✅ Transição suave junto com o sidebar (mesmo timing do motion.aside)
+          transition: "margin-left 0.25s cubic-bezier(0.22,1,0.36,1)",
+          minWidth: 0,
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+        }}
       >
         <AnimatePresence mode="wait">
           <motion.div key={currentPage} {...pageTransition}>
