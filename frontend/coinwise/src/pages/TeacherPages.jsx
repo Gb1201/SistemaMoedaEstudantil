@@ -42,6 +42,18 @@ const lStyle = {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+  return isMobile;
+}
+
 function formatDate(dateStr) {
   if (!dateStr) return "—";
   try {
@@ -385,6 +397,7 @@ function StudentsCarousel() {
 export function TeacherDashboard({ currentUser, onNavigate }) {
   const [transactions, setTransactions] = useState([]);
   const [loadingTx, setLoadingTx] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!currentUser?.id) return;
@@ -397,7 +410,7 @@ export function TeacherDashboard({ currentUser, onNavigate }) {
   const totalSent = transactions.reduce((s, t) => s + (t.valor ?? t.amount ?? 0), 0);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", fontFamily: F, background: "linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)", minHeight: "100vh", padding: "1.5rem", margin: "-1.5rem", width: "calc(100% + 3rem)" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", fontFamily: F, background: "linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)", minHeight: "100vh", padding: isMobile ? "1rem" : "1.5rem" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&display=swap');.teacher-input:focus{border-color:rgba(250,204,21,.55)!important;background:rgba(255,255,255,.08)!important;box-shadow:0 0 0 3px rgba(250,204,21,.1)!important;}.t-btn:hover{background:rgba(250,204,21,.12)!important;border-color:rgba(250,204,21,.35)!important;}.val-btn:hover{color:rgba(255,255,255,.8)!important;}`}</style>
 
       <PageHeader eyebrow="Professor" title={`Olá, ${currentUser?.name?.split(" ")[0] || "Professor"} 👋`} sub={`${currentUser?.subject || "Disciplina"} · ${transactions.length} reconhecimentos feitos`} />
@@ -407,7 +420,7 @@ export function TeacherDashboard({ currentUser, onNavigate }) {
       <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
 
         {/* Últimos envios */}
-        <motion.div {...fade(0.18)} style={{ ...G.card, padding: "1.5rem" }}>
+        <motion.div {...fade(0.18)} style={{ ...G.card, padding: isMobile ? "1rem" : "1.5rem" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
             <div>
               <p style={{ color: "white", fontWeight: 800, fontSize: "1rem", margin: 0, fontFamily: F }}>Últimos envios</p>
@@ -428,8 +441,8 @@ export function TeacherDashboard({ currentUser, onNavigate }) {
           )}
         </motion.div>
 
-        {/* Charts */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+        {/* Charts — empilha no mobile */}
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "1.25rem" }}>
           <CoinsAreaChart transactions={transactions} />
           <BalancePieChart balance={currentUser?.balance ?? currentUser?.saldo ?? 0} totalSent={totalSent} />
         </div>
@@ -456,6 +469,7 @@ export function SendCoinsPage({ currentUser, onUpdateUser }) {
   const [alunos, setAlunos] = useState([]);
   const [loadingAlunos, setLoadingAlunos] = useState(true);
   const [errorAlunos, setErrorAlunos] = useState(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     alunosApi.listar()

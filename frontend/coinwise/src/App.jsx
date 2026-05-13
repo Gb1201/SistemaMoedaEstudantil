@@ -85,7 +85,9 @@ export default function App() {
   const [authView, setAuthView] = useState(() => routeToAuthView[window.location.pathname] || "home");
   const [currentUser, setCurrentUser] = useState(() => getStoredUser());
   const [currentPage, setCurrentPage] = useState(() => getStoredValue(STORAGE_KEYS.currentPage, null));
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() =>
+    typeof window !== "undefined" && window.innerWidth < 768 ? true : false
+  );
   const [windowWidth, setWindowWidth] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth : 1024
   );
@@ -156,7 +158,10 @@ export default function App() {
     setAuthView("home");
   };
 
-  const navigate = (page) => setCurrentPage(page);
+  const navigate = (page) => {
+    setCurrentPage(page);
+    if (isMobile) setSidebarCollapsed(true); // ✅ fecha sidebar ao navegar no mobile
+  };
 
   const handleUpdateUser = (updatedUser) => {
     setCurrentUser(updatedUser);
@@ -216,6 +221,22 @@ export default function App() {
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(c => !c)}
       />
+
+      {/* ✅ Overlay mobile: escurece o fundo e fecha o sidebar ao clicar fora */}
+      {!sidebarCollapsed && isMobile && (
+        <div
+          onClick={() => setSidebarCollapsed(true)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(2px)",
+            WebkitBackdropFilter: "blur(2px)",
+            zIndex: 35,
+          }}
+        />
+      )}
+
       <Navbar
         currentUser={currentUser}
         onToggleSidebar={() => setSidebarCollapsed(c => !c)}

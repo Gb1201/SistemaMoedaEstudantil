@@ -48,6 +48,160 @@ export default function Sidebar({ currentUser, currentPage, onNavigate, onLogout
   const avatarLabel = (currentUser?.avatar || currentUser?.nome?.[0] || currentUser?.name?.[0] || "?").toUpperCase();
   const displayName = currentUser?.name  || currentUser?.nome  || "Usuário";
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+  // No mobile: sidebar some completamente (translateX) ao invés de colapsar para ícones
+  if (isMobile) {
+    return (
+      <>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&display=swap');
+          .sb-nav-btn { transition: all 0.18s cubic-bezier(0.22,1,0.36,1); }
+          .sb-nav-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.07) !important;
+            color: rgba(255,255,255,0.9) !important;
+          }
+          .sb-nav-btn:hover:not(.active) .nav-icon { color: rgba(255,255,255,0.85) !important; }
+          .sb-logout:hover {
+            background: rgba(248,113,113,0.1) !important;
+            color: #fca5a5 !important;
+          }
+        `}</style>
+
+        <motion.aside
+          animate={{ x: collapsed ? -W_OPEN : 0 }}
+          initial={{ x: -W_OPEN }}
+          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            position: "fixed",
+            left: 0, top: 0,
+            width: W_OPEN,
+            height: "100%",
+            background: bg,
+            zIndex: 40,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            fontFamily: FONT,
+            boxShadow: "4px 0 32px rgba(0,0,0,0.45)",
+            borderRight: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
+          {/* ── Top: Logo + fechar ── */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "1.1rem 0.875rem",
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            gap: "0.75rem",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+              <div style={{
+                width: "36px", height: "36px", flexShrink: 0,
+                borderRadius: "0.875rem",
+                background: "linear-gradient(135deg,#facc15 0%,#f59e0b 100%)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "#0b1d38", fontWeight: 900, fontSize: "1.1rem",
+                boxShadow: "0 4px 14px rgba(250,204,21,0.3)",
+              }}>◈</div>
+              <div>
+                <p style={{ color: "white", fontWeight: 800, fontSize: "0.95rem", letterSpacing: "-0.01em", lineHeight: 1.1, margin: 0 }}>CoinClass</p>
+                <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.6rem", letterSpacing: "0.08em", marginTop: 2 }}>Moeda Estudantil</p>
+              </div>
+            </div>
+            <button
+              onClick={onToggle}
+              style={{
+                width: "28px", height: "28px", flexShrink: 0,
+                borderRadius: "0.5rem",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "rgba(255,255,255,0.35)",
+                cursor: "pointer", fontSize: "0.65rem",
+              }}
+            >✕</button>
+          </div>
+
+          {/* ── User card ── */}
+          <div style={{ padding: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+            <div style={{
+              display: "flex", alignItems: "center", gap: "0.625rem",
+              padding: "0.6rem 0.75rem",
+              borderRadius: "0.875rem",
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}>
+              <div style={{
+                width: "36px", height: "36px", flexShrink: 0,
+                borderRadius: "0.875rem",
+                background: "linear-gradient(135deg,#facc15,#f59e0b)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "#0b1d38", fontWeight: 900, fontSize: "0.85rem",
+                boxShadow: "0 4px 12px rgba(250,204,21,0.25)",
+              }}>{avatarLabel}</div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <p style={{ color: "rgba(255,255,255,0.88)", fontWeight: 700, fontSize: "0.82rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", margin: 0, lineHeight: 1.2 }}>
+                  {displayName}
+                </p>
+                <span style={{
+                  display: "inline-block", marginTop: 3,
+                  background: badge.bg, color: badge.color, border: `1px solid ${badge.border}`,
+                  fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+                  padding: "2px 7px", borderRadius: "999px",
+                }}>{roleLabels[role] ?? role ?? "Usuário"}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Nav items ── */}
+          <nav style={{ flex: 1, padding: "0.875rem 0.625rem", display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto" }}>
+            <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", padding: "0 0.625rem", marginBottom: "0.5rem" }}>Menu</p>
+            {items.map((item, i) => {
+              const isActive = currentPage === item.page;
+              return (
+                <button
+                  key={item.page}
+                  className={`sb-nav-btn${isActive ? " active" : ""}`}
+                  onClick={() => onNavigate(item.page)}
+                  style={{
+                    width: "100%", display: "flex", alignItems: "center", gap: "0.625rem",
+                    padding: "0.625rem 0.75rem", borderRadius: "0.875rem",
+                    border: isActive ? "1px solid rgba(250,204,21,0.25)" : "1px solid transparent",
+                    background: isActive ? "linear-gradient(135deg,rgba(250,204,21,0.18) 0%,rgba(250,204,21,0.08) 100%)" : "transparent",
+                    color: isActive ? "#facc15" : "rgba(255,255,255,0.45)",
+                    cursor: "pointer", textAlign: "left", fontFamily: FONT, position: "relative",
+                  }}
+                >
+                  {isActive && <div style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: 3, height: 18, borderRadius: "0 3px 3px 0", background: "linear-gradient(180deg,#facc15,#f59e0b)", boxShadow: "0 0 8px rgba(250,204,21,0.5)" }} />}
+                  <span className="nav-icon" style={{ fontSize: "1rem", flexShrink: 0, color: isActive ? "#facc15" : "rgba(255,255,255,0.35)", lineHeight: 1 }}>{item.icon}</span>
+                  <span style={{ fontWeight: 600, fontSize: "0.82rem", whiteSpace: "nowrap" }}>{item.label}</span>
+                  {isActive && <div style={{ marginLeft: "auto", flexShrink: 0, width: 6, height: 6, borderRadius: "50%", background: "rgba(250,204,21,0.6)", boxShadow: "0 0 6px rgba(250,204,21,0.4)" }} />}
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* ── Logout ── */}
+          <div style={{ padding: "0.75rem 0.625rem 1.25rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+            <button
+              className="sb-logout"
+              onClick={onLogout}
+              style={{
+                width: "100%", display: "flex", alignItems: "center", gap: "0.625rem",
+                padding: "0.625rem 0.75rem", borderRadius: "0.875rem",
+                border: "1px solid transparent", background: "transparent",
+                color: "rgba(255,255,255,0.3)", cursor: "pointer", fontFamily: FONT, transition: "all 0.18s",
+              }}
+            >
+              <span style={{ fontSize: "1rem", flexShrink: 0 }}>⏎</span>
+              <span style={{ fontWeight: 600, fontSize: "0.82rem" }}>Sair</span>
+            </button>
+          </div>
+        </motion.aside>
+      </>
+    );
+  }
+
   return (
     <>
       <style>{`
