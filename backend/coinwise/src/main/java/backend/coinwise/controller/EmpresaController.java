@@ -50,9 +50,14 @@ public class EmpresaController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarEmpresa(@PathVariable Long id){
-        empresaService.deletarEmpresa(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> deletarEmpresa(@PathVariable Long id) {
+        System.out.println(">>> DELETE recebido para id: " + id);
+        try {
+            empresaService.deletarEmpresa(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     } 
 
     @PostMapping("/login")

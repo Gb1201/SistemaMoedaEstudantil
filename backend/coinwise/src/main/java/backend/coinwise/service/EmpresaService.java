@@ -74,16 +74,17 @@ public class EmpresaService {
     }
 
     //método para deletar uma empresa
-
-    public void deletarEmpresa(Long id){
-        //para deletarmos uma empresa, precisamos achar primeiro através do id
-        EmpresaParceira empresaExistente= empresaBD.findById(id)
+    public void deletarEmpresa(Long id) {
+        System.out.println(">>> Buscando empresa id: " + id);
+        System.out.println(">>> Total empresas no banco: " + empresaBD.count());
+        System.out.println(">>> IDs existentes: " + empresaBD.findAll().stream().map(e -> e.getId()).toList());
+        
+        EmpresaParceira empresaExistente = empresaBD.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Empresa não encontrada"));
-        
 
-        //aualiza a variavel
+        System.out.println(">>> Empresa encontrada: " + empresaExistente.getNome());
         empresaBD.delete(empresaExistente);
-        
+        System.out.println(">>> Deletada com sucesso");
     }
 
 

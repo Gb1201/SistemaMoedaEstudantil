@@ -384,11 +384,14 @@ export function StudentRewards({ currentUser }) {
 }
 
 // ── StudentProfile ────────────────────────────────────────────────────────────
-export function StudentProfile({ currentUser }) {
+export function StudentProfile({ currentUser, onLogout }) {
   const [editing,     setEditing]     = useState(false);
   const [saving,      setSaving]      = useState(false);
   const [saveError,   setSaveError]   = useState(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting,      setDeleting]      = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
   const [form, setForm] = useState({
     nome       : currentUser.nome        || currentUser.name        || "",
     email      : currentUser.email                                  || "",
@@ -415,6 +418,17 @@ export function StudentProfile({ currentUser }) {
       setSaveError(err.message || "Erro ao salvar alterações");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await alunosApi.deletar(currentUser.id);
+      onLogout?.();
+    } catch (err) {
+      alert(err.message || "Erro ao deletar a conta.");
+      setDeleting(false);
     }
   };
 
@@ -572,6 +586,157 @@ export function StudentProfile({ currentUser }) {
             </AnimatePresence>
           </div>
         </motion.div>
+
+        {/* Danger Zone */}
+        <motion.div {...fade(0.2)} style={{
+          ...GLASS,
+          padding: "1.5rem",
+          border: "1px solid rgba(239,68,68,0.2)",
+          background: "rgba(239,68,68,0.04)",
+        }}>
+          <p style={{ color:"rgba(239,68,68,0.75)", fontWeight:700, fontSize:"0.65rem", letterSpacing:"0.15em", textTransform:"uppercase", fontFamily:FONT, marginBottom:"0.5rem" }}>
+            ⚠ Zona de perigo
+          </p>
+          <p style={{ color:"rgba(255,255,255,0.4)", fontSize:"0.82rem", fontFamily:FONT, marginBottom:"1.25rem", lineHeight:1.6 }}>
+            Ao deletar sua conta, todo o seu histórico de moedas e dados pessoais serão permanentemente removidos. Essa ação não pode ser desfeita.
+          </p>
+          <motion.button
+            type="button"
+            whileHover={{ scale:1.02, boxShadow:"0 0 20px rgba(239,68,68,0.2)" }}
+            whileTap={{ scale:0.97 }}
+            onClick={() => { setShowDeleteModal(true); setDeleteConfirm(""); }}
+            style={{
+              padding:"0.75rem 1.5rem",
+              borderRadius:"0.875rem",
+              border:"1.5px solid rgba(239,68,68,0.4)",
+              background:"rgba(239,68,68,0.08)",
+              color:"rgba(239,68,68,0.85)",
+              fontWeight:700, fontSize:"0.875rem",
+              cursor:"pointer", fontFamily:FONT,
+              transition:"all 0.18s",
+              display:"flex", alignItems:"center", gap:"8px",
+            }}
+          >
+            🗑️ Deletar conta
+          </motion.button>
+        </motion.div>
+
+        <AnimatePresence>
+          {showDeleteModal && (
+            <motion.div
+              initial={{ opacity:0 }}
+              animate={{ opacity:1 }}
+              exit={{ opacity:0 }}
+              onClick={() => !deleting && setShowDeleteModal(false)}
+              style={{
+                position:"fixed", inset:0,
+                background:"rgba(6,12,26,0.85)",
+                backdropFilter:"blur(12px)",
+                WebkitBackdropFilter:"blur(12px)",
+                zIndex:100,
+                display:"flex", alignItems:"center", justifyContent:"center",
+                padding:"1.5rem",
+              }}
+            >
+              <motion.div
+                initial={{ scale:0.88, y:24 }}
+                animate={{ scale:1, y:0 }}
+                exit={{ scale:0.92, opacity:0 }}
+                transition={{ type:"spring", stiffness:360, damping:26 }}
+                onClick={e => e.stopPropagation()}
+                style={{
+                  background:"linear-gradient(160deg,#1a0a0a 0%,#2a1010 100%)",
+                  border:"1px solid rgba(239,68,68,0.25)",
+                  borderRadius:"1.5rem",
+                  padding:"2rem",
+                  maxWidth:420, width:"100%",
+                  fontFamily:FONT,
+                  boxShadow:"0 32px 80px rgba(0,0,0,0.6)",
+                }}
+              >
+                <div style={{ textAlign:"center", marginBottom:"1.5rem" }}>
+                  <div style={{
+                    width:56, height:56, borderRadius:"1rem",
+                    background:"rgba(239,68,68,0.12)",
+                    border:"1px solid rgba(239,68,68,0.25)",
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                    fontSize:"1.5rem", margin:"0 auto 1rem",
+                  }}>🗑️</div>
+                  <p style={{ color:"white", fontWeight:900, fontSize:"1.2rem", margin:"0 0 0.5rem", fontFamily:FONT }}>Deletar conta</p>
+                  <p style={{ color:"rgba(255,255,255,0.4)", fontSize:"0.85rem", fontFamily:FONT, lineHeight:1.6 }}>
+                    Essa ação é <strong style={{ color:"rgba(239,68,68,0.8)" }}>irreversível</strong>. Para confirmar, digite seu nome abaixo.
+                  </p>
+                </div>
+                <div style={{ marginBottom:"1.25rem" }}>
+                  <label style={{ display:"block", color:"rgba(255,255,255,0.32)", fontSize:"0.62rem", fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:"0.5rem", fontFamily:FONT }}>
+                    Digite <span style={{ color:"rgba(239,68,68,0.75)", fontStyle:"italic" }}>{form.nome}</span> para confirmar
+                  </label>
+                  <input
+                    type="text"
+                    value={deleteConfirm}
+                    onChange={e => setDeleteConfirm(e.target.value)}
+                    placeholder={form.nome}
+                    disabled={deleting}
+                    style={{
+                      width:"100%", padding:"0.8rem 1rem",
+                      borderRadius:"0.875rem",
+                      border:`1.5px solid ${deleteConfirm === form.nome ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.1)"}`,
+                      background:"rgba(255,255,255,0.05)",
+                      color:"white", fontSize:"0.875rem",
+                      fontFamily:FONT, outline:"none",
+                      boxSizing:"border-box",
+                    }}
+                  />
+                </div>
+                <div style={{ display:"flex", gap:"0.75rem" }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteModal(false)}
+                    disabled={deleting}
+                    style={{
+                      flex:1, padding:"0.875rem",
+                      borderRadius:"0.875rem",
+                      border:"1.5px solid rgba(255,255,255,0.12)",
+                      background:"transparent",
+                      color:"rgba(255,255,255,0.45)",
+                      fontWeight:600, fontSize:"0.875rem",
+                      cursor:"pointer", fontFamily:FONT,
+                    }}
+                  >Cancelar</button>
+                  <motion.button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={deleting || deleteConfirm !== form.nome}
+                    whileHover={deleteConfirm === form.nome && !deleting ? { scale:1.02, boxShadow:"0 0 24px rgba(239,68,68,0.3)" } : {}}
+                    whileTap={deleteConfirm === form.nome && !deleting ? { scale:0.97 } : {}}
+                    style={{
+                      flex:2, padding:"0.875rem",
+                      borderRadius:"0.875rem", border:"none",
+                      background: deleteConfirm === form.nome && !deleting
+                        ? "linear-gradient(135deg,#ef4444,#dc2626)"
+                        : "rgba(239,68,68,0.12)",
+                      color: deleteConfirm === form.nome && !deleting ? "white" : "rgba(239,68,68,0.35)",
+                      fontWeight:800, fontSize:"0.9rem",
+                      cursor: deleteConfirm === form.nome && !deleting ? "pointer" : "not-allowed",
+                      fontFamily:FONT, transition:"all 0.2s",
+                      display:"flex", alignItems:"center", justifyContent:"center", gap:"8px",
+                    }}
+                  >
+                    {deleting ? (
+                      <>
+                        <svg style={{ animation:"spin 0.8s linear infinite", width:15, height:15 }} viewBox="0 0 24 24" fill="none">
+                          <circle opacity={0.25} cx="12" cy="12" r="10" stroke="white" strokeWidth="4" />
+                          <path opacity={0.75} fill="white" d="M4 12a8 8 0 018-8v8z" />
+                        </svg>
+                        Deletando...
+                      </>
+                    ) : "Deletar permanentemente"}
+                  </motion.button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       </div>
     </div>

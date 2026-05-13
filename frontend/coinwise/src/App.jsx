@@ -173,14 +173,14 @@ export default function App() {
       case "student-dashboard":     return <StudentDashboard {...props} />;
       case "student-transactions":  return <StudentTransactions {...props} />;
       case "student-rewards":       return <StudentRewards {...props} />;
-      case "student-profile":       return <StudentProfile {...props} />;
+      case "student-profile":       return <StudentProfile {...props} onLogout={handleLogout} />;
       case "teacher-dashboard":     return <TeacherDashboard {...props} />;
       case "send-coins":            return <SendCoinsPage {...props} onUpdateUser={handleUpdateUser} />;
       case "teacher-transactions":  return <TeacherTransactions {...props} />;
       case "company-dashboard":     return <CompanyDashboard {...props} />;
       case "create-reward":         return <CreateRewardPage {...props} />;
       case "company-rewards":       return <CompanyRewardsList {...props} />;
-      case "company-profile":       return <CompanyProfilePage {...props} onUpdateUser={handleUpdateUser} />;
+      case "company-profile":       return <CompanyProfilePage {...props} onUpdateUser={handleUpdateUser} onLogout={handleLogout} />;
       default: return null;
     }
   };
