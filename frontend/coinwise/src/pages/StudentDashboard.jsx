@@ -1,5 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+import {
+  Trophy,
+  Gift,
+  ArrowUpDown,
+  User,
+  ChevronRight,
+} from "lucide-react";
 import { alunosApi } from "../api/api";
 
 const FONT = "'Sora', 'Nunito', sans-serif";
@@ -45,9 +52,9 @@ function PodiumRanking({ currentUserId }) {
     : alunos;
 
   const podiumConfig = [
-    { place: 2, height: 80,  color: "#94a3b8", glow: "rgba(148,163,184,0.3)", medal: "🥈", barDelay: 0.2 },
-    { place: 1, height: 130, color: "#facc15", glow: "rgba(250,204,21,0.5)",  medal: "🥇", barDelay: 0.0 },
-    { place: 3, height: 55,  color: "#fb923c", glow: "rgba(251,146,60,0.3)",  medal: "🥉", barDelay: 0.35 },
+    { place: 2, height: 80,  color: "#94a3b8", glow: "rgba(148,163,184,0.3)", medal: <Trophy size={18} strokeWidth={2.5} />, barDelay: 0.2 },
+    { place: 1, height: 130, color: "#facc15", glow: "rgba(250,204,21,0.5)",  medal: <Trophy size={22} strokeWidth={2.5} />, barDelay: 0.0 },
+    { place: 3, height: 55,  color: "#fb923c", glow: "rgba(251,146,60,0.3)",  medal: <Trophy size={16} strokeWidth={2.5} />, barDelay: 0.35 },
   ];
 
   const getInitials = (nome = "") =>
@@ -78,9 +85,9 @@ function PodiumRanking({ currentUserId }) {
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem", position: "relative" }}>
         <div>
-          <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.63rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", margin: "0 0 0.2rem", fontFamily: FONT }}>
-            🏆 Ranking
-          </p>
+          <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.63rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", margin: "0 0 0.2rem", fontFamily: FONT, display: "flex", alignItems: "center", gap: "5px" }}>
+              <Trophy size={11} strokeWidth={2.5} style={{ opacity: 0.7 }} /> Ranking
+            </p>
           <p style={{ color: "white", fontWeight: 800, fontSize: "0.95rem", margin: 0, fontFamily: FONT }}>
             Top alunos
           </p>
@@ -124,7 +131,7 @@ function PodiumRanking({ currentUserId }) {
                     initial={{ scale: 0, rotate: -20 }}
                     animate={revealed ? { scale: 1, rotate: 0 } : { scale: 0, rotate: -20 }}
                     transition={{ type: "spring", stiffness: 400, damping: 18, delay: cfg.barDelay + 0.1 }}
-                    style={{ fontSize: "1.4rem", lineHeight: 1 }}
+                    style={{ color: cfg.color, lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center" }}
                   >
                     {cfg.medal}
                   </motion.div>
@@ -287,7 +294,7 @@ export default function StudentDashboard({ currentUser, onNavigate }) {
 
   const quickActions = [
     {
-      icon: "🎁",
+      icon: <Gift size={18} strokeWidth={2} />,
       label: "Resgatar vantagens",
       sub: "Catálogo de recompensas",
       page: "student-rewards",
@@ -295,7 +302,7 @@ export default function StudentDashboard({ currentUser, onNavigate }) {
       accentBorder: "rgba(250,204,21,0.3)",
     },
     {
-      icon: "↕",
+      icon: <ArrowUpDown size={18} strokeWidth={2} />,
       label: "Ver extrato",
       sub: "Histórico completo",
       page: "student-transactions",
@@ -303,7 +310,7 @@ export default function StudentDashboard({ currentUser, onNavigate }) {
       accentBorder: "rgba(96,165,250,0.3)",
     },
     {
-      icon: "◉",
+      icon: <User size={18} strokeWidth={2} />,
       label: "Meu perfil",
       sub: "Editar informações",
       page: "student-profile",
@@ -392,7 +399,7 @@ export default function StudentDashboard({ currentUser, onNavigate }) {
             margin: 0,
             lineHeight: 1.1,
           }}>
-            Olá, {firstName} 👋
+            Olá, {firstName}
           </h2>
           <p style={{
             color: "rgba(255,255,255,0.28)",
@@ -603,9 +610,10 @@ export default function StudentDashboard({ currentUser, onNavigate }) {
 
                 <span className="qa-arrow" style={{
                   color: "rgba(255,255,255,0.2)",
-                  fontSize: "0.85rem",
                   opacity: 0.5,
-                }}>→</span>
+                  display: "flex",
+                  alignItems: "center",
+                }}><ChevronRight size={16} strokeWidth={2} /></span>
               </div>
             </motion.button>
           ))}

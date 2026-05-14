@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
-import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 
 import HomePage from "./pages/HomePage";
@@ -47,14 +46,12 @@ const authViewToRoute = {
 
 const VALID_ROLES = ["student", "teacher", "company"];
 
-// Lê do localStorage e valida — descarta se o usuário salvo estiver incompleto/corrompido
 const getStoredUser = () => {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.currentUser);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    // Garante que o objeto tem role válido antes de aceitar
     if (!parsed || !VALID_ROLES.includes(parsed.role)) {
       localStorage.removeItem(STORAGE_KEYS.currentUser);
       return null;
@@ -77,32 +74,10 @@ const getStoredValue = (key, fallback) => {
   }
 };
 
-// ✅ Valores sincronizados com Sidebar.jsx (W_COLLAPSED = 68, W_OPEN = 232)
-const W_OPEN = 232;
-const W_COLLAPSED = 68;
-
 export default function App() {
-  const [authView, setAuthView] = useState(() => routeToAuthView[window.location.pathname] || "home");
-  const [currentUser, setCurrentUser] = useState(() => getStoredUser());
-  const [currentPage, setCurrentPage] = useState(() => getStoredValue(STORAGE_KEYS.currentPage, null));
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() =>
-    typeof window !== "undefined" && window.innerWidth < 768 ? true : false
-  );
-  const [windowWidth, setWindowWidth] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth : 1024
-  );
-
-  useEffect(() => {
-    const onResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  // No mobile a sidebar fica sobreposta (overlay), não empurra o conteúdo
-  const isMobile = windowWidth < 768;
-
-  // ✅ Corrigido: usando W_COLLAPSED=68 e W_OPEN=232 (igual ao Sidebar.jsx)
-  const sidebarWidth = isMobile ? 0 : (sidebarCollapsed ? W_COLLAPSED : W_OPEN);
+  const [authView,     setAuthView]     = useState(() => routeToAuthView[window.location.pathname] || "home");
+  const [currentUser,  setCurrentUser]  = useState(() => getStoredUser());
+  const [currentPage,  setCurrentPage]  = useState(() => getStoredValue(STORAGE_KEYS.currentPage, null));
 
   useEffect(() => {
     const syncAuthViewFromUrl = () => {
@@ -143,7 +118,6 @@ export default function App() {
   }, [currentPage, currentUser]);
 
   const handleLogin = (user) => {
-    // Proteção extra: nunca aceita um usuário sem role válido
     if (!user || !VALID_ROLES.includes(user.role)) {
       console.error("handleLogin recebeu usuário inválido:", user);
       return;
@@ -160,7 +134,6 @@ export default function App() {
 
   const navigate = (page) => {
     setCurrentPage(page);
-    if (isMobile) setSidebarCollapsed(true); // ✅ fecha sidebar ao navegar no mobile
   };
 
   const handleUpdateUser = (updatedUser) => {
@@ -213,41 +186,17 @@ export default function App() {
 
   return (
     <div className="min-h-screen font-sans" style={{ background: "#0f172a" }}>
-      <Sidebar
+      <Navbar
         currentUser={currentUser}
         currentPage={currentPage}
         onNavigate={navigate}
         onLogout={handleLogout}
-        collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed(c => !c)}
       />
 
-      {/* ✅ Overlay mobile: escurece o fundo e fecha o sidebar ao clicar fora */}
-      {!sidebarCollapsed && isMobile && (
-        <div
-          onClick={() => setSidebarCollapsed(true)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.6)",
-            backdropFilter: "blur(2px)",
-            WebkitBackdropFilter: "blur(2px)",
-            zIndex: 35,
-          }}
-        />
-      )}
-
-      <Navbar
-        currentUser={currentUser}
-        onToggleSidebar={() => setSidebarCollapsed(c => !c)}
-        collapsed={sidebarCollapsed}
-      />
       <main
-        className="pt-16 min-h-screen"
+        className="min-h-screen"
         style={{
-          marginLeft: sidebarWidth,
-          // ✅ Transição suave junto com o sidebar (mesmo timing do motion.aside)
-          transition: "margin-left 0.25s cubic-bezier(0.22,1,0.36,1)",
+          paddingTop: 64, /* altura da navbar */
           minWidth: 0,
           overflow: "hidden",
           display: "flex",

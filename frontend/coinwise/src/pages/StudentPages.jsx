@@ -19,10 +19,9 @@ const GLASS = {
 const pageWrap = {
   background : BG,
   minHeight  : "100vh",
-  padding    : "1.75rem 1.5rem",
-  margin     : "-1.5rem",
-  width      : "calc(100% + 3rem)",
+  padding    : "1.75rem 1.25rem 3rem",
   fontFamily : FONT,
+  boxSizing  : "border-box",
 };
 
 const fade = (delay = 0) => ({

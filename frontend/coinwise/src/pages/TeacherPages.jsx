@@ -534,7 +534,7 @@ export function SendCoinsPage({ currentUser, onUpdateUser }) {
   const activeStep = !selectedStudent ? 0 : !amount ? 1 : 2;
 
   return (
-    <div style={{ background: "linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)", minHeight: "100vh", padding: "1.5rem", margin: "-1.5rem", width: "calc(100% + 3rem)" }}>
+    <div style={{ background: "linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)", minHeight: "100vh", padding: "1.75rem 1.25rem 3rem", boxSizing: "border-box" }}>
       <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", maxWidth: 720, fontFamily: F }}>
         <style>{`@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&display=swap');.sc-input:focus{border-color:rgba(250,204,21,.55)!important;background:rgba(255,255,255,.08)!important;box-shadow:0 0 0 3px rgba(250,204,21,.1)!important;outline:none;}.sc-input::placeholder{color:rgba(255,255,255,0.22);}.sc-textarea::placeholder{color:rgba(255,255,255,0.22);}.sc-textarea:focus{border-color:rgba(250,204,21,.55)!important;background:rgba(255,255,255,.08)!important;box-shadow:0 0 0 3px rgba(250,204,21,.1)!important;outline:none;}.s-row:hover{background:rgba(255,255,255,.07)!important;border-color:rgba(255,255,255,.14)!important;}.s-row.selected{background:rgba(250,204,21,.08)!important;border-color:rgba(250,204,21,.4)!important;}.q-chip{cursor:pointer;transition:all .15s;}.q-chip:hover{background:rgba(250,204,21,.2)!important;border-color:rgba(250,204,21,.5)!important;color:#facc15!important;}.q-chip.active{background:rgba(250,204,21,.18)!important;border-color:rgba(250,204,21,.5)!important;color:#facc15!important;}`}</style>
 
@@ -778,7 +778,7 @@ export function TeacherTransactions({ currentUser }) {
   const balance = currentUser?.balance ?? currentUser?.saldo ?? 0;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", fontFamily: F, background: "linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)", minHeight: "100vh", padding: "1.5rem", margin: "-1.5rem", width: "calc(100% + 3rem)" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", fontFamily: F, background: "linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)", minHeight: "100vh", padding: "1.75rem 1.25rem 3rem", boxSizing: "border-box" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&display=swap');@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
 
       <PageHeader eyebrow="Professor" title="Histórico de Envios" sub="Todos os reconhecimentos que você realizou" />
