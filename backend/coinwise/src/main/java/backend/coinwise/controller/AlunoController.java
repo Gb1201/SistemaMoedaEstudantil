@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import backend.coinwise.dtos.AlunoDTO;
+import backend.coinwise.dtos.EnderecoDTO;
 import backend.coinwise.dtos.LoginRequest;
 import backend.coinwise.model.Aluno;
 import backend.coinwise.service.AlunoService;
+import backend.coinwise.service.ViaCepService;
 
 @RestController
 @RequestMapping("/alunos")
@@ -25,49 +27,54 @@ public class AlunoController {
     @Autowired
     private AlunoService alunoService;
 
+    @Autowired
+    private ViaCepService viaCepService;
+
 
     // Endpoint para criar um aluno
     @PostMapping
-    public ResponseEntity<Aluno> criarAluno(@RequestBody Aluno aluno){
-        Aluno alunoNovo= alunoService.salvarAluno(aluno);
+    public ResponseEntity<Aluno> criarAluno(@RequestBody Aluno aluno) {
+        Aluno alunoNovo = alunoService.salvarAluno(aluno);
         return ResponseEntity.status(201).body(alunoNovo);
-    } //melhor boa pratica
-    
-    //endpoint para listar os alunos
-   @GetMapping
-    public ResponseEntity<List<AlunoDTO>> listarAlunos(){
+    }
+
+    // Endpoint para listar os alunos
+    @GetMapping
+    public ResponseEntity<List<AlunoDTO>> listarAlunos() {
         List<AlunoDTO> listaAlunos = alunoService.listarAlunos();
         return ResponseEntity.ok(listaAlunos);
     }
 
-    //endpoint para encontar um aluno especifico
+    // Endpoint para encontrar um aluno específico
     @GetMapping("/{id}")
-    public ResponseEntity<Aluno> buscarAlunoEspecifico(@PathVariable Long id){
-        Aluno alunoEncontrado= alunoService.buscarAlunoPorId(id);
+    public ResponseEntity<Aluno> buscarAlunoEspecifico(@PathVariable Long id) {
+        Aluno alunoEncontrado = alunoService.buscarAlunoPorId(id);
         return ResponseEntity.ok(alunoEncontrado);
     }
 
-
-    //endpoint para atualizar um aluno
+    // Endpoint para atualizar um aluno
     @PutMapping("/{id}")
-    public ResponseEntity<Aluno> atualizarAluno(@PathVariable Long id, @RequestBody Aluno aluno){
-        Aluno alunoAtualizado= alunoService.atualizarAluno(id, aluno);
-
+    public ResponseEntity<Aluno> atualizarAluno(@PathVariable Long id, @RequestBody Aluno aluno) {
+        Aluno alunoAtualizado = alunoService.atualizarAluno(id, aluno);
         return ResponseEntity.ok(alunoAtualizado);
     }
 
-
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarAluno(@PathVariable Long id){
+    public ResponseEntity<Void> deletarAluno(@PathVariable Long id) {
         alunoService.deletarAluno(id);
         return ResponseEntity.noContent().build();
-    } 
-
+    }
 
     @PostMapping("/login")
-    public ResponseEntity<Aluno> login(@RequestBody LoginRequest login){
+    public ResponseEntity<Aluno> login(@RequestBody LoginRequest login) {
         Aluno alunoLogado = alunoService.login(login);
         return ResponseEntity.ok(alunoLogado);
     }
 
+    //busca endereço pelo CEP via ViaCEP
+    @GetMapping("/cep/{cep}")
+    public ResponseEntity<EnderecoDTO> buscarEnderecoPorCep(@PathVariable String cep) {
+        EnderecoDTO endereco = viaCepService.buscarEnderecoPorCep(cep);
+        return ResponseEntity.ok(endereco);
+    }
 }

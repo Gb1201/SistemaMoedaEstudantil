@@ -19,6 +19,23 @@ async function request(path, options = {}) {
   return res.json();
 }
 
+// ── ViaCEP ────────────────────────────────────────────────────────────────────
+
+export const viaCepApi = {
+  /**
+   * Consulta o ViaCEP diretamente do front-end (API pública, sem autenticação).
+   * Retorna o objeto com { cep, logradouro, bairro, localidade, uf, ... }
+   * Se o CEP não existir, o objeto retornado terá { erro: true }.
+   */
+  buscar: async (cep) => {
+    const digits = cep.replace(/\D/g, "");
+    if (digits.length !== 8) throw new Error("CEP inválido.");
+    const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+    if (!res.ok) throw new Error("Falha ao consultar ViaCEP.");
+    return res.json();
+  },
+};
+
 // ── Alunos ────────────────────────────────────────────────────────────────────
 
 export const alunosApi = {
@@ -50,7 +67,7 @@ export const alunosApi = {
       body: JSON.stringify(dados),
     }),
 
-    extratoAluno: (alunoId) => request(`/professor/extrato/aluno/${alunoId}`),
+  extratoAluno: (alunoId) => request(`/professor/extrato/aluno/${alunoId}`),
 };
 
 // ── Empresas ──────────────────────────────────────────────────────────────────
@@ -85,7 +102,6 @@ export const empresasApi = {
       body: JSON.stringify(dados),
     }),
 };
-
 
 // ── Professores ───────────────────────────────────────────────────────────────
 
