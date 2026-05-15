@@ -10,6 +10,9 @@ import backend.coinwise.dtos.EmpresaDTO;
 import backend.coinwise.dtos.LoginRequest;
 import backend.coinwise.model.EmpresaParceira;
 import backend.coinwise.repository.EmpresaRepository;
+import backend.coinwise.repository.ResgateRepository;
+import backend.coinwise.repository.VantagemRepository;
+import jakarta.transaction.Transactional;
 
 
 @Service
@@ -17,6 +20,12 @@ public class EmpresaService {
 
     @Autowired
     EmpresaRepository empresaBD;
+
+    @Autowired
+    private VantagemRepository vantagemRepository;
+
+    @Autowired
+    private ResgateRepository resgateRepository;
 
 
 
@@ -73,18 +82,20 @@ public class EmpresaService {
         return empresaBD.save(empresaQueExiste);
     }
 
-    //método para deletar uma empresa
+    @Transactional
     public void deletarEmpresa(Long id) {
-        System.out.println(">>> Buscando empresa id: " + id);
-        System.out.println(">>> Total empresas no banco: " + empresaBD.count());
-        System.out.println(">>> IDs existentes: " + empresaBD.findAll().stream().map(e -> e.getId()).toList());
-        
+
         EmpresaParceira empresaExistente = empresaBD.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Empresa não encontrada"));
 
-        System.out.println(">>> Empresa encontrada: " + empresaExistente.getNome());
+        // primeiro remove os resgates ligados às vantagens da empresa
+        resgateRepository.deleteByEmpresaId(id);
+
+        // depois remove as vantagens
+        vantagemRepository.deleteByEmpresaId(id);
+
+        // por último remove a empresa
         empresaBD.delete(empresaExistente);
-        System.out.println(">>> Deletada com sucesso");
     }
 
 

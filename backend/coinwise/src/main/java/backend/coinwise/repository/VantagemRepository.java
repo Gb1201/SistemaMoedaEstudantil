@@ -1,7 +1,11 @@
 package backend.coinwise.repository;
 
 import backend.coinwise.model.Vantagem;
+import jakarta.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,4 +21,11 @@ public interface VantagemRepository extends JpaRepository<Vantagem, Long> {
 
     // Busca por categoria (ex: "Alimentação", "Educação")
     List<Vantagem> findByCategoriaAndAtivoTrue(String categoria);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Vantagem v WHERE v.empresa.id = :empresaId")
+    void deleteByEmpresaId(Long empresaId);
+
+    
 }

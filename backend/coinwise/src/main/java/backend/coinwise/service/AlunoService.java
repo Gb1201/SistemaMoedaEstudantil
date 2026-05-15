@@ -11,6 +11,8 @@ import backend.coinwise.dtos.EnderecoDTO;
 import backend.coinwise.dtos.LoginRequest;
 import backend.coinwise.model.Aluno;
 import backend.coinwise.repository.AlunoRepository;
+import backend.coinwise.repository.ResgateRepository;
+import backend.coinwise.repository.TransacaoRepository;
 
 @Service
 public class AlunoService {
@@ -21,6 +23,12 @@ public class AlunoService {
     @Autowired
     ViaCepService viaCepService;
 
+    @Autowired
+    ResgateRepository resgateRepository;
+
+    @Autowired
+    TransacaoRepository transacaoRepository;
+
     // método para salvar um aluno - C
     public Aluno salvarAluno(Aluno aluno) {
         if (aluno.getNome() == null || aluno.getEmail() == null || aluno.getSenha() == null
@@ -28,7 +36,7 @@ public class AlunoService {
             throw new IllegalArgumentException("Todos os campos devem ser preenchidos");
         }
 
-        // ✅ Preenche o endereço completo via ViaCEP usando o CEP informado
+        // Preenche o endereço completo via ViaCEP usando o CEP informado
         String enderecoCompleto = resolverEndereco(aluno.getEndereco());
         aluno.setEndereco(enderecoCompleto);
 
@@ -70,7 +78,7 @@ public class AlunoService {
         alunoExistente.setRa(alunoAtualizado.getRa());
         alunoExistente.setInstituicao(alunoAtualizado.getInstituicao());
 
-        // ✅ Atualiza o endereço via ViaCEP se um novo CEP/endereço for informado
+        // Atualiza o endereço via ViaCEP se um novo CEP/endereço for informado
         if (alunoAtualizado.getEndereco() != null) {
             String enderecoCompleto = resolverEndereco(alunoAtualizado.getEndereco());
             alunoExistente.setEndereco(enderecoCompleto);
@@ -79,11 +87,16 @@ public class AlunoService {
         return alunorepor.save(alunoExistente);
     }
 
-    // método para deletar um aluno - D
     public void deletarAluno(Long id) {
         Aluno alunoExistente = alunorepor.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Aluno não encontrado"));
+        // Remove resgates
+        resgateRepository.deleteByAlunoId(id);
 
+        // Remove transações
+        transacaoRepository.deleteByAlunoId(id);
+
+        // Remove aluno
         alunorepor.delete(alunoExistente);
     }
 

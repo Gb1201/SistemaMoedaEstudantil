@@ -14,6 +14,7 @@ public class EmpresaParceira {
     private String endereco;
     private String cnpj;
     private String senha;
+    private Boolean ativo = true;
 
 
     public Long getId() {
@@ -52,4 +53,12 @@ public class EmpresaParceira {
     public void setSenha(String senha) {
         this.senha = senha;
     }
+    public Boolean getAtivo() {
+        return ativo;
+    }
+    public void setAtivo(Boolean ativo) {
+        this.ativo = ativo;
+    }
+
+    
 }
