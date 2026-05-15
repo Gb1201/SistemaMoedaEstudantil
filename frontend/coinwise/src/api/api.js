@@ -126,3 +126,75 @@ export const professoresApi = {
   /** GET /professor/extrato/aluno/:id */
   extratoAluno: (alunoId) => request(`/professor/extrato/aluno/${alunoId}`),
 };
+
+// ── Vantagens ─────────────────────────────────────────────────────────────────
+
+export const vantagensApi = {
+  /**
+   * POST /vantagens (multipart/form-data)
+   * Cria uma nova vantagem com imagem opcional.
+   */
+  criar: async ({ empresaId, nome, custo, categoria, descricao, imagem }) => {
+    const fd = new FormData();
+    fd.append("empresaId", empresaId);
+    fd.append("nome", nome);
+    fd.append("custo", custo);
+    fd.append("categoria", categoria);
+    fd.append("descricao", descricao);
+    if (imagem) fd.append("imagem", imagem);
+
+    const res = await fetch(`${BASE_URL}/vantagens`, { method: "POST", body: fd });
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      throw new Error(detail || `Erro ${res.status}: ${res.statusText}`);
+    }
+    return res.json();
+  },
+
+  /** GET /vantagens — Lista todas as vantagens ativas */
+  listar: () => request("/vantagens"),
+
+  /** GET /vantagens/empresa/:empresaId */
+  listarPorEmpresa: (empresaId) => request(`/vantagens/empresa/${empresaId}`),
+
+  /** GET /vantagens/categoria/:categoria */
+  listarPorCategoria: (categoria) => request(`/vantagens/categoria/${categoria}`),
+
+  /** GET /vantagens/:id */
+  buscarPorId: (id) => request(`/vantagens/${id}`),
+
+  /**
+   * PUT /vantagens/:id (multipart/form-data)
+   * Atualiza campos e/ou imagem de uma vantagem.
+   */
+  atualizar: async (id, { nome, custo, categoria, descricao, imagem } = {}) => {
+    const fd = new FormData();
+    if (nome      !== undefined) fd.append("nome",      nome);
+    if (custo     !== undefined) fd.append("custo",     custo);
+    if (categoria !== undefined) fd.append("categoria", categoria);
+    if (descricao !== undefined) fd.append("descricao", descricao);
+    if (imagem)                  fd.append("imagem",    imagem);
+
+    const res = await fetch(`${BASE_URL}/vantagens/${id}`, { method: "PUT", body: fd });
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      throw new Error(detail || `Erro ${res.status}: ${res.statusText}`);
+    }
+    return res.json();
+  },
+
+  /** DELETE /vantagens/:id — Desativa uma vantagem */
+  desativar: (id) => request(`/vantagens/${id}`, { method: "DELETE" }),
+
+  // ── Resgates ──────────────────────────────────────────────────────────────
+
+  /** POST /vantagens/:vantagemId/resgatar/:alunoId */
+  resgatar: (vantagemId, alunoId) =>
+    request(`/vantagens/${vantagemId}/resgatar/${alunoId}`, { method: "POST" }),
+
+  /** GET /vantagens/resgates/aluno/:alunoId */
+  historicoResgates: (alunoId) => request(`/vantagens/resgates/aluno/${alunoId}`),
+
+  /** GET /vantagens/resgates/cupom/:codigoCupom */
+  consultarCupom: (codigoCupom) => request(`/vantagens/resgates/cupom/${codigoCupom}`),
+};

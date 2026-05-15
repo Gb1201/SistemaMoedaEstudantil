@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   AreaChart, Area, BarChart, Bar, RadialBarChart, RadialBar,
@@ -6,8 +6,7 @@ import {
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
 import Modal from "../components/Modal";
-import { mockRewards } from "../data/mockData";
-import { empresasApi } from "../api/api";
+import { empresasApi, vantagensApi } from "../api/api";
 
 // ── Design System ─────────────────────────────────────────────────────────────
 const F = "'Sora','Nunito',sans-serif";
@@ -40,6 +39,22 @@ const lStyle = {
   textTransform: "uppercase", display: "block",
   marginBottom: "0.5rem", fontFamily: F,
 };
+
+// ── Normaliza campos da API para o padrão interno do componente ───────────────
+// A API retorna: { id, nome, custo, descricao, categoria, ativo, imagemUrl, ... }
+// Os componentes esperam: { id, name, cost, description, category, available, image, totalRedeemed }
+function normalizeVantagem(v) {
+  return {
+    ...v,
+    name:          v.name          ?? v.nome        ?? "",
+    cost:          v.cost          ?? v.custo        ?? 0,
+    description:   v.description   ?? v.descricao    ?? "",
+    category:      v.category      ?? v.categoria    ?? "",
+    available:     v.available     ?? v.ativo        ?? true,
+    image:         v.image         ?? v.imagemUrl    ?? "🎁",
+    totalRedeemed: v.totalRedeemed ?? v.resgates     ?? 0,
+  };
+}
 
 // ── Page Header ───────────────────────────────────────────────────────────────
 function PageHeader({ eyebrow, title, sub }) {
@@ -294,8 +309,15 @@ function StatusPieChart({ rewards }) {
 // CompanyDashboard
 // ═══════════════════════════════════════════════════════════════════════════════
 export function CompanyDashboard({ currentUser, onNavigate }) {
-  const myRewards = mockRewards.filter(r => r.companyId === currentUser.id);
-  const totalRedeemed = myRewards.reduce((s, r) => s + r.totalRedeemed, 0);
+  const [myRewards, setMyRewards] = useState([]);
+
+  useEffect(() => {
+    vantagensApi.listarPorEmpresa(currentUser.id)
+      .then(data => setMyRewards((data ?? []).map(normalizeVantagem)))
+      .catch(() => {});
+  }, [currentUser.id]);
+
+  const totalRedeemed = myRewards.reduce((s, r) => s + (r.totalRedeemed ?? 0), 0);
   const active = myRewards.filter(r => r.available).length;
 
   const stats = [
@@ -383,21 +405,50 @@ export function CompanyDashboard({ currentUser, onNavigate }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 export function CreateRewardPage({ currentUser }) {
   const [form, setForm] = useState({ name: "", cost: "", description: "", category: "Alimentação", image: "🎁" });
+  const [imagemFile, setImagemFile] = useState(null);
+  const [imagemPreviewUrl, setImagemPreviewUrl] = useState(null);
   const [success, setSuccess] = useState(false);
   const [preview, setPreview] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   const categories = ["Alimentação", "Educação", "Cursos", "Brinde", "Serviços", "Entretenimento"];
   const emojis = ["🎁", "☕", "📚", "💻", "🍕", "🎮", "✏️", "🏷️", "🛍️", "🎓"];
 
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
-  const canSubmit = form.name && form.cost && form.description;
+  const canSubmit = form.name && form.cost && form.description && !submitting;
 
-  const handleSubmit = (e) => {
+  const handleImagemChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImagemFile(file);
+    setImagemPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!canSubmit) return;
-    setSuccess(true);
-    setForm({ name: "", cost: "", description: "", category: "Alimentação", image: "🎁" });
-    setTimeout(() => setSuccess(false), 4000);
+    setSubmitting(true);
+    setError(null);
+    try {
+      await vantagensApi.criar({
+        empresaId: currentUser.id,
+        nome: form.name,
+        custo: Number(form.cost),
+        categoria: form.category,
+        descricao: form.description,
+        imagem: imagemFile ?? undefined,
+      });
+      setSuccess(true);
+      setForm({ name: "", cost: "", description: "", category: "Alimentação", image: "🎁" });
+      setImagemFile(null);
+      setImagemPreviewUrl(null);
+      setTimeout(() => setSuccess(false), 4000);
+    } catch (err) {
+      setError(err.message || "Erro ao publicar vantagem.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -441,6 +492,30 @@ export function CreateRewardPage({ currentUser }) {
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8 }}
+            style={{
+              display: "flex", alignItems: "center", gap: "12px",
+              padding: "1rem 1.25rem",
+              borderRadius: "1rem",
+              background: "rgba(239,68,68,0.1)",
+              border: "1px solid rgba(239,68,68,0.3)",
+              fontFamily: F,
+            }}
+          >
+            <span style={{ fontSize: "1.5rem" }}>⚠️</span>
+            <div>
+              <p style={{ color: "rgba(239,68,68,0.9)", fontWeight: 700, fontSize: "0.875rem", margin: 0 }}>Erro ao publicar</p>
+              <p style={{ color: "rgba(239,68,68,0.6)", fontSize: "0.78rem", margin: 0 }}>{error}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div style={{ display: "grid", gridTemplateColumns: "1fr 260px", gap: "1.25rem" }} className="cr-grid">
         <style>{`.cr-grid{@media(max-width:760px){grid-template-columns:1fr!important}}`}</style>
 
@@ -448,25 +523,51 @@ export function CreateRewardPage({ currentUser }) {
         <motion.div {...fade(0.08)} style={{ ...G.card, padding: "1.75rem" }}>
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
 
-            {/* Emoji picker */}
+            {/* Image upload */}
             <div>
-              <label style={lStyle}>Ícone da vantagem</label>
-              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                {emojis.map(e => (
-                  <button
-                    type="button" key={e}
-                    onClick={() => setForm(f => ({ ...f, image: e }))}
-                    className={`emoji-btn${form.image === e ? " active" : ""}`}
-                    style={{
-                      width: 44, height: 44, borderRadius: "0.75rem",
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1.5px solid rgba(255,255,255,0.1)",
-                      fontSize: "1.3rem", cursor: "pointer",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                    }}
-                  >{e}</button>
-                ))}
-              </div>
+              <label style={lStyle}>Imagem da vantagem</label>
+              <label
+                htmlFor="imagem-upload"
+                style={{
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                  gap: "0.625rem", padding: "1.5rem",
+                  borderRadius: "0.875rem",
+                  border: `1.5px dashed ${imagemPreviewUrl ? "rgba(52,211,153,0.5)" : "rgba(255,255,255,0.15)"}`,
+                  background: imagemPreviewUrl ? "rgba(52,211,153,0.05)" : "rgba(255,255,255,0.03)",
+                  cursor: "pointer", transition: "all 0.2s",
+                  overflow: "hidden",
+                }}
+              >
+                {imagemPreviewUrl ? (
+                  <img src={imagemPreviewUrl} alt="Preview" style={{ maxHeight: 140, maxWidth: "100%", borderRadius: "0.625rem", objectFit: "cover" }} />
+                ) : (
+                  <>
+                    <span style={{ fontSize: "2rem" }}>🖼️</span>
+                    <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.8rem", fontFamily: F, margin: 0, textAlign: "center" }}>
+                      Clique para escolher uma imagem<br />
+                      <span style={{ color: "rgba(255,255,255,0.22)", fontSize: "0.72rem" }}>PNG, JPG, WEBP · max 5 MB</span>
+                    </p>
+                  </>
+                )}
+              </label>
+              <input
+                id="imagem-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleImagemChange}
+                style={{ display: "none" }}
+              />
+              {imagemPreviewUrl && (
+                <button
+                  type="button"
+                  onClick={() => { setImagemFile(null); setImagemPreviewUrl(null); }}
+                  style={{
+                    marginTop: "0.5rem", background: "none", border: "none",
+                    color: "rgba(239,68,68,0.65)", fontSize: "0.75rem",
+                    cursor: "pointer", fontFamily: F, padding: 0,
+                  }}
+                >✕ Remover imagem</button>
+              )}
             </div>
 
             {/* Name */}
@@ -548,8 +649,19 @@ export function CreateRewardPage({ currentUser }) {
                   fontWeight: 800, fontSize: "0.9rem",
                   cursor: canSubmit ? "pointer" : "not-allowed",
                   fontFamily: F, transition: "all 0.2s",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
                 }}
-              >Publicar Vantagem →</motion.button>
+              >
+                {submitting ? (
+                  <>
+                    <svg style={{ animation: "spin 0.8s linear infinite", width: 15, height: 15 }} viewBox="0 0 24 24" fill="none">
+                      <circle opacity={0.25} cx="12" cy="12" r="10" stroke="white" strokeWidth="4" />
+                      <path opacity={0.75} fill="white" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                    Publicando...
+                  </>
+                ) : "Publicar Vantagem →"}
+              </motion.button>
             </div>
           </form>
         </motion.div>
@@ -565,7 +677,12 @@ export function CreateRewardPage({ currentUser }) {
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.08)",
             }}>
-              <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>{form.image}</div>
+              <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>
+                {imagemPreviewUrl
+                  ? <img src={imagemPreviewUrl} alt="Preview" style={{ width: 48, height: 48, borderRadius: "0.75rem", objectFit: "cover" }} />
+                  : "🖼️"
+                }
+              </div>
               <p style={{ color: form.name ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.2)", fontWeight: 700, fontSize: "0.9rem", fontFamily: F, marginBottom: "0.25rem" }}>
                 {form.name || "Nome da vantagem"}
               </p>
@@ -1059,8 +1176,18 @@ export function CompanyProfilePage({ currentUser, onUpdateUser, onLogout }) {
 // CompanyRewardsList
 // ═══════════════════════════════════════════════════════════════════════════════
 export function CompanyRewardsList({ currentUser, onNavigate }) {
-  const myRewards = mockRewards.filter(r => r.companyId === currentUser.id);
+  const [myRewards, setMyRewards] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all");
+
+  useEffect(() => {
+    vantagensApi.listarPorEmpresa(currentUser.id)
+      .then(data => setMyRewards((data ?? []).map(normalizeVantagem)))
+      .catch(err => setError(err.message || "Erro ao carregar vantagens."))
+      .finally(() => setLoading(false));
+  }, [currentUser.id]);
+
   const filtered = filter === "all" ? myRewards : myRewards.filter(r => r.available === (filter === "active"));
 
   return (
@@ -1074,7 +1201,7 @@ export function CompanyRewardsList({ currentUser, onNavigate }) {
       `}</style>
 
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
-        <PageHeader eyebrow="Empresa" title="Minhas Vantagens" sub={`${myRewards.length} vantagens cadastradas`} />
+        <PageHeader eyebrow="Empresa" title="Minhas Vantagens" sub={loading ? "Carregando..." : `${myRewards.length} vantagens cadastradas`} />
         <motion.button
           {...fade(0.06)}
           whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
@@ -1090,6 +1217,35 @@ export function CompanyRewardsList({ currentUser, onNavigate }) {
         >+ Nova vantagem</motion.button>
       </div>
 
+      {/* Loading state */}
+      {loading && (
+        <motion.div {...fade(0.08)} style={{ textAlign: "center", padding: "4rem 0", color: "rgba(255,255,255,0.35)", fontFamily: F }}>
+          <svg style={{ animation: "spin 0.9s linear infinite", width: 32, height: 32, margin: "0 auto 1rem", display: "block" }} viewBox="0 0 24 24" fill="none">
+            <circle opacity={0.25} cx="12" cy="12" r="10" stroke="rgba(250,204,21,0.6)" strokeWidth="3" />
+            <path opacity={0.85} fill="rgba(250,204,21,0.8)" d="M4 12a8 8 0 018-8v8z" />
+          </svg>
+          <p style={{ fontSize: "0.875rem" }}>Carregando vantagens...</p>
+        </motion.div>
+      )}
+
+      {/* Error state */}
+      {!loading && error && (
+        <motion.div {...fade(0.08)} style={{
+          display: "flex", alignItems: "center", gap: "12px",
+          padding: "1rem 1.25rem", borderRadius: "1rem",
+          background: "rgba(239,68,68,0.08)",
+          border: "1px solid rgba(239,68,68,0.25)", fontFamily: F,
+        }}>
+          <span style={{ fontSize: "1.5rem" }}>⚠️</span>
+          <div>
+            <p style={{ color: "rgba(239,68,68,0.9)", fontWeight: 700, fontSize: "0.875rem", margin: 0 }}>Erro ao carregar</p>
+            <p style={{ color: "rgba(239,68,68,0.6)", fontSize: "0.78rem", margin: 0 }}>{error}</p>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Content */}
+      {!loading && !error && (<>
       {/* Filter pills */}
       <motion.div {...fade(0.08)} style={{ display: "flex", gap: "0.5rem" }}>
         {[["all", "Todas"], ["active", "Ativas"], ["inactive", "Esgotadas"]].map(([val, lbl]) => (
@@ -1158,6 +1314,7 @@ export function CompanyRewardsList({ currentUser, onNavigate }) {
           <p style={{ fontSize: "0.85rem", marginTop: "0.35rem" }}>Crie sua primeira vantagem para os alunos!</p>
         </motion.div>
       )}
+      </>)}
     </div>
   );
 }

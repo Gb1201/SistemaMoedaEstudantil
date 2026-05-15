@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RewardCard } from "../components/TransactionItem";
-import Modal from "../components/Modal";
-import { mockRewards } from "../data/mockData";
-import { alunosApi } from "../api/api";
+import { alunosApi, vantagensApi } from "../api/api";
 
 // ── Shared tokens ─────────────────────────────────────────────────────────────
 const FONT  = "'Sora','Nunito',sans-serif";
@@ -227,18 +224,60 @@ export function StudentTransactions({ currentUser }) {
 }
 
 // ── StudentRewards ────────────────────────────────────────────────────────────
-export function StudentRewards({ currentUser }) {
+export function StudentRewards({ currentUser, onBalanceUpdate }) {
+  const [vantagens,    setVantagens]    = useState([]);
+  const [loading,      setLoading]      = useState(true);
   const [redeemTarget, setRedeemTarget] = useState(null);
-  const [success,      setSuccess]      = useState(null);
+  const [redeeming,    setRedeeming]    = useState(false);
+  const [redeemError,  setRedeemError]  = useState(null);
+  const [success,      setSuccess]      = useState(null); // { nome, cupom, saldoRestante }
   const [filter,       setFilter]       = useState("all");
+  const [saldo,        setSaldo]        = useState(currentUser?.saldo ?? currentUser?.balance ?? 0);
 
-  const categories = ["all", ...new Set(mockRewards.map(r => r.category))];
-  const filtered   = filter === "all" ? mockRewards : mockRewards.filter(r => r.category === filter);
+  // Carrega vantagens da API
+  useEffect(() => {
+    vantagensApi.listar()
+      .then(data => setVantagens(Array.isArray(data) ? data : []))
+      .catch(() => setVantagens([]))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const confirmRedeem = () => {
-    setSuccess(redeemTarget.name);
-    setRedeemTarget(null);
-    setTimeout(() => setSuccess(null), 3500);
+  // Sincroniza saldo quando currentUser mudar
+  useEffect(() => {
+    setSaldo(currentUser?.saldo ?? currentUser?.balance ?? 0);
+  }, [currentUser]);
+
+  const categories = ["all", ...new Set(vantagens.map(v => v.categoria).filter(Boolean))];
+  const filtered   = filter === "all" ? vantagens : vantagens.filter(v => v.categoria === filter);
+
+  // Monta o src da imagem a partir do Base64 retornado pela API
+  const getImageSrc = (v) => {
+    if (!v.imagemBase64) return null;
+    const tipo = v.imagemTipo || "image/png";
+    return `data:${tipo};base64,${v.imagemBase64}`;
+  };
+
+  const handleConfirmRedeem = async () => {
+    if (!redeemTarget) return;
+    setRedeeming(true);
+    setRedeemError(null);
+    try {
+      const res = await vantagensApi.resgatar(redeemTarget.id, currentUser.id);
+      const novoSaldo = res.saldoRestante ?? (saldo - redeemTarget.custo);
+      setSaldo(novoSaldo);
+      if (onBalanceUpdate) onBalanceUpdate(novoSaldo);
+      setSuccess({
+        nome        : redeemTarget.nome,
+        cupom       : res.codigoCupom,
+        saldoRestante: novoSaldo,
+      });
+      setRedeemTarget(null);
+      setTimeout(() => setSuccess(null), 8000);
+    } catch (err) {
+      setRedeemError(err.message || "Erro ao realizar o resgate.");
+    } finally {
+      setRedeeming(false);
+    }
   };
 
   return (
@@ -247,6 +286,11 @@ export function StudentRewards({ currentUser }) {
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&display=swap');
         .cat-btn { transition: all 0.18s; }
         .cat-btn:hover { border-color: rgba(250,204,21,0.4) !important; color: rgba(255,255,255,0.85) !important; }
+        .vcard { transition: transform 0.2s, box-shadow 0.2s; }
+        .vcard:hover { transform: translateY(-3px); box-shadow: 0 20px 48px rgba(0,0,0,0.55) !important; }
+        .redeem-btn { transition: all 0.18s; }
+        .redeem-btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
 
       <div style={{ display:"flex", flexDirection:"column", gap:"1.5rem" }}>
@@ -262,7 +306,7 @@ export function StudentRewards({ currentUser }) {
           </p>
         </motion.div>
 
-        {/* Success toast */}
+        {/* Success toast — mostra cupom */}
         <AnimatePresence>
           {success && (
             <motion.div
@@ -274,14 +318,41 @@ export function StudentRewards({ currentUser }) {
                 border       : "1px solid rgba(74,222,128,0.25)",
                 borderRadius : "1rem",
                 padding      : "1rem 1.25rem",
-                display      : "flex", alignItems:"center", gap:"0.875rem",
+                fontFamily   : FONT,
               }}
             >
-              <span style={{ fontSize:"1.5rem" }}>🎉</span>
-              <div>
-                <p style={{ color:"#4ade80", fontWeight:700, fontSize:"0.85rem", margin:0 }}>Resgate confirmado!</p>
-                <p style={{ color:"rgba(74,222,128,0.6)", fontSize:"0.75rem", marginTop:2 }}>{success} foi resgatado com sucesso.</p>
+              <div style={{ display:"flex", alignItems:"center", gap:"0.875rem", marginBottom:"0.75rem" }}>
+                <span style={{ fontSize:"1.5rem" }}>🎉</span>
+                <div>
+                  <p style={{ color:"#4ade80", fontWeight:700, fontSize:"0.85rem", margin:0 }}>Resgate confirmado!</p>
+                  <p style={{ color:"rgba(74,222,128,0.6)", fontSize:"0.75rem", marginTop:2 }}>
+                    {success.nome} — verifique seu e-mail para o cupom.
+                  </p>
+                </div>
               </div>
+              {success.cupom && (
+                <div style={{
+                  background   : "rgba(0,0,0,0.3)",
+                  border       : "1px solid rgba(74,222,128,0.2)",
+                  borderRadius : "0.75rem",
+                  padding      : "0.75rem 1rem",
+                  display      : "flex",
+                  alignItems   : "center",
+                  justifyContent:"space-between",
+                  gap          : "0.5rem",
+                }}>
+                  <div>
+                    <p style={{ color:"rgba(255,255,255,0.35)", fontSize:"0.6rem", fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", margin:"0 0 0.2rem" }}>Código do cupom</p>
+                    <p style={{ color:"#4ade80", fontWeight:800, fontSize:"0.78rem", letterSpacing:"0.06em", margin:0, fontVariantNumeric:"tabular-nums" }}>
+                      {success.cupom}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => navigator.clipboard?.writeText(success.cupom)}
+                    style={{ background:"rgba(74,222,128,0.12)", border:"1px solid rgba(74,222,128,0.25)", borderRadius:"0.5rem", padding:"0.35rem 0.65rem", color:"#4ade80", fontSize:"0.7rem", fontWeight:700, cursor:"pointer", fontFamily:FONT }}
+                  >Copiar</button>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -304,7 +375,7 @@ export function StudentRewards({ currentUser }) {
               </p>
               <div style={{ display:"flex", alignItems:"baseline", gap:"0.5rem" }}>
                 <p style={{ color:"#facc15", fontWeight:900, fontSize:"2.5rem", letterSpacing:"-0.04em", lineHeight:1, margin:0, textShadow:"0 0 40px rgba(250,204,21,0.35)" }}>
-                  {(currentUser.balance ?? 0).toLocaleString("pt-BR")}
+                  {saldo.toLocaleString("pt-BR")}
                 </p>
                 <span style={{ color:"rgba(250,204,21,0.4)", fontSize:"0.9rem", fontWeight:600 }}>moedas ◈</span>
               </div>
@@ -339,43 +410,241 @@ export function StudentRewards({ currentUser }) {
         </motion.div>
 
         {/* Rewards grid */}
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))", gap:"0.875rem" }}>
-          {filtered.map((reward, i) => (
-            <RewardCard
-              key={reward.id}
-              reward={{ ...reward, canAfford: currentUser.balance >= reward.cost }}
-              onRedeem={setRedeemTarget}
-              index={i}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div style={{ textAlign:"center", padding:"3rem 0", color:"rgba(255,255,255,0.3)", fontFamily:FONT, fontSize:"0.85rem" }}>
+            Carregando vantagens…
+          </div>
+        ) : filtered.length === 0 ? (
+          <div style={{ textAlign:"center", padding:"3rem 0" }}>
+            <p style={{ fontSize:"2.5rem", marginBottom:"0.75rem" }}>🎁</p>
+            <p style={{ color:"rgba(255,255,255,0.22)", fontSize:"0.82rem", fontFamily:FONT }}>Nenhuma vantagem disponível</p>
+          </div>
+        ) : (
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))", gap:"0.875rem" }}>
+            {filtered.map((v, i) => {
+              const canAfford = saldo >= v.custo;
+              const imgSrc    = getImageSrc(v);
+              return (
+                <motion.div
+                  key={v.id}
+                  className="vcard"
+                  initial={{ opacity:0, y:16 }}
+                  animate={{ opacity:1, y:0 }}
+                  transition={{ duration:0.45, delay:0.06 + i*0.06, ease:[0.22,1,0.36,1] }}
+                  style={{
+                    ...GLASS,
+                    overflow    : "hidden",
+                    display     : "flex",
+                    flexDirection:"column",
+                    boxShadow   : "0 8px 32px rgba(0,0,0,0.35)",
+                    opacity     : canAfford ? 1 : 0.65,
+                  }}
+                >
+                  {/* Imagem da vantagem */}
+                  <div style={{
+                    width      : "100%",
+                    height     : 148,
+                    flexShrink : 0,
+                    overflow   : "hidden",
+                    position   : "relative",
+                    background : "rgba(255,255,255,0.03)",
+                    borderBottom:"1px solid rgba(255,255,255,0.07)",
+                  }}>
+                    {imgSrc ? (
+                      <img
+                        src={imgSrc}
+                        alt={v.nome}
+                        style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }}
+                      />
+                    ) : (
+                      <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"3rem", opacity:0.4 }}>
+                        🎁
+                      </div>
+                    )}
+                    {/* Badge categoria */}
+                    <span style={{
+                      position    : "absolute",
+                      top         : 10, left:10,
+                      background  : "rgba(0,0,0,0.55)",
+                      border      : "1px solid rgba(255,255,255,0.12)",
+                      backdropFilter:"blur(8px)",
+                      borderRadius: "999px",
+                      padding     : "0.2rem 0.6rem",
+                      color       : "rgba(255,255,255,0.6)",
+                      fontSize    : "0.6rem",
+                      fontWeight  : 700,
+                      letterSpacing:"0.08em",
+                      textTransform:"uppercase",
+                      fontFamily  : FONT,
+                    }}>{v.categoria}</span>
+                    {/* Badge saldo insuficiente */}
+                    {!canAfford && (
+                      <div style={{
+                        position:"absolute", inset:0,
+                        background:"rgba(0,0,0,0.45)",
+                        display:"flex", alignItems:"center", justifyContent:"center",
+                        backdropFilter:"blur(2px)",
+                      }}>
+                        <span style={{ background:"rgba(239,68,68,0.2)", border:"1px solid rgba(239,68,68,0.4)", borderRadius:"0.75rem", padding:"0.35rem 0.85rem", color:"rgba(239,68,68,0.85)", fontSize:"0.68rem", fontWeight:700, fontFamily:FONT }}>
+                          Saldo insuficiente
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Conteúdo */}
+                  <div style={{ padding:"1rem", display:"flex", flexDirection:"column", gap:"0.5rem", flex:1 }}>
+                    <div>
+                      <p style={{ color:"rgba(255,255,255,0.88)", fontWeight:700, fontSize:"0.88rem", margin:0, lineHeight:1.3 }}>{v.nome}</p>
+                      <p style={{ color:"rgba(255,255,255,0.32)", fontSize:"0.7rem", marginTop:"0.25rem" }}>{v.empresaNome}</p>
+                    </div>
+                    <p style={{ color:"rgba(255,255,255,0.42)", fontSize:"0.73rem", lineHeight:1.55, margin:0, flex:1,
+                      display:"-webkit-box", WebkitLineClamp:2, WebkitBoxOrient:"vertical", overflow:"hidden",
+                    }}>{v.descricao}</p>
+
+                    {/* Rodapé: custo + botão */}
+                    <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginTop:"0.25rem" }}>
+                      <div style={{ display:"flex", alignItems:"baseline", gap:"0.25rem" }}>
+                        <span style={{ color:"#facc15", fontWeight:900, fontSize:"1.15rem", lineHeight:1 }}>{v.custo}</span>
+                        <span style={{ color:"rgba(250,204,21,0.45)", fontSize:"0.68rem", fontWeight:600 }}>moedas</span>
+                      </div>
+                      <button
+                        className="redeem-btn"
+                        disabled={!canAfford}
+                        onClick={() => { setRedeemError(null); setRedeemTarget(v); }}
+                        style={{
+                          padding     : "0.45rem 0.9rem",
+                          borderRadius: "0.7rem",
+                          border      : "none",
+                          fontSize    : "0.73rem",
+                          fontWeight  : 800,
+                          cursor      : canAfford ? "pointer" : "not-allowed",
+                          fontFamily  : FONT,
+                          background  : canAfford
+                            ? "linear-gradient(135deg,#facc15 0%,#f59e0b 100%)"
+                            : "rgba(255,255,255,0.07)",
+                          color       : canAfford ? "#0b1d38" : "rgba(255,255,255,0.2)",
+                          boxShadow   : canAfford ? "0 4px 16px rgba(250,204,21,0.25)" : "none",
+                        }}
+                      >
+                        Resgatar
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Confirm Modal */}
-        <Modal
-          open={!!redeemTarget}
-          onClose={() => setRedeemTarget(null)}
-          onConfirm={confirmRedeem}
-          title="Confirmar resgate"
-          confirmLabel="Resgatar agora"
-          confirmColor="yellow"
-        >
+        <AnimatePresence>
           {redeemTarget && (
-            <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:"1rem", padding:"1.1rem" }}>
-              <div style={{ display:"flex", alignItems:"center", gap:"0.875rem" }}>
-                <span style={{ fontSize:"2.25rem" }}>{redeemTarget.image}</span>
-                <div>
-                  <p style={{ color:"rgba(255,255,255,0.88)", fontWeight:700, fontSize:"0.88rem", margin:0 }}>{redeemTarget.name}</p>
-                  <p style={{ color:"rgba(255,255,255,0.32)", fontSize:"0.72rem", marginTop:2 }}>{redeemTarget.company}</p>
-                  <p style={{ color:"#facc15", fontWeight:900, fontSize:"1.1rem", marginTop:"0.4rem" }}>−{redeemTarget.cost} moedas</p>
+            <motion.div
+              initial={{ opacity:0 }}
+              animate={{ opacity:1 }}
+              exit={{ opacity:0 }}
+              onClick={() => !redeeming && setRedeemTarget(null)}
+              style={{
+                position:"fixed", inset:0,
+                background:"rgba(6,12,26,0.85)",
+                backdropFilter:"blur(12px)",
+                WebkitBackdropFilter:"blur(12px)",
+                zIndex:100,
+                display:"flex", alignItems:"center", justifyContent:"center",
+                padding:"1.5rem",
+              }}
+            >
+              <motion.div
+                initial={{ scale:0.88, y:24 }}
+                animate={{ scale:1, y:0 }}
+                exit={{ scale:0.92, opacity:0 }}
+                transition={{ type:"spring", stiffness:360, damping:26 }}
+                onClick={e => e.stopPropagation()}
+                style={{
+                  background  :"linear-gradient(160deg,#0d1f3c 0%,#07121f 100%)",
+                  border      :"1px solid rgba(250,204,21,0.18)",
+                  borderRadius:"1.5rem",
+                  padding     :"1.75rem",
+                  maxWidth    :420, width:"100%",
+                  fontFamily  :FONT,
+                  boxShadow   :"0 32px 80px rgba(0,0,0,0.6)",
+                }}
+              >
+                <p style={{ color:"rgba(250,204,21,0.7)", fontSize:"0.62rem", fontWeight:700, letterSpacing:"0.15em", textTransform:"uppercase", margin:"0 0 0.5rem" }}>Confirmar resgate</p>
+                <p style={{ color:"white", fontWeight:900, fontSize:"1.15rem", margin:"0 0 1.25rem" }}>Tem certeza?</p>
+
+                {/* Card da vantagem */}
+                <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:"1rem", overflow:"hidden", marginBottom:"1rem" }}>
+                  {getImageSrc(redeemTarget) && (
+                    <img src={getImageSrc(redeemTarget)} alt={redeemTarget.nome}
+                      style={{ width:"100%", height:120, objectFit:"cover", display:"block" }} />
+                  )}
+                  <div style={{ padding:"0.9rem 1rem" }}>
+                    <p style={{ color:"rgba(255,255,255,0.88)", fontWeight:700, fontSize:"0.88rem", margin:0 }}>{redeemTarget.nome}</p>
+                    <p style={{ color:"rgba(255,255,255,0.32)", fontSize:"0.72rem", marginTop:2 }}>{redeemTarget.empresaNome}</p>
+                    <p style={{ color:"#facc15", fontWeight:900, fontSize:"1.1rem", marginTop:"0.5rem" }}>−{redeemTarget.custo} moedas</p>
+                  </div>
                 </div>
-              </div>
-              <div style={{ marginTop:"0.875rem", paddingTop:"0.75rem", borderTop:"1px solid rgba(255,255,255,0.07)", display:"flex", justifyContent:"space-between" }}>
-                <span style={{ color:"rgba(255,255,255,0.3)", fontSize:"0.72rem" }}>Saldo após resgate</span>
-                <span style={{ color:"rgba(255,255,255,0.75)", fontWeight:700, fontSize:"0.78rem" }}>{currentUser.balance - redeemTarget.cost} moedas</span>
-              </div>
-            </div>
+
+                {/* Saldo após */}
+                <div style={{ display:"flex", justifyContent:"space-between", padding:"0.7rem 0", borderTop:"1px solid rgba(255,255,255,0.07)", marginBottom:"1rem" }}>
+                  <span style={{ color:"rgba(255,255,255,0.3)", fontSize:"0.72rem" }}>Saldo após resgate</span>
+                  <span style={{ color: (saldo - redeemTarget.custo) >= 0 ? "rgba(255,255,255,0.75)" : "rgba(239,68,68,0.8)", fontWeight:700, fontSize:"0.78rem" }}>
+                    {(saldo - redeemTarget.custo).toLocaleString("pt-BR")} moedas
+                  </span>
+                </div>
+
+                {/* Erro */}
+                {redeemError && (
+                  <p style={{ color:"rgba(239,68,68,0.8)", fontSize:"0.78rem", background:"rgba(239,68,68,0.08)", border:"1px solid rgba(239,68,68,0.2)", borderRadius:"0.6rem", padding:"0.6rem 0.875rem", marginBottom:"1rem" }}>
+                    {redeemError}
+                  </p>
+                )}
+
+                {/* Ações */}
+                <div style={{ display:"flex", gap:"0.75rem" }}>
+                  <button
+                    onClick={() => setRedeemTarget(null)}
+                    disabled={redeeming}
+                    style={{
+                      flex:1, padding:"0.875rem", borderRadius:"0.875rem",
+                      border:"1.5px solid rgba(255,255,255,0.12)", background:"transparent",
+                      color:"rgba(255,255,255,0.45)", fontWeight:600, fontSize:"0.875rem",
+                      cursor:"pointer", fontFamily:FONT,
+                    }}
+                  >Cancelar</button>
+
+                  <motion.button
+                    onClick={handleConfirmRedeem}
+                    disabled={redeeming}
+                    whileHover={!redeeming ? { scale:1.02, boxShadow:"0 0 24px rgba(250,204,21,0.3)" } : {}}
+                    whileTap={!redeeming ? { scale:0.97 } : {}}
+                    style={{
+                      flex:2, padding:"0.875rem", borderRadius:"0.875rem", border:"none",
+                      background: redeeming ? "rgba(250,204,21,0.15)" : "linear-gradient(135deg,#facc15 0%,#f59e0b 100%)",
+                      color: redeeming ? "rgba(255,255,255,0.3)" : "#0b1d38",
+                      fontWeight:800, fontSize:"0.9rem",
+                      cursor: redeeming ? "not-allowed" : "pointer",
+                      fontFamily:FONT, transition:"all 0.2s",
+                      display:"flex", alignItems:"center", justifyContent:"center", gap:8,
+                    }}
+                  >
+                    {redeeming ? (
+                      <>
+                        <svg style={{ animation:"spin 0.8s linear infinite", width:15, height:15 }} viewBox="0 0 24 24" fill="none">
+                          <circle opacity={0.25} cx="12" cy="12" r="10" stroke="#0b1d38" strokeWidth="4"/>
+                          <path opacity={0.75} fill="#0b1d38" d="M4 12a8 8 0 018-8v8z"/>
+                        </svg>
+                        Resgatando…
+                      </>
+                    ) : "Resgatar agora →"}
+                  </motion.button>
+                </div>
+              </motion.div>
+            </motion.div>
           )}
-        </Modal>
+        </AnimatePresence>
 
       </div>
     </div>
