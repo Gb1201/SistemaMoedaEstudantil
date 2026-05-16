@@ -44,7 +44,7 @@ function PodiumRanking({ currentUserId }) {
         setLoading(false);
         setTimeout(() => setRevealed(true), 100);
       });
-  }, []);
+  }, [currentUserId]);
 
   // Reorder para pódio: 2º, 1º, 3º
   const podiumOrder = alunos.length === 3
@@ -286,11 +286,29 @@ function PodiumRanking({ currentUserId }) {
 }
 
 export default function StudentDashboard({ currentUser, onNavigate }) {
-  const firstName   = (currentUser.name || currentUser.nome || "Aluno").split(" ")[0];
-  const ra          = currentUser.ra         || "—";
-  const curso       = currentUser.curso      || currentUser.course || "—";
-  const balance     = currentUser.balance    ?? 0;
-  const instituicao = currentUser.instituicao || "—";
+  // Estado local para gerenciar os dados em tempo real do aluno logado
+  const [currentStudentData, setCurrentStudentData] = useState(currentUser);
+
+  useEffect(() => {
+    // Busca a lista atualizada para pegar as moedas atuais e recalcular dinamicamente
+    alunosApi.listar()
+      .then(data => {
+        if (Array.isArray(data)) {
+          const userId = currentUser.id || currentUser.ra;
+          const me = data.find(aluno => aluno.id === userId || aluno.ra === userId);
+          if (me) {
+            setCurrentStudentData(me);
+          }
+        }
+      })
+      .catch((err) => console.error("Erro ao atualizar saldo do dashboard", err));
+  }, [currentUser]);
+
+  const firstName   = (currentStudentData.name || currentStudentData.nome || "Aluno").split(" ")[0];
+  const ra          = currentStudentData.ra          || "—";
+  const curso       = currentStudentData.curso       || currentStudentData.course || "—";
+  const balance     = currentStudentData.balance     ?? currentStudentData.saldo ?? 0;
+  const instituicao = currentStudentData.instituicao || "—";
 
   const quickActions = [
     {
@@ -522,7 +540,7 @@ export default function StudentDashboard({ currentUser, onNavigate }) {
             <div>
               <p style={{ color: "rgba(255,255,255,0.22)", fontSize: "0.58rem", letterSpacing: "0.12em", textTransform: "uppercase", margin: 0 }}>Titular</p>
               <p style={{ color: "rgba(255,255,255,0.82)", fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.05em", marginTop: 3 }}>
-                {(currentUser.name || currentUser.nome || "ALUNO").toUpperCase()}
+                {(currentStudentData.name || currentStudentData.nome || "ALUNO").toUpperCase()}
               </p>
               <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.68rem", marginTop: 2 }}>{curso}</p>
             </div>
@@ -619,6 +637,7 @@ export default function StudentDashboard({ currentUser, onNavigate }) {
           ))}
         </div>
       </motion.div>
+      
       {/* ── Ranking ── */}
       <PodiumRanking currentUserId={currentUser?.id ?? currentUser?.ra} />
 
