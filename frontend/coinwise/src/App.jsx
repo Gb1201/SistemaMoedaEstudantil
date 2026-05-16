@@ -7,12 +7,12 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 
-import StudentDashboard from "./pages/StudentDashboard";
-import { StudentTransactions, StudentRewards, StudentProfile } from "./pages/StudentPages";
+import StudentDashboard from "./pages/aluno/StudentDashboard";
+import { StudentTransactions, StudentRewards, StudentProfile } from "./pages/aluno/StudentPages";
 
-import { TeacherDashboard, SendCoinsPage, TeacherTransactions } from "./pages/TeacherPages";
+import { TeacherDashboard, SendCoinsPage, TeacherTransactions } from "./pages/professor/TeacherPages";
 
-import { CompanyDashboard, CreateRewardPage, CompanyRewardsList, CompanyProfilePage } from "./pages/CompanyPages";
+import { CompanyDashboard, CreateRewardPage, CompanyRewardsList, CompanyProfilePage } from "./pages/empresa/CompanyPages";
 
 const defaultPageByRole = {
   student: "student-dashboard",

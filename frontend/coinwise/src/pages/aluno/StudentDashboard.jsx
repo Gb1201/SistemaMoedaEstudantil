@@ -7,7 +7,7 @@ import {
   User,
   ChevronRight,
 } from "lucide-react";
-import { alunosApi } from "../api/api";
+import { alunosApi } from "../../api/api";
 
 const FONT = "'Sora', 'Nunito', sans-serif";
 

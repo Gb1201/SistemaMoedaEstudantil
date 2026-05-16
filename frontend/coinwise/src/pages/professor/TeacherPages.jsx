@@ -4,8 +4,8 @@ import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
-import { alunosApi } from "../api/api";
-import { professoresApi } from "../api/api";
+import { alunosApi } from "../../api/api";
+import { professoresApi } from "../../api/api";
 
 // ── Design System ─────────────────────────────────────────────────────────────
 const F = "'Sora','Nunito',sans-serif";

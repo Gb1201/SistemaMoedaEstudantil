@@ -5,8 +5,8 @@ import {
   PieChart, Pie, Cell,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
-import Modal from "../components/Modal";
-import { empresasApi, vantagensApi } from "../api/api";
+import Modal from "../../components/Modal";
+import { empresasApi, vantagensApi } from "../../api/api";
 
 // ── Design System ─────────────────────────────────────────────────────────────
 const F = "'Sora','Nunito',sans-serif";

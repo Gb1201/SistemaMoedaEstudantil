@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { alunosApi, vantagensApi } from "../api/api";
+import { alunosApi, vantagensApi } from "../../api/api";
 
 // ── Shared tokens ─────────────────────────────────────────────────────────────
 const FONT  = "'Sora','Nunito',sans-serif";
