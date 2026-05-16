@@ -409,8 +409,14 @@ export default function RegisterPage({ onGoLogin }) {
         <label className={labelClass} style={{ fontFamily: FONT }}>Você é...</label>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
           {[
-            { value: "student", label: "Aluno", icon: "👨‍🎓", desc: "Ganhe e resgate moedas" },
-            { value: "company", label: "Empresa Parceira", icon: "🏢", desc: "Ofereça vantagens" },
+            {
+              value: "student", label: "Aluno", desc: "Ganhe e resgate moedas",
+              Icon: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
+            },
+            {
+              value: "company", label: "Empresa Parceira", desc: "Ofereça vantagens",
+              Icon: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h1"/><path d="M14 9h1"/><path d="M9 13h1"/><path d="M14 13h1"/><path d="M9 17h6"/></svg>,
+            },
           ].map((r) => (
             <button key={r.value} type="button" onClick={() => setRole(r.value)}
               style={{
@@ -419,7 +425,9 @@ export default function RegisterPage({ onGoLogin }) {
                 background: role === r.value ? "rgba(250,204,21,0.1)" : "rgba(255,255,255,0.04)",
                 textAlign: "left", cursor: "pointer", transition: "all 0.2s", fontFamily: FONT,
               }}>
-              <p style={{ fontSize: "1.5rem", marginBottom: "0.4rem" }}>{r.icon}</p>
+              <div style={{ marginBottom: "0.5rem" }}>
+                <r.Icon width={22} height={22} style={{ color: role === r.value ? "#facc15" : "rgba(255,255,255,0.45)" }} />
+              </div>
               <p style={{ fontWeight: 700, fontSize: "0.85rem", marginBottom: "0.2rem",
                 color: role === r.value ? "#facc15" : "rgba(255,255,255,0.8)" }}>{r.label}</p>
               <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.35)" }}>{r.desc}</p>
@@ -488,8 +496,10 @@ export default function RegisterPage({ onGoLogin }) {
             <p style={{
               fontSize: "0.7rem", color: "rgba(250,204,21,0.6)", fontFamily: FONT,
               fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "0.75rem",
+              display: "flex", alignItems: "center", gap: "5px",
             }}>
-              📍 Endereço — CEP preenche automaticamente
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Endereço — CEP preenche automaticamente
             </p>
             <AddressBlock
               form={form}
@@ -508,8 +518,10 @@ export default function RegisterPage({ onGoLogin }) {
             <p style={{
               fontSize: "0.7rem", color: "rgba(250,204,21,0.6)", fontFamily: FONT,
               fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "0.75rem",
+              display: "flex", alignItems: "center", gap: "5px",
             }}>
-              📍 Endereço da empresa — CEP preenche automaticamente
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Endereço da empresa — CEP preenche automaticamente
             </p>
             <AddressBlock
               form={form}
@@ -566,7 +578,11 @@ export default function RegisterPage({ onGoLogin }) {
               fontSize: "0.75rem", fontFamily: FONT,
               color: form.password === form.confirm ? "rgba(34,197,94,0.9)" : "rgba(239,68,68,0.8)",
             }}>
-            <span>{form.password === form.confirm ? "✓" : "✗"}</span>
+            {form.password === form.confirm ? (
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            ) : (
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            )}
             <span>{form.password === form.confirm ? "Senhas coincidem" : "Senhas não coincidem"}</span>
           </motion.div>
         )}
@@ -603,7 +619,12 @@ export default function RegisterPage({ onGoLogin }) {
               <path opacity={0.75} fill="#1e3a5f" d="M4 12a8 8 0 018-8v8z" />
             </svg>
           )}
-          {loading ? "Cadastrando..." : "Criar minha conta ✓"}
+          {loading ? "Cadastrando..." : (
+            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              Criar minha conta
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+          )}
         </motion.button>
       </div>
     </motion.div>,
@@ -693,17 +714,26 @@ export default function RegisterPage({ onGoLogin }) {
 
           <div style={{ marginTop: "2.5rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
             {[
-              { icon: "🏆", text: "Reconhecimento por mérito" },
-              { icon: "🛍️", text: "Catálogo de recompensas reais" },
-              { icon: "📊", text: "Acompanhe seu progresso" },
+              {
+                Icon: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4a2 2 0 0 1-2-2V5h4"/><path d="M18 9h2a2 2 0 0 0 2-2V5h-4"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="M6 9a6 6 0 0 0 12 0V3H6z"/></svg>,
+                text: "Reconhecimento por mérito",
+              },
+              {
+                Icon: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>,
+                text: "Catálogo de recompensas reais",
+              },
+              {
+                Icon: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/><line x1="2" y1="20" x2="22" y2="20"/></svg>,
+                text: "Acompanhe seu progresso",
+              },
             ].map((item) => (
               <div key={item.text} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <div style={{
                   width: 36, height: 36, borderRadius: "0.625rem",
                   background: "rgba(250,204,21,0.1)", border: "1px solid rgba(250,204,21,0.2)",
-                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1rem",
+                  display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                 }}>
-                  {item.icon}
+                  <item.Icon width={16} height={16} style={{ color: "rgba(250,204,21,0.85)" }} />
                 </div>
                 <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.875rem" }}>{item.text}</span>
               </div>

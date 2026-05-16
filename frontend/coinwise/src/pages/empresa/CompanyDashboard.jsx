@@ -75,7 +75,7 @@ export function CompanyDashboard({ currentUser, onNavigate }) {
 
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
         <div>
-          <PageHeader eyebrow="Empresa" title={`Olá, ${currentUser.name} 👋`} sub={currentUser.description || "Painel da empresa parceira"} />
+          <PageHeader eyebrow="Empresa" title={`Olá, ${currentUser.name} `} sub={currentUser.description || "Painel da empresa parceira"} />
           {lastUpdatedStr && (
             <p style={{ color: "rgba(52,211,153,0.45)", fontSize: "0.65rem", fontFamily: F, marginTop: "0.3rem", display: "flex", alignItems: "center", gap: "5px" }}>
               <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: "rgba(52,211,153,0.6)", boxShadow: "0 0 6px rgba(52,211,153,0.5)", flexShrink: 0 }} />

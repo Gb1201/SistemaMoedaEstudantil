@@ -13,35 +13,134 @@ const fadeIn = (delay = 0) => ({
   transition: { duration: 0.6, delay },
 });
 
+/* ─── Icon components ───────────────────────────────────────── */
+const Icon = {
+  Trophy: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 9H4a2 2 0 0 1-2-2V5h4"/><path d="M18 9h2a2 2 0 0 0 2-2V5h-4"/>
+      <path d="M8 21h8"/><path d="M12 17v4"/><path d="M6 9a6 6 0 0 0 12 0V3H6z"/>
+    </svg>
+  ),
+  Building: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h1"/><path d="M14 9h1"/>
+      <path d="M9 13h1"/><path d="M14 13h1"/><path d="M9 17h6"/>
+    </svg>
+  ),
+  BarChart: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/>
+      <line x1="6" y1="20" x2="6" y2="16"/><line x1="2" y1="20" x2="22" y2="20"/>
+    </svg>
+  ),
+  Lock: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </svg>
+  ),
+  Monitor: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/>
+      <line x1="12" y1="17" x2="12" y2="21"/>
+    </svg>
+  ),
+  Zap: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </svg>
+  ),
+  GraduationCap: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+    </svg>
+  ),
+  Teacher: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+  ),
+  User: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+    </svg>
+  ),
+  Send: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+    </svg>
+  ),
+  ShoppingBag: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+      <line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+    </svg>
+  ),
+  TrendingUp: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
+    </svg>
+  ),
+  FileText: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+      <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+    </svg>
+  ),
+  MessageSquare: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  ),
+  Rocket: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+      <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+      <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+    </svg>
+  ),
+  Star: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+  ),
+  Bell: (p) => (
+    <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+    </svg>
+  ),
+};
+
 /* ─── Data ──────────────────────────────────────────────────── */
 const features = [
   {
-    icon: "🏆",
+    icon: Icon.Trophy,
     title: "Reconhecimento Meritocrático",
     desc: "Professores recompensam alunos com moedas digitais por desempenho, participação e comportamento positivo.",
   },
   {
-    icon: "🏢",
+    icon: Icon.Building,
     title: "Rede de Empresas Parceiras",
     desc: "Alunos trocam moedas acumuladas por benefícios reais oferecidos por empresas parceiras da plataforma.",
   },
   {
-    icon: "📊",
+    icon: Icon.BarChart,
     title: "Dados em Tempo Real",
     desc: "Acompanhe o progresso individual e coletivo com dashboards completos para professores e gestores.",
   },
   {
-    icon: "🔒",
+    icon: Icon.Lock,
     title: "Seguro e Confiável",
     desc: "Plataforma com autenticação robusta e dados protegidos, focada no ambiente escolar.",
   },
   {
-    icon: "📱",
+    icon: Icon.Monitor,
     title: "Acesso em Qualquer Lugar",
     desc: "Interface responsiva para alunos, professores e empresas acessarem de qualquer dispositivo.",
   },
   {
-    icon: "⚡",
+    icon: Icon.Zap,
     title: "Configuração Rápida",
     desc: "Escola configurada em minutos. Comece a distribuir moedas no mesmo dia do cadastro.",
   },
@@ -73,7 +172,7 @@ const steps = [
 const profiles = [
   {
     id: "alunos",
-    emoji: "🎓",
+    emoji: Icon.GraduationCap,
     tag: "Para Alunos",
     title: "Seu esforço vale mais do que uma nota.",
     slogan: "Ganhe, gerencie e aproveite suas moedas.",
@@ -86,7 +185,7 @@ const profiles = [
   },
   {
     id: "professores",
-    emoji: "🧑‍🏫",
+    emoji: Icon.Teacher,
     tag: "Para Professores",
     title: "Reconheça quem se dedica, de verdade.",
     slogan: "Motivar ficou muito mais fácil.",
@@ -99,7 +198,7 @@ const profiles = [
   },
   {
     id: "empresas",
-    emoji: "🏢",
+    emoji: Icon.Building,
     tag: "Para Empresas",
     title: "Conecte sua marca ao futuro.",
     slogan: "Visibilidade real para quem importa.",
@@ -273,8 +372,8 @@ function DashboardMockup() {
         transition={{ delay: 0.8, duration: 0.4 }}
         className="absolute -bottom-5 -left-5 bg-white rounded-2xl px-4 py-3 shadow-2xl flex items-center gap-3 border border-gray-100"
       >
-        <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 text-sm flex-shrink-0">
-          ✓
+        <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <div>
           <p className="text-gray-800 text-xs font-bold leading-tight">Novo prêmio disponível!</p>
@@ -289,7 +388,7 @@ function DashboardMockup() {
         transition={{ delay: 1.0, duration: 0.4 }}
         className="absolute -top-5 -right-5 bg-yellow-400 rounded-2xl px-4 py-2.5 shadow-xl shadow-yellow-400/30 flex items-center gap-2"
       >
-        <span className="text-base">🏆</span>
+        <Icon.Trophy width={16} height={16} style={{ color: "#1e3a5f", flexShrink: 0 }} />
         <div>
           <p className="text-blue-900 text-[10px] font-semibold leading-none">Top da turma</p>
           <p className="text-blue-900/70 text-[10px] mt-0.5">#3 este mês</p>
@@ -311,9 +410,9 @@ function AppPreview() {
           <span className="text-white text-sm font-bold">CoinClass</span>
         </div>
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-xs">
-            👤
-          </div>
+          <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
+              <Icon.User width={14} height={14} style={{ color: "rgba(255,255,255,0.7)" }} />
+            </div>
           <div>
             <p className="text-white text-xs font-semibold leading-none">Ana Silva</p>
             <p className="text-white/40 text-[10px]">Aluna · 3º Ano</p>
@@ -329,24 +428,26 @@ function AppPreview() {
             <p className="text-white font-black text-3xl leading-none">1.240</p>
             <p className="text-yellow-400 text-xs mt-1.5 font-semibold tracking-wide">CoinWise</p>
           </div>
-          <div className="w-14 h-14 rounded-2xl bg-yellow-400/20 border border-yellow-400/30 flex items-center justify-center text-2xl">
-            🏆
-          </div>
+          <div className="w-14 h-14 rounded-2xl bg-yellow-400/20 border border-yellow-400/30 flex items-center justify-center">
+              <Icon.Trophy width={26} height={26} style={{ color: "rgba(250,204,21,0.9)" }} />
+            </div>
         </div>
 
         {/* Quick actions */}
         <div className="grid grid-cols-3 gap-2">
           {[
-            { icon: "📤", label: "Transferir" },
-            { icon: "🛍️", label: "Loja" },
-            { icon: "📈", label: "Histórico" },
+            { icon: Icon.Send, label: "Transferir" },
+            { icon: Icon.ShoppingBag, label: "Loja" },
+            { icon: Icon.TrendingUp, label: "Histórico" },
           ].map((a) => (
             <div
               key={a.label}
               className="rounded-xl bg-white/[0.06] border border-white/10 p-3 text-center cursor-pointer hover:bg-white/10 hover:border-white/20 transition-all"
             >
-              <p className="text-lg">{a.icon}</p>
-              <p className="text-white/55 text-[10px] mt-1.5 font-medium">{a.label}</p>
+              <div className="flex justify-center mb-1.5">
+                <a.icon width={18} height={18} style={{ color: "rgba(255,255,255,0.6)" }} />
+              </div>
+              <p className="text-white/55 text-[10px] font-medium">{a.label}</p>
             </div>
           ))}
         </div>
@@ -357,16 +458,16 @@ function AppPreview() {
             Atividade recente
           </p>
           {[
-            { icon: "📝", title: "Entrega de projeto", sub: "Prof. João · há 2h", val: "+50" },
-            { icon: "🗣️", title: "Participação em aula", sub: "Prof. Maria · ontem", val: "+20" },
-            { icon: "🛍️", title: "Desconto Livraria XYZ", sub: "Parceiro · 3 dias atrás", val: "-120" },
+            { icon: Icon.FileText, title: "Entrega de projeto", sub: "Prof. João · há 2h", val: "+50" },
+            { icon: Icon.MessageSquare, title: "Participação em aula", sub: "Prof. Maria · ontem", val: "+20" },
+            { icon: Icon.ShoppingBag, title: "Desconto Livraria XYZ", sub: "Parceiro · 3 dias atrás", val: "-120" },
           ].map((item, i) => (
             <div
               key={i}
               className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/8 hover:bg-white/[0.07] transition-colors"
             >
-              <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-sm flex-shrink-0">
-                {item.icon}
+              <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                <item.icon width={14} height={14} style={{ color: "rgba(255,255,255,0.6)" }} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-white text-xs font-medium truncate">{item.title}</p>
@@ -498,7 +599,10 @@ export default function HomePage({ onGoLogin, onGoRegister }) {
         >
           {/* Left: copy */}
           <motion.div {...fadeUp(0)}>
-            <span className="section-label">🚀 Plataforma de Moeda Estudantil</span>
+            <span className="section-label" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <Icon.Rocket width={13} height={13} style={{ color: "#facc15", flexShrink: 0 }} />
+              Plataforma de Moeda Estudantil
+            </span>
 
             <h1
               className="text-white font-black leading-[1.08] tracking-tight"
@@ -596,9 +700,9 @@ export default function HomePage({ onGoLogin, onGoRegister }) {
                 className="feature-card rounded-2xl bg-white/[0.05] border border-white/10 p-6 hover:bg-white/[0.08] hover:border-white/18 transition-all group cursor-default"
               >
                 <div
-                  className="feature-icon w-12 h-12 rounded-2xl bg-yellow-400/12 border border-yellow-400/20 flex items-center justify-center text-2xl mb-5"
+                  className="feature-icon w-12 h-12 rounded-2xl bg-yellow-400/12 border border-yellow-400/20 flex items-center justify-center mb-5"
                 >
-                  {f.icon}
+                  <f.icon width={22} height={22} style={{ color: "rgba(250,204,21,0.85)" }} />
                 </div>
                 <h3
                   className="text-white font-bold mb-2 leading-snug"
@@ -655,9 +759,9 @@ export default function HomePage({ onGoLogin, onGoRegister }) {
                   {/* Icon + tag */}
                   <div className="flex flex-col items-center gap-2 text-center" style={{ minWidth: "80px" }}>
                     <div
-                      className={`w-14 h-14 rounded-2xl ${p.accentBg} flex items-center justify-center text-3xl border ${p.border}`}
+                      className={`w-14 h-14 rounded-2xl ${p.accentBg} flex items-center justify-center border ${p.border}`}
                     >
-                      {p.emoji}
+                      <p.emoji width={28} height={28} className={p.accent} style={{ strokeWidth: 1.75 }} />
                     </div>
                     <span
                       className={`text-[10px] font-bold uppercase tracking-widest ${p.accent} whitespace-nowrap`}

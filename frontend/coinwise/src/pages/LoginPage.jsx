@@ -214,9 +214,18 @@ export default function LoginPage({ onLogin, onGoRegister }) {
               style={{ display: "flex", gap: "0.75rem", marginTop: "2.25rem" }}
             >
               {[
-                { icon: "👨‍🎓", label: "Para Alunos", desc: "Ganhe e resgate" },
-                { icon: "👨‍🏫", label: "Professores", desc: "Reconheça mérito" },
-                { icon: "🏢", label: "Empresas", desc: "Ofereça vantagens" },
+                {
+                  Icon: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
+                  label: "Para Alunos", desc: "Ganhe e resgate"
+                },
+                {
+                  Icon: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+                  label: "Professores", desc: "Reconheça mérito"
+                },
+                {
+                  Icon: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h1"/><path d="M14 9h1"/><path d="M9 13h1"/><path d="M14 13h1"/><path d="M9 17h6"/></svg>,
+                  label: "Empresas", desc: "Ofereça vantagens"
+                },
               ].map((item, i) => (
                 <div
                   key={i}
@@ -228,7 +237,9 @@ export default function LoginPage({ onLogin, onGoRegister }) {
                     padding: "0.875rem 0.75rem",
                   }}
                 >
-                  <p style={{ fontSize: "1.4rem", marginBottom: "0.35rem" }}>{item.icon}</p>
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <item.Icon width={22} height={22} style={{ color: "rgba(250,204,21,0.75)" }} />
+                  </div>
                   <p style={{ color: "rgba(255,255,255,0.8)", fontWeight: 700, fontSize: "0.78rem", marginBottom: "0.2rem" }}>
                     {item.label}
                   </p>
@@ -313,10 +324,10 @@ export default function LoginPage({ onLogin, onGoRegister }) {
                 marginBottom: "1rem",
               }}>
                 {[
-                  { value: "student", label: "👨‍🎓 Aluno" },
-                  { value: "teacher", label: "👨‍🏫 Professor" },
-                  { value: "company", label: "🏢 Empresa" },
-                ].map(({ value, label }) => (
+                  { value: "student",  label: "Aluno",     Icon: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> },
+                  { value: "teacher", label: "Professor", Icon: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+                  { value: "company", label: "Empresa",   Icon: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h1"/><path d="M14 9h1"/><path d="M9 13h1"/><path d="M14 13h1"/><path d="M9 17h6"/></svg> },
+                ].map(({ value, label, Icon: BtnIcon }) => (
                   <button
                     key={value}
                     type="button"
@@ -331,8 +342,10 @@ export default function LoginPage({ onLogin, onGoRegister }) {
                       fontWeight: 700, fontSize: "0.82rem",
                       cursor: "pointer", fontFamily: FONT,
                       transition: "all 0.18s",
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: "5px",
                     }}
                   >
+                    <BtnIcon width={13} height={13} style={{ flexShrink: 0 }} />
                     {label}
                   </button>
                 ))}
@@ -396,7 +409,7 @@ export default function LoginPage({ onLogin, onGoRegister }) {
                         border: "1px solid rgba(239,68,68,0.25)",
                       }}
                     >
-                      <span style={{ color: "#f87171", fontSize: "0.85rem", flexShrink: 0, marginTop: 1 }}>⚠</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                       <p style={{ color: "rgba(248,113,113,0.9)", fontSize: "0.8rem", lineHeight: 1.5, fontFamily: FONT }}>
                         {error}
                       </p>
