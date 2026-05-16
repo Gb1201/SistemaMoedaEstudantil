@@ -1,7 +1,112 @@
-import { useState } from "react";
+import { useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Float, Environment, Sparkles, ContactShadows } from "@react-three/drei";
+import * as THREE from "three";
 import { alunosApi, empresasApi, professoresApi } from "../api/api";
 import { mockUsers } from "../data/mockData";
+
+
+/* ─── Login Coin 3D Components ──────────────────────────────── */
+function LoginCoinEdge({ radius, thickness }) {
+  const geo = useMemo(() => new THREE.TorusGeometry(radius, thickness * 0.5, 6, 80), [radius, thickness]);
+  return (
+    <mesh geometry={geo} rotation={[Math.PI / 2, 0, 0]}>
+      <meshStandardMaterial color="#b8860b" metalness={1} roughness={0.15} envMapIntensity={2} />
+    </mesh>
+  );
+}
+
+function LoginCoinRing({ radius, yPos }) {
+  return (
+    <mesh position={[0, yPos, 0]} rotation={[Math.PI / 2, 0, 0]}>
+      <torusGeometry args={[radius, 0.015, 8, 96]} />
+      <meshStandardMaterial color="#ffd700" metalness={1} roughness={0.05} emissive="#ffaa00" emissiveIntensity={0.4} envMapIntensity={3} />
+    </mesh>
+  );
+}
+
+function LoginCoinEmblem() {
+  const geo = useMemo(() => {
+    const shape = new THREE.Shape();
+    const outerR = 0.82, innerR = 0.48, gapAngle = 0.72;
+    const startAngle = gapAngle / 2;
+    const endAngle = Math.PI * 2 - gapAngle / 2;
+    const segments = 80;
+    for (let i = 0; i <= segments; i++) {
+      const a = startAngle + (endAngle - startAngle) * (i / segments);
+      if (i === 0) shape.moveTo(Math.cos(a) * outerR, Math.sin(a) * outerR);
+      else shape.lineTo(Math.cos(a) * outerR, Math.sin(a) * outerR);
+    }
+    for (let i = segments; i >= 0; i--) {
+      const a = startAngle + (endAngle - startAngle) * (i / segments);
+      shape.lineTo(Math.cos(a) * innerR, Math.sin(a) * innerR);
+    }
+    shape.closePath();
+    return new THREE.ExtrudeGeometry(shape, { depth: 0.07, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.014, bevelSegments: 4, curveSegments: 48 });
+  }, []);
+  const mat = { color: "#fff8dc", metalness: 0.6, roughness: 0.06, emissive: "#ffe066", emissiveIntensity: 0.9, envMapIntensity: 3 };
+  return (
+    <>
+      <mesh geometry={geo} position={[0, 0.178, 0]} rotation={[-Math.PI / 2, 0, Math.PI]}>
+        <meshStandardMaterial {...mat} />
+      </mesh>
+      <mesh geometry={geo} position={[0, -0.178, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[-1, 1, 1]}>
+        <meshStandardMaterial {...mat} />
+      </mesh>
+    </>
+  );
+}
+
+function LoginCoinMesh() {
+  const spinRef = useRef();
+  const glowRef = useRef();
+  useFrame((state) => {
+    const t = state.clock.getElapsedTime();
+    if (spinRef.current) spinRef.current.rotation.y = t * 0.55;
+    if (glowRef.current) glowRef.current.intensity = 2.5 + Math.sin(t * 1.5) * 0.8;
+  });
+  const gold = useMemo(() => ({ color: "#d4a017", metalness: 0.98, roughness: 0.08, envMapIntensity: 3, emissive: "#b8860b", emissiveIntensity: 0.35 }), []);
+  const face = useMemo(() => ({ color: "#c8940f", metalness: 0.99, roughness: 0.04, envMapIntensity: 4, emissive: "#ffd700", emissiveIntensity: 0.25 }), []);
+  return (
+    <group ref={spinRef}>
+      <group rotation={[Math.PI / 2, 0, 0]}>
+        <mesh castShadow receiveShadow><cylinderGeometry args={[2.2, 2.2, 0.28, 128]} /><meshStandardMaterial {...gold} /></mesh>
+        <mesh position={[0, 0.145, 0]}><cylinderGeometry args={[2.18, 2.2, 0.01, 128]} /><meshStandardMaterial {...face} /></mesh>
+        <mesh position={[0, -0.145, 0]}><cylinderGeometry args={[2.18, 2.2, 0.01, 128]} /><meshStandardMaterial {...face} /></mesh>
+        <mesh position={[0, 0.155, 0]}><cylinderGeometry args={[1.85, 1.85, 0.02, 128]} /><meshStandardMaterial color="#e6b800" metalness={1} roughness={0.03} envMapIntensity={5} emissive="#ffd700" emissiveIntensity={0.2} /></mesh>
+        <mesh position={[0, -0.155, 0]}><cylinderGeometry args={[1.85, 1.85, 0.02, 128]} /><meshStandardMaterial color="#e6b800" metalness={1} roughness={0.03} envMapIntensity={5} emissive="#ffd700" emissiveIntensity={0.2} /></mesh>
+        <LoginCoinRing radius={2.0} yPos={0.16} />
+        <LoginCoinRing radius={1.6} yPos={0.165} />
+        <LoginCoinRing radius={2.0} yPos={-0.16} />
+        <LoginCoinRing radius={1.6} yPos={-0.165} />
+        <LoginCoinEdge radius={2.2} thickness={0.28} />
+        <LoginCoinEmblem />
+        <pointLight ref={glowRef} color="#ffd700" intensity={3} distance={6} decay={2} />
+      </group>
+    </group>
+  );
+}
+
+function LoginCoinScene() {
+  return (
+    <Canvas camera={{ position: [0, 0, 6.5], fov: 42 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.4 }} style={{ position: "absolute", inset: 0 }}>
+      <ambientLight intensity={0.3} color="#1a0a4a" />
+      <directionalLight position={[4, 6, 3]} intensity={3.5} color="#ffe066" castShadow />
+      <pointLight position={[-5, 3, 2]} color="#3b6ef5" intensity={8} distance={14} decay={2} />
+      <pointLight position={[3, -2, -4]} color="#9b59b6" intensity={10} distance={16} decay={2} />
+      <pointLight position={[-2, -3, -5]} color="#7e22ce" intensity={6} distance={12} decay={2} />
+      <pointLight position={[0, 6, 1]} color="#60a5fa" intensity={5} distance={10} decay={2} />
+      <Float speed={1.4} rotationIntensity={0} floatIntensity={0.6} floatingRange={[-0.15, 0.15]}>
+        <LoginCoinMesh />
+      </Float>
+      <Sparkles count={80} scale={6} size={2} speed={0.4} opacity={0.6} color="#ffd700" noise={0.5} />
+      <Sparkles count={40} scale={8} size={1.2} speed={0.2} opacity={0.3} color="#818cf8" noise={0.3} />
+      <ContactShadows position={[0, -3.2, 0]} opacity={0.4} scale={10} blur={3} far={5} color="#1a0050" />
+      <Environment preset="city" />
+    </Canvas>
+  );
+}
 
 const FONT = "'Sora', 'Nunito', sans-serif";
 
@@ -141,6 +246,7 @@ export default function LoginPage({ onLogin, onGoRegister }) {
             padding: "3rem 3.5rem",
             borderRight: "1px solid rgba(255,255,255,0.06)",
             position: "relative",
+            overflow: "hidden",
           }}
         >
           {/* Logo */}
@@ -160,98 +266,19 @@ export default function LoginPage({ onLogin, onGoRegister }) {
             </div>
           </div>
 
-          {/* Main copy */}
-          <div style={{ maxWidth: 400 }}>
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <span style={{
-                display: "inline-flex", alignItems: "center", gap: 6,
-                fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em",
-                textTransform: "uppercase", color: "#facc15",
-                marginBottom: "1.25rem",
-              }}>
-                <span style={{ display: "block", width: 20, height: 2, background: "#facc15", borderRadius: 2 }} />
-                Bem-vindo de volta
-              </span>
-
-              <h2 style={{
-                color: "white", fontWeight: 900,
-                fontSize: "clamp(2rem, 3.2vw, 2.75rem)",
-                lineHeight: 1.1, letterSpacing: "-0.02em",
-                margin: "0 0 1.25rem",
-              }}>
-                Reconheça o mérito
-                <br />
-                <span style={{
-                  background: "linear-gradient(90deg, #facc15, #fde68a)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}>
-                  estudantil
-                </span>{" "}
-                de forma
-                <br />
-                inovadora.
-              </h2>
-
-              <p style={{
-                color: "rgba(255,255,255,0.42)",
-                fontSize: "0.95rem", lineHeight: 1.7,
-              }}>
-                Professores recompensam alunos com moedas digitais.
-                Alunos trocam por vantagens reais em empresas parceiras.
-              </p>
-            </motion.div>
-
-            {/* Role cards */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45, duration: 0.5 }}
-              style={{ display: "flex", gap: "0.75rem", marginTop: "2.25rem" }}
-            >
-              {[
-                {
-                  Icon: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
-                  label: "Para Alunos", desc: "Ganhe e resgate"
-                },
-                {
-                  Icon: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-                  label: "Professores", desc: "Reconheça mérito"
-                },
-                {
-                  Icon: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h1"/><path d="M14 9h1"/><path d="M9 13h1"/><path d="M14 13h1"/><path d="M9 17h6"/></svg>,
-                  label: "Empresas", desc: "Ofereça vantagens"
-                },
-              ].map((item, i) => (
-                <div
-                  key={i}
-                  style={{
-                    flex: 1,
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.09)",
-                    borderRadius: "1rem",
-                    padding: "0.875rem 0.75rem",
-                  }}
-                >
-                  <div style={{ marginBottom: "0.5rem" }}>
-                    <item.Icon width={22} height={22} style={{ color: "rgba(250,204,21,0.75)" }} />
-                  </div>
-                  <p style={{ color: "rgba(255,255,255,0.8)", fontWeight: 700, fontSize: "0.78rem", marginBottom: "0.2rem" }}>
-                    {item.label}
-                  </p>
-                  <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.72rem" }}>{item.desc}</p>
-                </div>
-              ))}
-            </motion.div>
+          {/* 3D Coin */}
+          <div style={{ position: "relative", flex: 1, minHeight: 0 }}>
+            <LoginCoinScene />
+            {/* Bloom overlay */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none",
+              mixBlendMode: "screen",
+              background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255,215,0,0.18) 0%, transparent 65%)",
+            }} />
           </div>
 
           {/* Footer */}
           <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.75rem" }}>
-            © 2026 CoinClass. Todos os direitos reservados.
           </p>
         </div>
 
