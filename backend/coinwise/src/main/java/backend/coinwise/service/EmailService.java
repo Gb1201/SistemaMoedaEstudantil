@@ -58,7 +58,7 @@ public class EmailService {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(resgate.getAluno().getEmail());
-            message.setSubject("CoinWise - Seu cupom de resgate: " + resgate.getVantagem().getNome());
+            message.setSubject("CoinClass - Seu cupom de resgate: " + resgate.getVantagem().getNome());
             message.setText(
                 "Olá, " + resgate.getAluno().getNome() + "!\n\n" +
                 "Parabéns! Seu resgate foi realizado com sucesso.\n\n" +
@@ -75,7 +75,7 @@ public class EmailService {
                 "Apresente este código presencialmente na empresa parceira para realizar a troca.\n\n" +
                 "Descrição da vantagem:\n" +
                 resgate.getVantagem().getDescricao() + "\n\n" +
-                "CoinWise - Sistema de Moeda Estudantil"
+                "CoinClass - Sistema de Moeda Estudantil"
             );
             mailSender.send(message);
         } catch (Exception e) {
@@ -87,7 +87,7 @@ public class EmailService {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(resgate.getVantagem().getEmpresa().getEmail());
-            message.setSubject("CoinWise - Novo resgate: " + resgate.getVantagem().getNome());
+            message.setSubject("CoinClass - Novo resgate: " + resgate.getVantagem().getNome());
             message.setText(
                 "Olá, " + resgate.getVantagem().getEmpresa().getNome() + "!\n\n" +
                 "Um aluno realizou o resgate de uma de suas vantagens no sistema CoinWise.\n\n" +
@@ -105,7 +105,7 @@ public class EmailService {
                 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
                 "Ao atender o aluno presencialmente, solicite que ele apresente o código acima\n" +
                 "e confirme que os dados correspondem antes de liberar a vantagem.\n\n" +
-                "CoinWise - Sistema de Moeda Estudantil"
+                "CoinClass - Sistema de Moeda Estudantil"
             );
             mailSender.send(message);
         } catch (Exception e) {

@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
   Float,
-  Environment,
   OrbitControls,
   Sparkles,
   ContactShadows,
@@ -234,7 +233,7 @@ function CoinEdge({ radius, thickness }) {
         color="#b8860b"
         metalness={1}
         roughness={0.15}
-        envMapIntensity={2}
+        envMapIntensity={0}
       />
     </mesh>
   );
@@ -251,7 +250,7 @@ function CoinRing({ radius, yPos }) {
         roughness={0.05}
         emissive="#ffaa00"
         emissiveIntensity={0.4}
-        envMapIntensity={3}
+        envMapIntensity={0}
       />
     </mesh>
   );
@@ -299,7 +298,7 @@ function CoinEmblem() {
     roughness: 0.06,
     emissive: "#ffe066",
     emissiveIntensity: 0.9,
-    envMapIntensity: 3,
+    envMapIntensity: 0,
   };
 
   return (
@@ -336,7 +335,7 @@ function CoinzMesh() {
     color: "#d4a017",
     metalness: 0.98,
     roughness: 0.08,
-    envMapIntensity: 3,
+    envMapIntensity: 0,
     emissive: "#b8860b",
     emissiveIntensity: 0.35,
   }), []);
@@ -345,7 +344,7 @@ function CoinzMesh() {
     color: "#c8940f",
     metalness: 0.99,
     roughness: 0.04,
-    envMapIntensity: 4,
+    envMapIntensity: 0,
     emissive: "#ffd700",
     emissiveIntensity: 0.25,
   }), []);
@@ -355,30 +354,30 @@ function CoinzMesh() {
       <group rotation={[Math.PI / 2, 0, 0]}>
         {/* Main coin body */}
         <mesh castShadow receiveShadow>
-          <cylinderGeometry args={[2.2, 2.2, 0.28, 128, 1, false]} />
+          <cylinderGeometry args={[1.4, 1.4, 0.28, 128, 1, false]} />
           <meshStandardMaterial {...goldMaterial} />
         </mesh>
 
         {/* Top face */}
         <mesh position={[0, 0.145, 0]}>
-          <cylinderGeometry args={[2.18, 2.2, 0.01, 128]} />
+          <cylinderGeometry args={[1.38, 1.4, 0.01, 128]} />
           <meshStandardMaterial {...faceMaterial} />
         </mesh>
 
         {/* Bottom face */}
         <mesh position={[0, -0.145, 0]}>
-          <cylinderGeometry args={[2.18, 2.2, 0.01, 128]} />
+          <cylinderGeometry args={[1.38, 1.4, 0.01, 128]} />
           <meshStandardMaterial {...faceMaterial} />
         </mesh>
 
         {/* Inner elevated platform on face */}
         <mesh position={[0, 0.155, 0]}>
-          <cylinderGeometry args={[1.85, 1.85, 0.02, 128]} />
+          <cylinderGeometry args={[1.18, 1.18, 0.02, 128]} />
           <meshStandardMaterial
             color="#e6b800"
             metalness={1}
             roughness={0.03}
-            envMapIntensity={5}
+            envMapIntensity={0}
             emissive="#ffd700"
             emissiveIntensity={0.2}
           />
@@ -386,25 +385,25 @@ function CoinzMesh() {
 
         {/* Inner elevated platform on back */}
         <mesh position={[0, -0.155, 0]}>
-          <cylinderGeometry args={[1.85, 1.85, 0.02, 128]} />
+          <cylinderGeometry args={[1.18, 1.18, 0.02, 128]} />
           <meshStandardMaterial
             color="#e6b800"
             metalness={1}
             roughness={0.03}
-            envMapIntensity={5}
+            envMapIntensity={0}
             emissive="#ffd700"
             emissiveIntensity={0.2}
           />
         </mesh>
 
         {/* Decorative rings */}
-        <CoinRing radius={2.0} yPos={0.16} />
-        <CoinRing radius={1.6} yPos={0.165} />
-        <CoinRing radius={2.0} yPos={-0.16} />
-        <CoinRing radius={1.6} yPos={-0.165} />
+        <CoinRing radius={1.28} yPos={0.16} />
+        <CoinRing radius={1.02} yPos={0.165} />
+        <CoinRing radius={1.28} yPos={-0.16} />
+        <CoinRing radius={1.02} yPos={-0.165} />
 
         {/* Edge knurl */}
-        <CoinEdge radius={2.2} thickness={0.28} />
+        <CoinEdge radius={1.4} thickness={0.28} />
 
         {/* Star emblem on top face (Y+ face = front after rotation) */}
         <CoinEmblem />
@@ -511,8 +510,7 @@ function CoinzScene() {
         color="#1a0050"
       />
 
-      {/* Environment for reflections */}
-      <Environment preset="city" />
+      {/* Environment for reflections removed */}
 
       {/* Orbit controls — user can drag to inspect */}
       <OrbitControls
@@ -591,7 +589,7 @@ function CoinzHero({ onGoRegister, onGoLogin }) {
     <section className="relative overflow-hidden" style={{ minHeight: "100vh" }}>
 
       {/* Dark space background */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 0, background: "radial-gradient(ellipse 80% 60% at 70% 50%, rgba(59,110,245,0.13) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 75% 55%, rgba(155,89,182,0.10) 0%, transparent 55%), linear-gradient(135deg, #070415 0%, #0a0520 50%, #060312 100%)" }} />
+      <div style={{ position: "absolute", inset: 0, zIndex: 0, background: "radial-gradient(ellipse 80% 60% at 70% 50%, rgba(59,110,245,0.13) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 75% 55%, rgba(30,58,95,0.30) 0%, transparent 55%), linear-gradient(160deg, #0f172a 0%, #1e3a5f 55%, #0f172a 100%)" }} />
 
       {/* Subtle star field */}
       <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
@@ -638,7 +636,7 @@ function CoinzHero({ onGoRegister, onGoLogin }) {
       }} />
 
       {/* Bottom fade to page */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(to bottom, rgba(10,5,30,0.65) 0%, transparent 15%, transparent 80%, rgba(10,5,30,0.98) 100%)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(to bottom, rgba(15,23,42,0.65) 0%, transparent 15%, transparent 80%, rgba(15,23,42,0.98) 100%)", pointerEvents: "none" }} />
 
       {/* ── Two-column layout ── */}
       <div
@@ -1026,7 +1024,7 @@ export default function HomePage({ onGoLogin, onGoRegister }) {
     <div
       className="min-h-screen"
       style={{
-        background: "linear-gradient(160deg, #08051e 0%, #0e0a2e 40%, #0a0620 100%)",
+        background: "linear-gradient(160deg, #0f172a 0%, #1e3a5f 55%, #0f172a 100%)",
         fontFamily: "'Sora', 'Nunito', 'DM Sans', sans-serif",
       }}
     >
@@ -1079,7 +1077,7 @@ export default function HomePage({ onGoLogin, onGoRegister }) {
       {/* ═══ NAVBAR ═══════════════════════════════════════════ */}
       <header
         className="sticky top-0 z-50 border-b border-white/8 backdrop-blur-xl"
-        style={{ background: "rgba(8,5,30,0.75)" }}
+        style={{ background: "rgba(15,23,42,0.75)" }}
       >
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <Logo />

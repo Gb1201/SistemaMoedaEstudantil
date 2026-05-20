@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Environment, Sparkles, ContactShadows } from "@react-three/drei";
+import { Float, Sparkles, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 import { alunosApi, empresasApi, professoresApi } from "../api/api";
 import { mockUsers } from "../data/mockData";
@@ -12,7 +12,7 @@ function LoginCoinEdge({ radius, thickness }) {
   const geo = useMemo(() => new THREE.TorusGeometry(radius, thickness * 0.5, 6, 80), [radius, thickness]);
   return (
     <mesh geometry={geo} rotation={[Math.PI / 2, 0, 0]}>
-      <meshStandardMaterial color="#b8860b" metalness={1} roughness={0.15} envMapIntensity={2} />
+      <meshStandardMaterial color="#b8860b" metalness={1} roughness={0.15} envMapIntensity={0} />
     </mesh>
   );
 }
@@ -21,7 +21,7 @@ function LoginCoinRing({ radius, yPos }) {
   return (
     <mesh position={[0, yPos, 0]} rotation={[Math.PI / 2, 0, 0]}>
       <torusGeometry args={[radius, 0.015, 8, 96]} />
-      <meshStandardMaterial color="#ffd700" metalness={1} roughness={0.05} emissive="#ffaa00" emissiveIntensity={0.4} envMapIntensity={3} />
+      <meshStandardMaterial color="#ffd700" metalness={1} roughness={0.05} emissive="#ffaa00" emissiveIntensity={0.4} envMapIntensity={0} />
     </mesh>
   );
 }
@@ -45,7 +45,7 @@ function LoginCoinEmblem() {
     shape.closePath();
     return new THREE.ExtrudeGeometry(shape, { depth: 0.07, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.014, bevelSegments: 4, curveSegments: 48 });
   }, []);
-  const mat = { color: "#fff8dc", metalness: 0.6, roughness: 0.06, emissive: "#ffe066", emissiveIntensity: 0.9, envMapIntensity: 3 };
+  const mat = { color: "#fff8dc", metalness: 0.6, roughness: 0.06, emissive: "#ffe066", emissiveIntensity: 0.9, envMapIntensity: 0 };
   return (
     <>
       <mesh geometry={geo} position={[0, 0.178, 0]} rotation={[-Math.PI / 2, 0, Math.PI]}>
@@ -66,21 +66,21 @@ function LoginCoinMesh() {
     if (spinRef.current) spinRef.current.rotation.y = t * 0.55;
     if (glowRef.current) glowRef.current.intensity = 2.5 + Math.sin(t * 1.5) * 0.8;
   });
-  const gold = useMemo(() => ({ color: "#d4a017", metalness: 0.98, roughness: 0.08, envMapIntensity: 3, emissive: "#b8860b", emissiveIntensity: 0.35 }), []);
-  const face = useMemo(() => ({ color: "#c8940f", metalness: 0.99, roughness: 0.04, envMapIntensity: 4, emissive: "#ffd700", emissiveIntensity: 0.25 }), []);
+  const gold = useMemo(() => ({ color: "#d4a017", metalness: 0.98, roughness: 0.08, envMapIntensity: 0, emissive: "#b8860b", emissiveIntensity: 0.35 }), []);
+  const face = useMemo(() => ({ color: "#c8940f", metalness: 0.99, roughness: 0.04, envMapIntensity: 0, emissive: "#ffd700", emissiveIntensity: 0.25 }), []);
   return (
     <group ref={spinRef}>
       <group rotation={[Math.PI / 2, 0, 0]}>
-        <mesh castShadow receiveShadow><cylinderGeometry args={[2.2, 2.2, 0.28, 128]} /><meshStandardMaterial {...gold} /></mesh>
-        <mesh position={[0, 0.145, 0]}><cylinderGeometry args={[2.18, 2.2, 0.01, 128]} /><meshStandardMaterial {...face} /></mesh>
-        <mesh position={[0, -0.145, 0]}><cylinderGeometry args={[2.18, 2.2, 0.01, 128]} /><meshStandardMaterial {...face} /></mesh>
-        <mesh position={[0, 0.155, 0]}><cylinderGeometry args={[1.85, 1.85, 0.02, 128]} /><meshStandardMaterial color="#e6b800" metalness={1} roughness={0.03} envMapIntensity={5} emissive="#ffd700" emissiveIntensity={0.2} /></mesh>
-        <mesh position={[0, -0.155, 0]}><cylinderGeometry args={[1.85, 1.85, 0.02, 128]} /><meshStandardMaterial color="#e6b800" metalness={1} roughness={0.03} envMapIntensity={5} emissive="#ffd700" emissiveIntensity={0.2} /></mesh>
-        <LoginCoinRing radius={2.0} yPos={0.16} />
-        <LoginCoinRing radius={1.6} yPos={0.165} />
-        <LoginCoinRing radius={2.0} yPos={-0.16} />
-        <LoginCoinRing radius={1.6} yPos={-0.165} />
-        <LoginCoinEdge radius={2.2} thickness={0.28} />
+        <mesh castShadow receiveShadow><cylinderGeometry args={[1.4, 1.4, 0.28, 128]} /><meshStandardMaterial {...gold} /></mesh>
+        <mesh position={[0, 0.145, 0]}><cylinderGeometry args={[1.38, 1.4, 0.01, 128]} /><meshStandardMaterial {...face} /></mesh>
+        <mesh position={[0, -0.145, 0]}><cylinderGeometry args={[1.38, 1.4, 0.01, 128]} /><meshStandardMaterial {...face} /></mesh>
+        <mesh position={[0, 0.155, 0]}><cylinderGeometry args={[1.18, 1.18, 0.02, 128]} /><meshStandardMaterial color="#e6b800" metalness={1} roughness={0.03} envMapIntensity={0} emissive="#ffd700" emissiveIntensity={0.2} /></mesh>
+        <mesh position={[0, -0.155, 0]}><cylinderGeometry args={[1.18, 1.18, 0.02, 128]} /><meshStandardMaterial color="#e6b800" metalness={1} roughness={0.03} envMapIntensity={0} emissive="#ffd700" emissiveIntensity={0.2} /></mesh>
+        <LoginCoinRing radius={1.28} yPos={0.16} />
+        <LoginCoinRing radius={1.02} yPos={0.165} />
+        <LoginCoinRing radius={1.28} yPos={-0.16} />
+        <LoginCoinRing radius={1.02} yPos={-0.165} />
+        <LoginCoinEdge radius={1.4} thickness={0.28} />
         <LoginCoinEmblem />
         <pointLight ref={glowRef} color="#ffd700" intensity={3} distance={6} decay={2} />
       </group>
@@ -103,7 +103,6 @@ function LoginCoinScene() {
       <Sparkles count={80} scale={6} size={2} speed={0.4} opacity={0.6} color="#ffd700" noise={0.5} />
       <Sparkles count={40} scale={8} size={1.2} speed={0.2} opacity={0.3} color="#818cf8" noise={0.3} />
       <ContactShadows position={[0, -3.2, 0]} opacity={0.4} scale={10} blur={3} far={5} color="#1a0050" />
-      <Environment preset="city" />
     </Canvas>
   );
 }
