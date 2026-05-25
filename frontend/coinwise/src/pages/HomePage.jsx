@@ -230,10 +230,12 @@ function CoinEdge({ radius, thickness }) {
   return (
     <mesh geometry={geometry} rotation={[Math.PI / 2, 0, 0]}>
       <meshStandardMaterial
-        color="#b8860b"
-        metalness={1}
-        roughness={0.15}
+        color="#d4a017"
+        metalness={0.95}
+        roughness={0.18}
         envMapIntensity={0}
+        emissive="#b8860b"
+        emissiveIntensity={0.55}
       />
     </mesh>
   );
@@ -445,7 +447,7 @@ function CoinzScene() {
       <CameraRig />
 
       {/* Lighting */}
-      <ambientLight intensity={0.3} color="#1a0a4a" />
+      <ambientLight intensity={0.9} color="#c8940f" />
 
       {/* Key light — warm gold */}
       <directionalLight

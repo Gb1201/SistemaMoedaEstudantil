@@ -129,7 +129,7 @@ export default function App() {
   const handleLogout = () => {
     setCurrentUser(null);
     setCurrentPage(null);
-    setAuthView("home");
+    setAuthView("login");
   };
 
   const navigate = (page) => {

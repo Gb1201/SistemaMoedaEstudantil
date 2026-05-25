@@ -12,7 +12,7 @@ function LoginCoinEdge({ radius, thickness }) {
   const geo = useMemo(() => new THREE.TorusGeometry(radius, thickness * 0.5, 6, 80), [radius, thickness]);
   return (
     <mesh geometry={geo} rotation={[Math.PI / 2, 0, 0]}>
-      <meshStandardMaterial color="#b8860b" metalness={1} roughness={0.15} envMapIntensity={0} />
+      <meshStandardMaterial color="#d4a017" metalness={0.95} roughness={0.18} envMapIntensity={0} emissive="#b8860b" emissiveIntensity={0.55} />
     </mesh>
   );
 }
@@ -91,7 +91,7 @@ function LoginCoinMesh() {
 function LoginCoinScene() {
   return (
     <Canvas camera={{ position: [0, 0, 6.5], fov: 42 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.4 }} style={{ position: "absolute", inset: 0 }}>
-      <ambientLight intensity={0.3} color="#1a0a4a" />
+      <ambientLight intensity={0.9} color="#c8940f" />
       <directionalLight position={[4, 6, 3]} intensity={3.5} color="#ffe066" castShadow />
       <pointLight position={[-5, 3, 2]} color="#3b6ef5" intensity={8} distance={14} decay={2} />
       <pointLight position={[3, -2, -4]} color="#9b59b6" intensity={10} distance={16} decay={2} />
