@@ -1,0 +1,47 @@
+@startuml Cadastro_Vantagem
+
+title Cadastro de Vantagem - Empresa Parceira
+
+actor "Empresa Parceira" as EP
+participant "VantagemController" as VC
+participant "VantagemService" as VS
+participant "EmpresaRepository" as ER
+participant "VantagemRepository" as VR
+participant "EmailService" as ES
+database "Banco de Dados" as DB
+
+EP -> VC : POST /vantagens\n{ nome, descricao, custo, foto }
+activate VC
+
+VC -> VS : cadastrarVantagem(empresaId, dto)
+activate VS
+
+VS -> ER : findById(empresaId)
+activate ER
+ER -> DB : SELECT empresa WHERE id = ?
+DB --> ER : Empresa
+ER --> VS : Optional<Empresa>
+deactivate ER
+
+alt empresa não encontrada
+    VS --> VC : throw EmpresaNotFoundException
+    VC --> EP : 404 Not Found
+else empresa encontrada
+    VS -> VR : save(vantagem)
+    activate VR
+    VR -> DB : INSERT INTO vantagem
+    DB --> VR : Vantagem salva
+    VR --> VS : Vantagem
+    deactivate VR
+
+    VS ->> ES : notificarCadastroVantagem(empresa, vantagem)
+    note right : Assíncrono — não bloqueia\no fluxo principal
+
+    VS --> VC : VantagemResponseDTO
+    deactivate VS
+    VC --> EP : 201 Created\n{ id, nome, descricao, custo }
+end
+
+deactivate VC
+
+@enduml
