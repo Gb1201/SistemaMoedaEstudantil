@@ -1,0 +1,54 @@
+@startuml Cadastro_Aluno
+title Caso de Uso: Realizar Cadastro (Aluno)
+
+actor Aluno
+participant "CadastroController\n(REST)" as Controller
+participant "AlunoService" as Service
+participant "AlunoRepository" as Repo
+participant "EmailService\n(@Async)" as Email
+database "Banco de Dados" as DB
+
+Aluno -> Controller : POST /alunos\n{ nome, email, cpf, curso, senha }
+
+activate Controller
+Controller -> Controller : validarDadosEntrada()
+
+alt dados inválidos
+  Controller --> Aluno : 400 Bad Request\n{ erros de validação }
+else dados válidos
+  Controller -> Service : cadastrarAluno(AlunoDTO)
+  activate Service
+
+  Service -> Repo : existsByEmail(email)
+  activate Repo
+  Repo -> DB : SELECT * FROM aluno WHERE email = ?
+  DB --> Repo : resultado
+  Repo --> Service : boolean
+  deactivate Repo
+
+  alt email já cadastrado
+    Service --> Controller : throw AlunoJaExisteException
+    Controller --> Aluno : 409 Conflict\n{ "Email já cadastrado" }
+  else email disponível
+    Service -> Service : encodeSenha(senha)
+    Service -> Service : gerarCodigoAtivacao()
+
+    Service -> Repo : save(Aluno)
+    activate Repo
+    Repo -> DB : INSERT INTO aluno (...)
+    DB --> Repo : Aluno (com id)
+    Repo --> Service : Aluno salvo
+    deactivate Repo
+
+    Service ->> Email : enviarEmailAtivacao(email, codigoAtivacao)
+    note right of Email : @Async — não bloqueia\nNotificar por Email (include)
+
+    Service --> Controller : AlunoResponseDTO
+    deactivate Service
+
+    Controller --> Aluno : 201 Created\n{ id, nome, email, status: "PENDENTE" }
+  end
+end
+
+deactivate Controller
+@enduml
