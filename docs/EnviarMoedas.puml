@@ -1,0 +1,80 @@
+@startuml Enviar_Moedas
+title Caso de Uso: Enviar Moedas
+
+actor Professor
+participant "TransacaoController\n(REST)" as Controller
+participant "TransacaoService" as Service
+participant "ProfessorRepository" as ProfRepo
+participant "AlunoRepository" as AlunoRepo
+participant "TransacaoRepository" as TransRepo
+participant "EmailService\n(@Async)" as Email
+database "Banco de Dados" as DB
+
+Professor -> Controller : POST /transacoes/enviar\n{ alunoId, quantidade, mensagem }
+note right of Professor : Requer autenticação JWT
+
+activate Controller
+Controller -> Controller : extrairProfessorId(JWT)
+Controller -> Service : enviarMoedas(EnvioMoedasDTO)
+activate Service
+
+Service -> ProfRepo : findById(professorId)
+activate ProfRepo
+ProfRepo -> DB : SELECT * FROM professor WHERE id = ?
+DB --> ProfRepo : Professor
+ProfRepo --> Service : Professor
+deactivate ProfRepo
+
+Service -> Service : verificarSaldoSuficiente\n(professor.saldo, quantidade)
+
+alt saldo insuficiente
+  Service --> Controller : throw SaldoInsuficienteException
+  Controller --> Professor : 422 Unprocessable Entity\n{ "Saldo insuficiente" }
+else saldo suficiente
+  Service -> AlunoRepo : findById(alunoId)
+  activate AlunoRepo
+  AlunoRepo -> DB : SELECT * FROM aluno WHERE id = ?
+  DB --> AlunoRepo : Aluno
+  AlunoRepo --> Service : Aluno
+  deactivate AlunoRepo
+
+  alt aluno não encontrado
+    Service --> Controller : throw AlunoNaoEncontradoException
+    Controller --> Professor : 404 Not Found\n{ "Aluno não encontrado" }
+  else aluno encontrado
+    Service -> Service : professor.saldo -= quantidade
+    Service -> Service : aluno.saldo += quantidade
+
+    Service -> ProfRepo : save(professor)
+    activate ProfRepo
+    ProfRepo -> DB : UPDATE professor SET saldo = ?
+    DB --> ProfRepo : ok
+    ProfRepo --> Service : Professor atualizado
+    deactivate ProfRepo
+
+    Service -> AlunoRepo : save(aluno)
+    activate AlunoRepo
+    AlunoRepo -> DB : UPDATE aluno SET saldo = ?
+    DB --> AlunoRepo : ok
+    AlunoRepo --> Service : Aluno atualizado
+    deactivate AlunoRepo
+
+    Service -> TransRepo : save(Transacao)
+    activate TransRepo
+    TransRepo -> DB : INSERT INTO transacao (...)
+    DB --> TransRepo : Transacao (com id)
+    TransRepo --> Service : Transacao salva
+    deactivate TransRepo
+
+    Service ->> Email : enviarNotificacao(aluno.email,\n  professor.nome, quantidade, mensagem)
+    note right of Email : @Async — não bloqueia\nNotificar por Email (include)
+
+    Service --> Controller : TransacaoResponseDTO
+    deactivate Service
+
+    Controller --> Professor : 201 Created\n{ id, quantidade, saldoRestante, dataHora }
+  end
+end
+
+deactivate Controller
+@enduml

@@ -1,0 +1,165 @@
+@startuml
+title Sistema de Moeda Estudantil - Fluxo Geral
+
+actor Aluno
+actor Professor
+actor "Empresa Parceira" as Empresa
+
+participant "Sistema Web" as Sistema
+participant "Auth Service" as Auth
+participant "Moeda Service" as Moeda
+participant "Vantagem Service" as Vantagem
+participant "Email Service" as Email
+database Banco
+
+== Cadastro de Aluno ==
+
+Aluno -> Sistema : Solicitar cadastro
+activate Sistema
+
+Sistema -> Banco : Salvar dados do aluno
+activate Banco
+Banco --> Sistema : Cadastro realizado
+deactivate Banco
+
+Sistema ->> Email : Enviar email de boas-vindas
+activate Email
+Email --> Sistema : Solicitação recebida
+deactivate Email
+
+Sistema --> Aluno : Cadastro concluído
+deactivate Sistema
+
+== Cadastro de Empresa Parceira ==
+
+Empresa -> Sistema : Solicitar cadastro
+activate Sistema
+
+Sistema -> Banco : Salvar empresa
+activate Banco
+Banco --> Sistema : Empresa cadastrada
+deactivate Banco
+
+Sistema ->> Email : Enviar confirmação
+activate Email
+Email --> Sistema : Solicitação recebida
+deactivate Email
+
+Sistema --> Empresa : Cadastro concluído
+deactivate Sistema
+
+== Login ==
+
+Aluno -> Sistema : Login
+activate Sistema
+
+Sistema -> Auth : Validar credenciais
+activate Auth
+
+Auth -> Banco : Consultar usuário
+activate Banco
+Banco --> Auth : Dados encontrados
+deactivate Banco
+
+Auth --> Sistema : Login válido
+deactivate Auth
+
+Sistema --> Aluno : Acesso liberado
+deactivate Sistema
+
+== Envio de Moedas ==
+
+Professor -> Sistema : Enviar moedas para aluno
+activate Sistema
+
+Sistema -> Auth : Validar professor
+activate Auth
+Auth --> Sistema : Professor autorizado
+deactivate Auth
+
+Sistema -> Moeda : Registrar transferência
+activate Moeda
+
+Moeda -> Banco : Atualizar saldo
+activate Banco
+Banco --> Moeda : Saldo atualizado
+deactivate Banco
+
+Moeda ->> Email : Notificar aluno
+activate Email
+Email --> Moeda : Solicitação recebida
+deactivate Email
+
+Moeda --> Sistema : Transferência concluída
+deactivate Moeda
+
+Sistema --> Professor : Operação realizada
+deactivate Sistema
+
+== Consulta de Extrato ==
+
+Aluno -> Sistema : Consultar extrato
+activate Sistema
+
+Sistema -> Banco : Buscar movimentações
+activate Banco
+Banco --> Sistema : Lista de transações
+deactivate Banco
+
+Sistema --> Aluno : Exibir extrato
+deactivate Sistema
+
+== Cadastro de Vantagem ==
+
+Empresa -> Sistema : Cadastrar vantagem
+activate Sistema
+
+Sistema -> Vantagem : Registrar vantagem
+activate Vantagem
+
+Vantagem -> Banco : Salvar vantagem
+activate Banco
+Banco --> Vantagem : Vantagem salva
+deactivate Banco
+
+Vantagem --> Sistema : Cadastro concluído
+deactivate Vantagem
+
+Sistema --> Empresa : Vantagem cadastrada
+deactivate Sistema
+
+== Resgate de Vantagem ==
+
+Aluno -> Sistema : Resgatar vantagem
+activate Sistema
+
+Sistema -> Vantagem : Solicitar resgate
+activate Vantagem
+
+Vantagem -> Banco : Verificar saldo
+activate Banco
+Banco --> Vantagem : Saldo suficiente
+deactivate Banco
+
+Vantagem -> Banco : Debitar moedas
+activate Banco
+Banco --> Vantagem : Débito realizado
+deactivate Banco
+
+Vantagem -> Banco : Registrar cupom
+activate Banco
+Banco --> Vantagem : Cupom gerado
+deactivate Banco
+
+Vantagem ->> Email : Enviar cupom por email
+activate Email
+Email --> Vantagem : Solicitação recebida
+deactivate Email
+
+Vantagem --> Sistema : Resgate concluído
+deactivate Vantagem
+
+Sistema --> Aluno : Cupom disponível
+deactivate Sistema
+
+@enduml
