@@ -6,6 +6,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import backend.coinwise.dtos.EmailResgateMessage;
+import backend.coinwise.dtos.EmailTransacaoMessage;
 import backend.coinwise.model.Resgate;
 import backend.coinwise.model.Transacao;
 
@@ -110,7 +112,7 @@ public class EmailService {
             """.replace("{CONTEUDO}", conteudo);
     }
 
-    // ─── Transações ───────────────────────────────────────────────────────────
+    // ─── Transações (via entidade JPA) ────────────────────────────────────────
 
     public void enviarEmailProfessor(Transacao transacao) {
         String conteudo = """
@@ -119,14 +121,27 @@ public class EmailService {
               <p class="subtitle">Sua transfer&ecirc;ncia foi realizada com sucesso.</p>
               <div class="card">
                 <div class="card-label">Detalhes da Transa&ccedil;&atilde;o</div>
-                <div class="row"><span class="rk">Aluno beneficiado</span><span class="rv">%s</span></div>
-                <div class="row"><span class="rk">Moedas enviadas</span><span class="rv gold">%s moedas</span></div>
-                <div class="row"><span class="rk">Motivo</span><span class="rv">%s</span></div>
+                <table width="100%%" cellpadding="0" cellspacing="0" border="0">
+                  <tr style="border-bottom:1px solid #2d3748;">
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Aluno beneficiado:</td>
+                    <td style="font-size:14px;font-weight:500;color:#e2e8f0;text-align:right;padding:10px 0;">%s</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #2d3748;">
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Moedas enviadas:</td>
+                    <td style="font-size:18px;font-weight:700;color:#f5c518;text-align:right;padding:10px 0;">%s moedas</td>
+                  </tr>
+                  <tr>
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Motivo:</td>
+                    <td style="font-size:14px;font-weight:500;color:#e2e8f0;text-align:right;padding:10px 0;">%s</td>
+                  </tr>
+                </table>
               </div>
-              <div class="pill">
-                <span class="pill-label">Seu saldo atual</span>
-                <span class="pill-value">%s moedas</span>
-              </div>
+              <table width="100%%" cellpadding="0" cellspacing="0" border="0" style="background:linear-gradient(135deg,#f5c518 0%%,#e6a800 100%%);border-radius:10px;margin-bottom:28px;">
+                <tr>
+                  <td style="padding:16px 24px;font-size:13px;color:#1a1a00;font-weight:500;">Seu saldo atual:</td>
+                  <td style="padding:16px 24px;font-size:20px;font-weight:800;color:#1a1a00;text-align:right;">%s moedas</td>
+                </tr>
+              </table>
             </div>
             """.formatted(
                 transacao.getProfessor().getNome(),
@@ -155,12 +170,19 @@ public class EmailService {
               </div>
               <div class="card">
                 <div class="card-label">Detalhes</div>
-                <div class="row"><span class="rk">Motivo</span><span class="rv">%s</span></div>
+                <table width="100%%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Motivo:</td>
+                    <td style="font-size:14px;font-weight:500;color:#e2e8f0;text-align:right;padding:10px 0;">%s</td>
+                  </tr>
+                </table>
               </div>
-              <div class="pill">
-                <span class="pill-label">Seu saldo atual</span>
-                <span class="pill-value">%s moedas</span>
-              </div>
+              <table width="100%%" cellpadding="0" cellspacing="0" border="0" style="background:linear-gradient(135deg,#f5c518 0%%,#e6a800 100%%);border-radius:10px;margin-bottom:28px;">
+                <tr>
+                  <td style="padding:16px 24px;font-size:13px;color:#1a1a00;font-weight:500;">Seu saldo atual:</td>
+                  <td style="padding:16px 24px;font-size:20px;font-weight:800;color:#1a1a00;text-align:right;">%s moedas</td>
+                </tr>
+              </table>
             </div>
             """.formatted(
                 transacao.getAluno().getNome(),
@@ -177,7 +199,7 @@ public class EmailService {
         );
     }
 
-    // ─── Resgates ─────────────────────────────────────────────────────────────
+    // ─── Resgates (via entidade JPA) ──────────────────────────────────────────
 
     public void enviarEmailCupomAluno(Resgate resgate) {
         String conteudo = """
@@ -192,8 +214,16 @@ public class EmailService {
                 <div class="coupon-body">
                   <div class="coupon-name">%s</div>
                   <div class="coupon-empresa">%s</div>
-                  <div class="row"><span class="rk">Custo</span><span class="rv gold">%s moedas</span></div>
-                  <div class="row"><span class="rk">Data do resgate</span><span class="rv">%s</span></div>
+                  <table width="100%%" cellpadding="0" cellspacing="0" border="0">
+                    <tr style="border-bottom:1px solid #2d3748;">
+                      <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Custo:</td>
+                      <td style="font-size:18px;font-weight:700;color:#f5c518;text-align:right;padding:10px 0;">%s moedas</td>
+                    </tr>
+                    <tr>
+                      <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Data do resgate:</td>
+                      <td style="font-size:14px;font-weight:500;color:#e2e8f0;text-align:right;padding:10px 0;">%s</td>
+                    </tr>
+                  </table>
                 </div>
                 <div class="coupon-code-section">
                   <div class="code-label">C&oacute;digo do cupom</div>
@@ -233,15 +263,37 @@ public class EmailService {
               <p class="subtitle">Um aluno resgatou uma vantagem da sua empresa. Confira os dados antes de liberar o benef&iacute;cio.</p>
               <div class="card-label" style="margin-bottom:12px">Dados do aluno</div>
               <div class="card">
-                <div class="row"><span class="rk">Nome</span><span class="rv">%s</span></div>
-                <div class="row"><span class="rk">E-mail</span><span class="rv mono">%s</span></div>
-                <div class="row"><span class="rk">RA</span><span class="rv mono">%s</span></div>
+                <table width="100%%" cellpadding="0" cellspacing="0" border="0">
+                  <tr style="border-bottom:1px solid #2d3748;">
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Nome:</td>
+                    <td style="font-size:14px;font-weight:500;color:#e2e8f0;text-align:right;padding:10px 0;">%s</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #2d3748;">
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">E-mail:</td>
+                    <td style="font-size:13px;font-family:monospace;color:#64748b;text-align:right;padding:10px 0;">%s</td>
+                  </tr>
+                  <tr>
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">RA:</td>
+                    <td style="font-size:13px;font-family:monospace;color:#64748b;text-align:right;padding:10px 0;">%s</td>
+                  </tr>
+                </table>
               </div>
               <div class="card-label" style="margin-bottom:12px;margin-top:16px">Dados do resgate</div>
               <div class="card">
-                <div class="row"><span class="rk">Vantagem</span><span class="rv">%s</span></div>
-                <div class="row"><span class="rk">Custo</span><span class="rv gold">%s moedas</span></div>
-                <div class="row"><span class="rk">Data</span><span class="rv">%s</span></div>
+                <table width="100%%" cellpadding="0" cellspacing="0" border="0">
+                  <tr style="border-bottom:1px solid #2d3748;">
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Vantagem:</td>
+                    <td style="font-size:14px;font-weight:500;color:#e2e8f0;text-align:right;padding:10px 0;">%s</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #2d3748;">
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Custo:</td>
+                    <td style="font-size:18px;font-weight:700;color:#f5c518;text-align:right;padding:10px 0;">%s moedas</td>
+                  </tr>
+                  <tr>
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Data:</td>
+                    <td style="font-size:14px;font-weight:500;color:#e2e8f0;text-align:right;padding:10px 0;">%s</td>
+                  </tr>
+                </table>
               </div>
               <div class="coupon-code-section" style="border-radius:12px;margin-bottom:16px">
                 <div class="code-label">C&oacute;digo de valida&ccedil;&atilde;o do cupom</div>
@@ -266,6 +318,216 @@ public class EmailService {
         enviarHtml(
             resgate.getVantagem().getEmpresa().getEmail(),
             "CoinClass \u2013 Novo resgate: " + resgate.getVantagem().getNome(),
+            base(conteudo)
+        );
+    }
+
+    // ─── Transações (via RabbitMQ — recebe DTO, sem JPA) ─────────────────────
+
+    public void enviarEmailProfessor(EmailTransacaoMessage msg) {
+        String conteudo = """
+            <div class="body">
+              <p class="greeting">Ol&aacute;, %s!</p>
+              <p class="subtitle">Sua transfer&ecirc;ncia foi realizada com sucesso.</p>
+              <div class="card">
+                <div class="card-label">Detalhes da Transa&ccedil;&atilde;o</div>
+                <table width="100%%" cellpadding="0" cellspacing="0" border="0">
+                  <tr style="border-bottom:1px solid #2d3748;">
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Aluno beneficiado:</td>
+                    <td style="font-size:14px;font-weight:500;color:#e2e8f0;text-align:right;padding:10px 0;">%s</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #2d3748;">
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Moedas enviadas:</td>
+                    <td style="font-size:18px;font-weight:700;color:#f5c518;text-align:right;padding:10px 0;">%s moedas</td>
+                  </tr>
+                  <tr>
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Motivo:</td>
+                    <td style="font-size:14px;font-weight:500;color:#e2e8f0;text-align:right;padding:10px 0;">%s</td>
+                  </tr>
+                </table>
+              </div>
+              <table width="100%%" cellpadding="0" cellspacing="0" border="0" style="background:linear-gradient(135deg,#f5c518 0%%,#e6a800 100%%);border-radius:10px;margin-bottom:28px;">
+                <tr>
+                  <td style="padding:16px 24px;font-size:13px;color:#1a1a00;font-weight:500;">Seu saldo atual:</td>
+                  <td style="padding:16px 24px;font-size:20px;font-weight:800;color:#1a1a00;text-align:right;">%s moedas</td>
+                </tr>
+              </table>
+            </div>
+            """.formatted(
+                msg.nomeProfessor(),
+                msg.nomeAluno(),
+                msg.valor(),
+                msg.motivo(),
+                msg.saldoProfessor()
+            );
+
+        enviarHtml(
+            msg.emailProfessor(),
+            "CoinClass \u2013 Confirma\u00e7\u00e3o de envio de moedas",
+            base(conteudo)
+        );
+    }
+
+    public void enviarEmailAluno(EmailTransacaoMessage msg) {
+        String conteudo = """
+            <div class="body">
+              <p class="greeting">Ol&aacute;, %s!</p>
+              <p class="subtitle">Um professor reconheceu seu m&eacute;rito. Parab&eacute;ns!</p>
+              <div class="coin-hero">
+                <div class="coin-amount">+%s</div>
+                <div class="coin-label">moedas recebidas</div>
+                <div class="coin-from">enviadas por <strong>%s</strong></div>
+              </div>
+              <div class="card">
+                <div class="card-label">Detalhes</div>
+                <table width="100%%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Motivo:</td>
+                    <td style="font-size:14px;font-weight:500;color:#e2e8f0;text-align:right;padding:10px 0;">%s</td>
+                  </tr>
+                </table>
+              </div>
+              <table width="100%%" cellpadding="0" cellspacing="0" border="0" style="background:linear-gradient(135deg,#f5c518 0%%,#e6a800 100%%);border-radius:10px;margin-bottom:28px;">
+                <tr>
+                  <td style="padding:16px 24px;font-size:13px;color:#1a1a00;font-weight:500;">Seu saldo atual:</td>
+                  <td style="padding:16px 24px;font-size:20px;font-weight:800;color:#1a1a00;text-align:right;">%s moedas</td>
+                </tr>
+              </table>
+            </div>
+            """.formatted(
+                msg.nomeAluno(),
+                msg.valor(),
+                msg.nomeProfessor(),
+                msg.motivo(),
+                msg.saldoAluno()
+            );
+
+        enviarHtml(
+            msg.emailAluno(),
+            "CoinClass \u2013 Voc\u00ea recebeu moedas!",
+            base(conteudo)
+        );
+    }
+
+    // ─── Resgates (via RabbitMQ — recebe DTO, sem JPA) ───────────────────────
+
+    public void enviarEmailCupomAluno(EmailResgateMessage msg) {
+        String conteudo = """
+            <div class="body">
+              <p class="greeting">Parab&eacute;ns, %s!</p>
+              <p class="subtitle">Seu resgate foi confirmado. Guarde o c&oacute;digo abaixo.</p>
+              <div class="coupon">
+                <div class="coupon-header">
+                  <span class="coupon-header-title">Cupom de Resgate</span>
+                  <span style="font-size:24px">&#127903;</span>
+                </div>
+                <div class="coupon-body">
+                  <div class="coupon-name">%s</div>
+                  <div class="coupon-empresa">%s</div>
+                  <table width="100%%" cellpadding="0" cellspacing="0" border="0">
+                    <tr style="border-bottom:1px solid #2d3748;">
+                      <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Custo:</td>
+                      <td style="font-size:18px;font-weight:700;color:#f5c518;text-align:right;padding:10px 0;">%s moedas</td>
+                    </tr>
+                    <tr>
+                      <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Data do resgate:</td>
+                      <td style="font-size:14px;font-weight:500;color:#e2e8f0;text-align:right;padding:10px 0;">%s</td>
+                    </tr>
+                  </table>
+                </div>
+                <div class="coupon-code-section">
+                  <div class="code-label">C&oacute;digo do cupom</div>
+                  <div class="code">%s</div>
+                </div>
+              </div>
+              <div class="info-box">
+                <strong>Como usar:</strong> Apresente este c&oacute;digo presencialmente na empresa parceira.
+                O atendente ir&aacute; validar o c&oacute;digo e liberar sua vantagem.
+              </div>
+              <div class="desc-card">
+                <div class="desc-label">Descri&ccedil;&atilde;o da vantagem</div>
+                <div class="desc-text">%s</div>
+              </div>
+            </div>
+            """.formatted(
+                msg.nomeAluno(),
+                msg.nomeVantagem(),
+                msg.nomeEmpresa(),
+                msg.valorDescontado(),
+                msg.dataResgate(),
+                msg.codigoCupom(),
+                msg.descVantagem()
+            );
+
+        enviarHtml(
+            msg.emailAluno(),
+            "CoinClass \u2013 Seu cupom: " + msg.nomeVantagem(),
+            base(conteudo)
+        );
+    }
+
+    public void enviarEmailConferenciaEmpresa(EmailResgateMessage msg) {
+        String conteudo = """
+            <div class="body">
+              <p class="greeting">Ol&aacute;, %s!</p>
+              <p class="subtitle">Um aluno resgatou uma vantagem da sua empresa. Confira os dados antes de liberar o benef&iacute;cio.</p>
+              <div class="card-label" style="margin-bottom:12px">Dados do aluno</div>
+              <div class="card">
+                <table width="100%%" cellpadding="0" cellspacing="0" border="0">
+                  <tr style="border-bottom:1px solid #2d3748;">
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Nome:</td>
+                    <td style="font-size:14px;font-weight:500;color:#e2e8f0;text-align:right;padding:10px 0;">%s</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #2d3748;">
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">E-mail:</td>
+                    <td style="font-size:13px;font-family:monospace;color:#64748b;text-align:right;padding:10px 0;">%s</td>
+                  </tr>
+                  <tr>
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">RA:</td>
+                    <td style="font-size:13px;font-family:monospace;color:#64748b;text-align:right;padding:10px 0;">%s</td>
+                  </tr>
+                </table>
+              </div>
+              <div class="card-label" style="margin-bottom:12px;margin-top:16px">Dados do resgate</div>
+              <div class="card">
+                <table width="100%%" cellpadding="0" cellspacing="0" border="0">
+                  <tr style="border-bottom:1px solid #2d3748;">
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Vantagem:</td>
+                    <td style="font-size:14px;font-weight:500;color:#e2e8f0;text-align:right;padding:10px 0;">%s</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #2d3748;">
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Custo:</td>
+                    <td style="font-size:18px;font-weight:700;color:#f5c518;text-align:right;padding:10px 0;">%s moedas</td>
+                  </tr>
+                  <tr>
+                    <td style="font-size:13px;color:#94a3b8;padding:10px 0;">Data:</td>
+                    <td style="font-size:14px;font-weight:500;color:#e2e8f0;text-align:right;padding:10px 0;">%s</td>
+                  </tr>
+                </table>
+              </div>
+              <div class="coupon-code-section" style="border-radius:12px;margin-bottom:16px">
+                <div class="code-label">C&oacute;digo de valida&ccedil;&atilde;o do cupom</div>
+                <div class="code">%s</div>
+              </div>
+              <div class="warn-box">
+                <strong>Aten&ccedil;&atilde;o:</strong> Confirme que o c&oacute;digo apresentado pelo aluno corresponde ao c&oacute;digo acima
+                e que os dados de identifica&ccedil;&atilde;o conferem antes de liberar a vantagem.
+              </div>
+            </div>
+            """.formatted(
+                msg.nomeEmpresa(),
+                msg.nomeAluno(),
+                msg.emailAluno(),
+                msg.raAluno(),
+                msg.nomeVantagem(),
+                msg.valorDescontado(),
+                msg.dataResgate(),
+                msg.codigoCupom()
+            );
+
+        enviarHtml(
+            msg.emailEmpresa(),
+            "CoinClass \u2013 Novo resgate: " + msg.nomeVantagem(),
             base(conteudo)
         );
     }
