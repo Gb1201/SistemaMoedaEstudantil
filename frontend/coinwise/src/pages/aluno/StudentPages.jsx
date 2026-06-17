@@ -52,6 +52,301 @@ function formatDate(dateStr) {
   }
 }
 
+// ── RedeemingModal ────────────────────────────────────────────────────────────
+// Modal dedicado para o estado de carregamento do resgate, melhorando a
+// heurística de "Visibilidade do Estado do Sistema" (Nielsen #1).
+function RedeemingModal({ vantagem }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      style={{
+        position        : "fixed", inset: 0,
+        background      : "rgba(6,12,26,0.92)",
+        backdropFilter  : "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        zIndex          : 200,
+        display         : "flex",
+        alignItems      : "center",
+        justifyContent  : "center",
+        padding         : "1.5rem",
+      }}
+    >
+      <motion.div
+        initial={{ scale: 0.88, y: 28 }}
+        animate={{ scale: 1,    y: 0  }}
+        exit   ={{ scale: 0.92, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 380, damping: 28 }}
+        style={{
+          background  : "linear-gradient(160deg,#0d1f3c 0%,#07121f 100%)",
+          border      : "1px solid rgba(250,204,21,0.2)",
+          borderRadius: "1.75rem",
+          padding     : "2.25rem 2rem",
+          maxWidth    : 380, width: "100%",
+          fontFamily  : FONT,
+          boxShadow   : "0 40px 100px rgba(0,0,0,0.7)",
+          textAlign   : "center",
+        }}
+      >
+        {/* Ícone animado */}
+        <div style={{ position: "relative", width: 72, height: 72, margin: "0 auto 1.5rem" }}>
+          {/* Anel giratório externo */}
+          <svg
+            viewBox="0 0 72 72"
+            style={{
+              position : "absolute", inset: 0,
+              animation: "spin 1.4s linear infinite",
+              width    : "100%", height: "100%",
+            }}
+          >
+            <circle
+              cx="36" cy="36" r="32"
+              fill="none"
+              stroke="rgba(250,204,21,0.15)"
+              strokeWidth="4"
+            />
+            <circle
+              cx="36" cy="36" r="32"
+              fill="none"
+              stroke="#facc15"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeDasharray="50 150"
+            />
+          </svg>
+          {/* Ícone central */}
+          <div style={{
+            position      : "absolute", inset: 0,
+            display       : "flex", alignItems: "center", justifyContent: "center",
+            fontSize      : "1.75rem",
+            background    : "rgba(250,204,21,0.08)",
+            borderRadius  : "50%",
+            border        : "1px solid rgba(250,204,21,0.18)",
+          }}>◈</div>
+        </div>
+
+        {/* Título */}
+        <p style={{
+          color      : "white",
+          fontWeight : 900,
+          fontSize   : "1.15rem",
+          margin     : "0 0 0.5rem",
+          letterSpacing: "-0.02em",
+        }}>
+          Estamos resgatando…
+        </p>
+
+        {/* Nome da vantagem */}
+        {vantagem?.nome && (
+          <p style={{
+            color     : "rgba(250,204,21,0.75)",
+            fontWeight: 600,
+            fontSize  : "0.82rem",
+            margin    : "0 0 0.75rem",
+          }}>
+            {vantagem.nome}
+          </p>
+        )}
+
+        {/* Descrição do processo */}
+        <p style={{
+          color     : "rgba(255,255,255,0.35)",
+          fontSize  : "0.78rem",
+          lineHeight: 1.6,
+          margin    : 0,
+        }}>
+          Estamos processando o seu resgate junto ao parceiro.
+          <br />Não feche esta janela.
+        </p>
+
+        {/* Barra de progresso indeterminada */}
+        <div style={{
+          marginTop   : "1.75rem",
+          height      : 4,
+          borderRadius: "999px",
+          background  : "rgba(255,255,255,0.07)",
+          overflow    : "hidden",
+        }}>
+          <motion.div
+            animate={{ x: ["-100%", "200%"] }}
+            transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
+            style={{
+              height      : "100%",
+              width       : "45%",
+              borderRadius: "999px",
+              background  : "linear-gradient(90deg, transparent, #facc15, transparent)",
+            }}
+          />
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ── SuccessModal ──────────────────────────────────────────────────────────────
+function SuccessModal({ success, onClose }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard?.writeText(success.cupom);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+      style={{
+        position            : "fixed", inset: 0,
+        background          : "rgba(6,12,26,0.88)",
+        backdropFilter      : "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
+        zIndex              : 200,
+        display             : "flex",
+        alignItems          : "center",
+        justifyContent      : "center",
+        padding             : "1.5rem",
+      }}
+    >
+      <motion.div
+        initial={{ scale: 0.88, y: 28 }}
+        animate={{ scale: 1,    y: 0  }}
+        exit   ={{ scale: 0.92, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 380, damping: 28 }}
+        onClick={e => e.stopPropagation()}
+        style={{
+          background  : "linear-gradient(160deg,#0a1f14 0%,#07121f 100%)",
+          border      : "1px solid rgba(74,222,128,0.22)",
+          borderRadius: "1.75rem",
+          padding     : "2rem",
+          maxWidth    : 400, width: "100%",
+          fontFamily  : FONT,
+          boxShadow   : "0 40px 100px rgba(0,0,0,0.65), 0 0 0 1px rgba(74,222,128,0.06) inset",
+          textAlign   : "center",
+        }}
+      >
+        {/* Ícone celebração */}
+        <motion.div
+          initial={{ scale: 0.5, rotate: -15 }}
+          animate={{ scale: 1,   rotate: 0   }}
+          transition={{ type: "spring", stiffness: 400, damping: 18, delay: 0.08 }}
+          style={{
+            width       : 68, height: 68,
+            borderRadius: "1.25rem",
+            background  : "rgba(74,222,128,0.1)",
+            border      : "1px solid rgba(74,222,128,0.25)",
+            display     : "flex", alignItems: "center", justifyContent: "center",
+            fontSize    : "2rem",
+            margin      : "0 auto 1.25rem",
+            boxShadow   : "0 0 32px rgba(74,222,128,0.15)",
+          }}
+        >
+          🎉
+        </motion.div>
+
+        {/* Título */}
+        <p style={{ color:"white", fontWeight:900, fontSize:"1.2rem", margin:"0 0 0.35rem", letterSpacing:"-0.02em" }}>
+          Resgate confirmado!
+        </p>
+        <p style={{ color:"rgba(74,222,128,0.65)", fontSize:"0.8rem", margin:"0 0 1.75rem", lineHeight:1.5 }}>
+          {success.nome}
+          {success.cupom ? " · verifique também seu e-mail." : ""}
+        </p>
+
+        {/* Bloco do cupom */}
+        {success.cupom && (
+          <div style={{
+            background  : "rgba(0,0,0,0.35)",
+            border      : "1px solid rgba(74,222,128,0.18)",
+            borderRadius: "1.1rem",
+            padding     : "1.1rem 1.25rem",
+            marginBottom: "1.5rem",
+          }}>
+            <p style={{ color:"rgba(255,255,255,0.3)", fontSize:"0.6rem", fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", margin:"0 0 0.6rem" }}>
+              Código do cupom
+            </p>
+            <p style={{
+              color          : "#4ade80",
+              fontWeight     : 900,
+              fontSize       : "1.35rem",
+              letterSpacing  : "0.12em",
+              margin         : "0 0 1rem",
+              fontVariantNumeric: "tabular-nums",
+              wordBreak      : "break-all",
+            }}>
+              {success.cupom}
+            </p>
+            <motion.button
+              onClick={handleCopy}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              style={{
+                width       : "100%",
+                padding     : "0.65rem",
+                borderRadius: "0.75rem",
+                border      : `1px solid ${copied ? "rgba(74,222,128,0.5)" : "rgba(74,222,128,0.25)"}`,
+                background  : copied ? "rgba(74,222,128,0.18)" : "rgba(74,222,128,0.08)",
+                color       : copied ? "#4ade80" : "rgba(74,222,128,0.7)",
+                fontWeight  : 700,
+                fontSize    : "0.78rem",
+                cursor      : "pointer",
+                fontFamily  : FONT,
+                transition  : "all 0.18s",
+                display     : "flex", alignItems: "center", justifyContent: "center", gap: 6,
+              }}
+            >
+              {copied ? "✓ Copiado!" : "Copiar código"}
+            </motion.button>
+          </div>
+        )}
+
+        {/* Novo saldo */}
+        <div style={{
+          display        : "flex",
+          justifyContent : "space-between",
+          alignItems     : "center",
+          padding        : "0.75rem 1rem",
+          background     : "rgba(250,204,21,0.05)",
+          border         : "1px solid rgba(250,204,21,0.12)",
+          borderRadius   : "0.875rem",
+          marginBottom   : "1.5rem",
+        }}>
+          <span style={{ color:"rgba(255,255,255,0.3)", fontSize:"0.72rem" }}>Saldo restante</span>
+          <span style={{ color:"#facc15", fontWeight:800, fontSize:"0.88rem" }}>
+            {success.saldoRestante?.toLocaleString("pt-BR")} moedas ◈
+          </span>
+        </div>
+
+        {/* Fechar */}
+        <motion.button
+          onClick={onClose}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+          style={{
+            width       : "100%",
+            padding     : "0.875rem",
+            borderRadius: "0.875rem",
+            border      : "none",
+            background  : "linear-gradient(135deg,#4ade80 0%,#22c55e 100%)",
+            color       : "#052e16",
+            fontWeight  : 800,
+            fontSize    : "0.9rem",
+            cursor      : "pointer",
+            fontFamily  : FONT,
+            boxShadow   : "0 4px 20px rgba(74,222,128,0.25)",
+          }}
+        >
+          Concluir
+        </motion.button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 // ── StudentTransactions ───────────────────────────────────────────────────────
 export function StudentTransactions({ currentUser }) {
   const [filter, setFilter] = useState("all");
@@ -261,19 +556,22 @@ export function StudentRewards({ currentUser, onBalanceUpdate }) {
     if (!redeemTarget) return;
     setRedeeming(true);
     setRedeemError(null);
+    // Fecha o modal de confirmação e abre o modal de progresso
+    const target = redeemTarget;
+    setRedeemTarget(null);
     try {
-      const res = await vantagensApi.resgatar(redeemTarget.id, currentUser.id);
-      const novoSaldo = res.saldoRestante ?? (saldo - redeemTarget.custo);
+      const res = await vantagensApi.resgatar(target.id, currentUser.id);
+      const novoSaldo = res.saldoRestante ?? (saldo - target.custo);
       setSaldo(novoSaldo);
       if (onBalanceUpdate) onBalanceUpdate(novoSaldo);
       setSuccess({
-        nome        : redeemTarget.nome,
+        nome        : target.nome,
         cupom       : res.codigoCupom,
         saldoRestante: novoSaldo,
       });
-      setRedeemTarget(null);
-      setTimeout(() => setSuccess(null), 8000);
     } catch (err) {
+      // Reabre o modal de confirmação com o erro
+      setRedeemTarget(target);
       setRedeemError(err.message || "Erro ao realizar o resgate.");
     } finally {
       setRedeeming(false);
@@ -305,57 +603,6 @@ export function StudentRewards({ currentUser, onBalanceUpdate }) {
             Troque suas moedas por benefícios reais
           </p>
         </motion.div>
-
-        {/* Success toast — mostra cupom */}
-        <AnimatePresence>
-          {success && (
-            <motion.div
-              initial={{ opacity:0, y:-10, scale:0.97 }}
-              animate={{ opacity:1, y:0,   scale:1 }}
-              exit   ={{ opacity:0, y:-6,  scale:0.97 }}
-              style={{
-                background   : "rgba(74,222,128,0.08)",
-                border       : "1px solid rgba(74,222,128,0.25)",
-                borderRadius : "1rem",
-                padding      : "1rem 1.25rem",
-                fontFamily   : FONT,
-              }}
-            >
-              <div style={{ display:"flex", alignItems:"center", gap:"0.875rem", marginBottom:"0.75rem" }}>
-                <span style={{ fontSize:"1.5rem" }}>🎉</span>
-                <div>
-                  <p style={{ color:"#4ade80", fontWeight:700, fontSize:"0.85rem", margin:0 }}>Resgate confirmado!</p>
-                  <p style={{ color:"rgba(74,222,128,0.6)", fontSize:"0.75rem", marginTop:2 }}>
-                    {success.nome} — verifique seu e-mail para o cupom.
-                  </p>
-                </div>
-              </div>
-              {success.cupom && (
-                <div style={{
-                  background   : "rgba(0,0,0,0.3)",
-                  border       : "1px solid rgba(74,222,128,0.2)",
-                  borderRadius : "0.75rem",
-                  padding      : "0.75rem 1rem",
-                  display      : "flex",
-                  alignItems   : "center",
-                  justifyContent:"space-between",
-                  gap          : "0.5rem",
-                }}>
-                  <div>
-                    <p style={{ color:"rgba(255,255,255,0.35)", fontSize:"0.6rem", fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", margin:"0 0 0.2rem" }}>Código do cupom</p>
-                    <p style={{ color:"#4ade80", fontWeight:800, fontSize:"0.78rem", letterSpacing:"0.06em", margin:0, fontVariantNumeric:"tabular-nums" }}>
-                      {success.cupom}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => navigator.clipboard?.writeText(success.cupom)}
-                    style={{ background:"rgba(74,222,128,0.12)", border:"1px solid rgba(74,222,128,0.25)", borderRadius:"0.5rem", padding:"0.35rem 0.65rem", color:"#4ade80", fontSize:"0.7rem", fontWeight:700, cursor:"pointer", fontFamily:FONT }}
-                  >Copiar</button>
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Balance card */}
         <motion.div {...fade(0.1)} style={{
@@ -537,7 +784,17 @@ export function StudentRewards({ currentUser, onBalanceUpdate }) {
           </div>
         )}
 
-        {/* Confirm Modal */}
+        {/* ── Modal de progresso do resgate ── */}
+        <AnimatePresence>
+          {redeeming && <RedeemingModal vantagem={null} />}
+        </AnimatePresence>
+
+        {/* ── Modal de sucesso com cupom ── */}
+        <AnimatePresence>
+          {success && <SuccessModal success={success} onClose={() => setSuccess(null)} />}
+        </AnimatePresence>
+
+        {/* ── Modal de confirmação ── */}
         <AnimatePresence>
           {redeemTarget && (
             <motion.div
@@ -606,7 +863,6 @@ export function StudentRewards({ currentUser, onBalanceUpdate }) {
                 <div style={{ display:"flex", gap:"0.75rem" }}>
                   <button
                     onClick={() => setRedeemTarget(null)}
-                    disabled={redeeming}
                     style={{
                       flex:1, padding:"0.875rem", borderRadius:"0.875rem",
                       border:"1.5px solid rgba(255,255,255,0.12)", background:"transparent",
@@ -617,28 +873,18 @@ export function StudentRewards({ currentUser, onBalanceUpdate }) {
 
                   <motion.button
                     onClick={handleConfirmRedeem}
-                    disabled={redeeming}
-                    whileHover={!redeeming ? { scale:1.02, boxShadow:"0 0 24px rgba(250,204,21,0.3)" } : {}}
-                    whileTap={!redeeming ? { scale:0.97 } : {}}
+                    whileHover={{ scale:1.02, boxShadow:"0 0 24px rgba(250,204,21,0.3)" }}
+                    whileTap={{ scale:0.97 }}
                     style={{
                       flex:2, padding:"0.875rem", borderRadius:"0.875rem", border:"none",
-                      background: redeeming ? "rgba(250,204,21,0.15)" : "linear-gradient(135deg,#facc15 0%,#f59e0b 100%)",
-                      color: redeeming ? "rgba(255,255,255,0.3)" : "#0b1d38",
+                      background: "linear-gradient(135deg,#facc15 0%,#f59e0b 100%)",
+                      color: "#0b1d38",
                       fontWeight:800, fontSize:"0.9rem",
-                      cursor: redeeming ? "not-allowed" : "pointer",
+                      cursor: "pointer",
                       fontFamily:FONT, transition:"all 0.2s",
-                      display:"flex", alignItems:"center", justifyContent:"center", gap:8,
                     }}
                   >
-                    {redeeming ? (
-                      <>
-                        <svg style={{ animation:"spin 0.8s linear infinite", width:15, height:15 }} viewBox="0 0 24 24" fill="none">
-                          <circle opacity={0.25} cx="12" cy="12" r="10" stroke="#0b1d38" strokeWidth="4"/>
-                          <path opacity={0.75} fill="#0b1d38" d="M4 12a8 8 0 018-8v8z"/>
-                        </svg>
-                        Resgatando…
-                      </>
-                    ) : "Resgatar agora →"}
+                    Resgatar agora →
                   </motion.button>
                 </div>
               </motion.div>
