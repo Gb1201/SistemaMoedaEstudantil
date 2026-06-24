@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
-import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 
-import StudentDashboard from "./pages/StudentDashboard";
-import { StudentTransactions, StudentRewards, StudentProfile } from "./pages/StudentPages";
+import StudentDashboard from "./pages/aluno/StudentDashboard";
+import { StudentTransactions, StudentRewards, StudentProfile } from "./pages/aluno/StudentPages";
 
-import { TeacherDashboard, SendCoinsPage, TeacherTransactions } from "./pages/TeacherPages";
+import { TeacherDashboard, SendCoinsPage, TeacherTransactions } from "./pages/professor/TeacherPages";
 
-import { CompanyDashboard, CreateRewardPage, CompanyRewardsList } from "./pages/CompanyPages";
+import { CompanyDashboard, CreateRewardPage, CompanyRewardsList, CompanyProfilePage } from "./pages/empresa/CompanyPages";
 
 const defaultPageByRole = {
   student: "student-dashboard",
@@ -45,11 +44,29 @@ const authViewToRoute = {
   register: "/register",
 };
 
+const VALID_ROLES = ["student", "teacher", "company"];
+
+const getStoredUser = () => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.currentUser);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !VALID_ROLES.includes(parsed.role)) {
+      localStorage.removeItem(STORAGE_KEYS.currentUser);
+      return null;
+    }
+    return parsed;
+  } catch {
+    localStorage.removeItem(STORAGE_KEYS.currentUser);
+    return null;
+  }
+};
+
 const getStoredValue = (key, fallback) => {
   if (typeof window === "undefined") return fallback;
   const value = localStorage.getItem(key);
   if (value === null) return fallback;
-
   try {
     return JSON.parse(value);
   } catch {
@@ -58,23 +75,20 @@ const getStoredValue = (key, fallback) => {
 };
 
 export default function App() {
-  const [authView, setAuthView] = useState(() => routeToAuthView[window.location.pathname] || "home"); // "home" | "login" | "register"
-  const [currentUser, setCurrentUser] = useState(() => getStoredValue(STORAGE_KEYS.currentUser, null));
-  const [currentPage, setCurrentPage] = useState(() => getStoredValue(STORAGE_KEYS.currentPage, null));
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [authView,     setAuthView]     = useState(() => routeToAuthView[window.location.pathname] || "home");
+  const [currentUser,  setCurrentUser]  = useState(() => getStoredUser());
+  const [currentPage,  setCurrentPage]  = useState(() => getStoredValue(STORAGE_KEYS.currentPage, null));
 
   useEffect(() => {
     const syncAuthViewFromUrl = () => {
       setAuthView(routeToAuthView[window.location.pathname] || "home");
     };
-
     window.addEventListener("popstate", syncAuthViewFromUrl);
     return () => window.removeEventListener("popstate", syncAuthViewFromUrl);
   }, []);
 
   useEffect(() => {
     if (currentUser) return;
-
     const route = authViewToRoute[authView] || "/home";
     if (window.location.pathname !== route) {
       window.history.pushState({}, "", route);
@@ -86,7 +100,6 @@ export default function App() {
       localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(currentUser));
       return;
     }
-
     localStorage.removeItem(STORAGE_KEYS.currentUser);
   }, [currentUser]);
 
@@ -95,7 +108,6 @@ export default function App() {
       localStorage.setItem(STORAGE_KEYS.currentPage, JSON.stringify(currentPage));
       return;
     }
-
     localStorage.removeItem(STORAGE_KEYS.currentPage);
   }, [currentPage]);
 
@@ -106,6 +118,10 @@ export default function App() {
   }, [currentPage, currentUser]);
 
   const handleLogin = (user) => {
+    if (!user || !VALID_ROLES.includes(user.role)) {
+      console.error("handleLogin recebeu usuário inválido:", user);
+      return;
+    }
     setCurrentUser(user);
     setCurrentPage(defaultPageByRole[user.role]);
   };
@@ -113,32 +129,35 @@ export default function App() {
   const handleLogout = () => {
     setCurrentUser(null);
     setCurrentPage(null);
-    setAuthView("home");
+    setAuthView("login");
   };
 
-  const navigate = (page) => setCurrentPage(page);
+  const navigate = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleUpdateUser = (updatedUser) => {
+    setCurrentUser(updatedUser);
+  };
 
   const renderPage = () => {
     const props = { currentUser, onNavigate: navigate };
     switch (currentPage) {
-      // Student
-      case "student-dashboard": return <StudentDashboard {...props} />;
-      case "student-transactions": return <StudentTransactions {...props} />;
-      case "student-rewards": return <StudentRewards {...props} />;
-      case "student-profile": return <StudentProfile {...props} />;
-      // Teacher
-      case "teacher-dashboard": return <TeacherDashboard {...props} />;
-      case "send-coins": return <SendCoinsPage {...props} />;
-      case "teacher-transactions": return <TeacherTransactions {...props} />;
-      // Company
-      case "company-dashboard": return <CompanyDashboard {...props} />;
-      case "create-reward": return <CreateRewardPage {...props} />;
-      case "company-rewards": return <CompanyRewardsList {...props} />;
+      case "student-dashboard":     return <StudentDashboard {...props} />;
+      case "student-transactions":  return <StudentTransactions {...props} />;
+      case "student-rewards":       return <StudentRewards {...props} />;
+      case "student-profile":       return <StudentProfile {...props} onLogout={handleLogout} />;
+      case "teacher-dashboard":     return <TeacherDashboard {...props} />;
+      case "send-coins":            return <SendCoinsPage {...props} onUpdateUser={handleUpdateUser} />;
+      case "teacher-transactions":  return <TeacherTransactions {...props} />;
+      case "company-dashboard":     return <CompanyDashboard {...props} />;
+      case "create-reward":         return <CreateRewardPage {...props} />;
+      case "company-rewards":       return <CompanyRewardsList {...props} />;
+      case "company-profile":       return <CompanyProfilePage {...props} onUpdateUser={handleUpdateUser} onLogout={handleLogout} />;
       default: return null;
     }
   };
 
-  // Auth screens
   if (!currentUser) {
     return (
       <AnimatePresence mode="wait">
@@ -165,35 +184,30 @@ export default function App() {
     );
   }
 
-  const sidebarWidth = sidebarCollapsed ? 72 : 240;
-
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
-      <Sidebar
+    <div className="min-h-screen font-sans" style={{ background: "#0f172a" }}>
+      <Navbar
         currentUser={currentUser}
         currentPage={currentPage}
         onNavigate={navigate}
         onLogout={handleLogout}
-        collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed(c => !c)}
-      />
-      <Navbar
-        currentUser={currentUser}
-        onToggleSidebar={() => setSidebarCollapsed(c => !c)}
-        collapsed={sidebarCollapsed}
       />
 
       <main
-        className="pt-16 min-h-screen transition-all duration-300"
-        style={{ marginLeft: sidebarWidth }}
+        className="min-h-screen"
+        style={{
+          paddingTop: 64, /* altura da navbar */
+          minWidth: 0,
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+        }}
       >
-        <div className="p-6 max-w-6xl mx-auto">
-          <AnimatePresence mode="wait">
-            <motion.div key={currentPage} {...pageTransition}>
-              {renderPage()}
-            </motion.div>
-          </AnimatePresence>
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div key={currentPage} {...pageTransition}>
+            {renderPage()}
+          </motion.div>
+        </AnimatePresence>
       </main>
     </div>
   );

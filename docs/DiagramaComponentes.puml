@@ -1,54 +1,37 @@
 @startuml
 title Diagrama de Componentes - Sistema de Moeda Estudantil
 
-'======================
-' FRONT-END
-'======================
-package "Client Side (Front-end)" {
-  component "Web App (React)" as ReactApp
+skinparam linetype ortho
 
-  note right of ReactApp
-    Telas: Login, Cadastro,
-    Extrato, Envio de Moedas,
-    Resgate de Vantagens
-  end note
+package "Lado do Cliente (Front-end)" {
+  component "Aplicação Web (React)" as ReactApp
 }
 
-'======================
-' BACK-END
-'======================
-package "Server Side (Back-end - MVC)" {
-
-  component "API Controller (REST)" as API
-  component "Auth / Security (JWT)" as Auth
-  component "Service Layer\n(Regras de Negócio)" as Service
-  component "Repository Layer\n(JPA / Hibernate)" as Repo
-
-  API --> Auth : valida token
-  API --> Service : delega requisições
-  Service --> Repo : acessa dados
+package "Lado do Servidor (Back-end - MVC)" {
+  component "Controlador API (REST)" as API
+  component "Autenticação / Segurança (JWT)" as Auth
+  component "Camada de Serviço\n(Regras de Negócio)" as Service
+  component "Camada de Repositório\n(JPA / Hibernate)" as Repo
 }
 
-'======================
-' SERVIÇO EXTERNO
-'======================
 package "Serviços Externos" {
-  component "SMTP / Email Provider" as Email
+  component "Provedor de E-mail" as Email
 }
 
-Service --> Email : envia notificações\n(moedas recebidas, cupom)
-
-'======================
-' DATA LAYER
-'======================
-package "Data Layer" {
+package "Camada de Dados" {
   database "PostgreSQL" as DB
 }
 
 '======================
-' CONEXÕES ENTRE CAMADAS
+' CONEXÕES bola-e-meia-lua
+' A -0)- B  →  A fornece, B consome
 '======================
-ReactApp --> API : HTTP / JSON (REST)
-Repo --> DB : CRUD / ORM
+ReactApp  -0)-  API     : API REST
+API       -0)-  Auth    : Autenticação JWT
+API       -0)-  Service : Serviço de Negócio
+Service   -0)-  Repo    : Persistência de Dados
+Service   -0)-  Email   : Serviço de E-mail
+
+Repo --> DB : ORM / SQL
 
 @enduml

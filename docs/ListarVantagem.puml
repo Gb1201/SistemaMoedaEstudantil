@@ -1,0 +1,59 @@
+@startuml Listagem_Vantagens
+
+title Listagem de Vantagens - Aluno
+
+actor "Aluno" as AL
+participant "VantagemController" as VC
+participant "VantagemService" as VS
+participant "AlunoRepository" as AR
+participant "VantagemRepository" as VR
+participant "LogService" as LS
+database "Banco de Dados" as DB
+
+AL -> VC : GET /vantagens
+activate VC
+
+VC -> VS : listarVantagens(alunoId)
+activate VS
+
+VS -> AR : findById(alunoId)
+activate AR
+
+AR -> DB : SELECT aluno WHERE id = ?
+DB --> AR : Aluno
+
+AR --> VS : Optional<Aluno>
+deactivate AR
+
+alt Aluno nao encontrado
+
+    VS --> VC : AlunoNotFoundException
+    deactivate VS
+
+    VC --> AL : 404 Not Found
+
+else Aluno autenticado
+
+    VS ->> LS : registrarAcessoListagem(alunoId, timestamp)
+
+    VS -> VR : findAll()
+    activate VR
+
+    VR -> DB : SELECT * FROM vantagem
+    DB --> VR : List<Vantagem>
+
+    VR --> VS : List<Vantagem>
+    deactivate VR
+
+    VS -> VS : converterParaDTO(vantagens)
+
+    VS --> VC : List<VantagemResponseDTO>
+    deactivate VS
+
+    VC --> AL : 200 OK
+
+end
+
+deactivate VC
+
+@enduml

@@ -1,0 +1,78 @@
+@startuml Cadastro_Empresa_Parceira
+title Caso de Uso: Realizar Cadastro (Empresa Parceira)
+
+actor "Empresa Parceira" as Empresa
+participant "EmpresaController\n(REST)" as Controller
+participant "EmpresaService" as Service
+participant "EmpresaRepository" as Repo
+participant "VantagemService" as VantagemService
+participant "VantagemRepository" as VantagemRepo
+participant "EmailService\n(@Async)" as Email
+database "Banco de Dados" as DB
+
+Empresa -> Controller : POST /empresas\n{ nome, cnpj, email, senha, descricao }
+
+activate Controller
+Controller -> Controller : validarDadosEntrada()
+
+alt dados inválidos
+  Controller --> Empresa : 400 Bad Request\n{ erros de validação }
+else dados válidos
+  Controller -> Service : cadastrarEmpresa(EmpresaDTO)
+  activate Service
+
+  Service -> Repo : existsByCnpj(cnpj)
+  activate Repo
+  Repo -> DB : SELECT * FROM empresa WHERE cnpj = ?
+  DB --> Repo : resultado
+  Repo --> Service : boolean
+  deactivate Repo
+
+  alt CNPJ já cadastrado
+    Service --> Controller : throw EmpresaJaExisteException
+    Controller --> Empresa : 409 Conflict\n{ "CNPJ já cadastrado" }
+  else CNPJ disponível
+    Service -> Repo : existsByEmail(email)
+    activate Repo
+    Repo -> DB : SELECT * FROM empresa WHERE email = ?
+    DB --> Repo : resultado
+    Repo --> Service : boolean
+    deactivate Repo
+
+    alt email já cadastrado
+      Service --> Controller : throw EmailJaCadastradoException
+      Controller --> Empresa : 409 Conflict\n{ "Email já cadastrado" }
+    else dados únicos
+      Service -> Service : encodeSenha(senha)
+
+      Service -> Repo : save(EmpresaParceira)
+      activate Repo
+      Repo -> DB : INSERT INTO empresa (...)
+      DB --> Repo : EmpresaParceira (com id)
+      Repo --> Service : EmpresaParceira salva
+      deactivate Repo
+
+      Service -> VantagemService : inicializarCatalogo(empresa.id)
+      activate VantagemService
+      VantagemService -> VantagemRepo : saveAll(vantagensDefault)
+      activate VantagemRepo
+      VantagemRepo -> DB : INSERT INTO vantagem (...)
+      DB --> VantagemRepo : ok
+      VantagemRepo --> VantagemService : Vantagens salvas
+      deactivate VantagemRepo
+      VantagemService --> Service : void
+      deactivate VantagemService
+
+      Service ->> Email : enviarEmailBoasVindas(email, nome)
+      note right of Email : @Async — não bloqueia\nNotificar por Email (include)
+
+      Service --> Controller : EmpresaResponseDTO
+      deactivate Service
+
+      Controller --> Empresa : 201 Created\n{ id, nome, cnpj, email, status: "ATIVO" }
+    end
+  end
+end
+
+deactivate Controller
+@enduml

@@ -137,12 +137,34 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
 | **Manutenibilidade** | Código orientado a objetos, sem SQL espalhado pela aplicação |
 | **Segurança** | Proteção automática contra SQL Injection via queries parametrizadas |
 
-### 🔹 Fluxo de dados
+## 🔹 Fluxo de dados
 
-## 🧬 Modelo de Dados (Resumo)
+#### 🧬 Modelo de Dados(DER)
 <div align="center">
-  <img src="docs/SistemaMoeda(2).png" alt="Diagrama do Modelo de Dados - CoinClass" width="800px">
+  <img src="docs/SistemaMoeda (2).png" alt="Diagrama do Modelo de Dados - CoinClass" width="800px">
 </div>
+
+---
+
+## 🏗 Diagramas
+
+#### 🔹 Diagrama de Classes
+<div align="center">
+  <img src="docs/DiagramaClasses.png" alt="Diagrama de Classes - CoinClass" width="800px">
+</div>
+
+
+#### 🔹 Diagrama de Componentes
+<div align="center">
+  <img src="docs/DiagramaComponentes.png" alt="Diagrama de Componentes - CoinClass" width="800px">
+</div>
+
+
+#### 🔹 Diagrama Caso de Uso
+<div align="center">
+  <img src="docs/DiagramaCasoUso.png" alt="Diagrama de Caso de USo - CoinClass" width="800px">
+</div>
+
 
 ---
 
@@ -160,7 +182,6 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
 ### Pré-requisitos
 - Java 17+
 - Node.js
-- Docker (opcional)
 
 ---
 
@@ -226,7 +247,7 @@ Descreva o propósito das pastas principais.
 │
 ├── /backend                     # 📁 Aplicação Spring Boot
 │   ├── .env.example             # 🧩 Variáveis de ambiente do Back-end.
-│   ├── Dockerfile               # 🐳 Docker build do Back-end.
+│   ├── Dockerfile               # 🐳 Docker build do Back-end(Para caso de Deploy)
 │   │
 │   ├── /src/main/java           # 📂 Código-fonte Java
 │   │   └── /com/exemplo/app
@@ -234,10 +255,8 @@ Descreva o propósito das pastas principais.
 │   │       ├── /service         # ⚙️ Regras e lógica de negócio.
 │   │       ├── /repository      # 🗄️ Repositórios (JPA/Hibernate).
 │   │       ├── /model           # 🧬 Entidades persistentes (JPA).
-│   │       ├── /domain          # 🌐 Objetos de Domínio puro (sem anotações).
 │   │       ├── /dto             # ✉️ Data Transfer Objects.
 │   │       ├── /config          # 🔧 Configurações gerais (DB, Swagger, CORS, etc.).
-│   │       ├── /exception       # 💥 Exceptions e handlers globais.
 │   │       └── /security        # 🛡️ Autenticação e Autorização (Spring Security).
 │   │
 │   ├── /src/main/resources      # 📂 Recursos do Spring Boot
@@ -261,12 +280,6 @@ Descreva o propósito das pastas principais.
 
 
 ---
-
-## 🧪 Testes
-
-### Testes Unitários e de Integração
-Para rodar os testes da unidade e integração:
-
 
 ## 🔗 Documentações utilizadas
 
