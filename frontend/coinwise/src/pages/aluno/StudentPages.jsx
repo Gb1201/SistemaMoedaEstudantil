@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { alunosApi, vantagensApi } from "../../api/api";
+import QRCode from "../../components/QRCode";
 
 // ── Shared tokens ─────────────────────────────────────────────────────────────
 const FONT  = "'Sora','Nunito',sans-serif";
@@ -269,6 +270,20 @@ function SuccessModal({ success, onClose }) {
             <p style={{ color:"rgba(255,255,255,0.3)", fontSize:"0.6rem", fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", margin:"0 0 0.6rem" }}>
               Código do cupom
             </p>
+
+            {/* QR Code — gerado no front a partir do código único que já vem do back-end.
+                Permite ao parceiro conferir o resgate escaneando, sem digitar nada. */}
+            <div style={{
+              display        : "flex",
+              justifyContent : "center",
+              margin         : "0 0 1rem",
+              padding        : "0.75rem",
+              background     : "#f0fdf4",
+              borderRadius   : "0.85rem",
+            }}>
+              <QRCode value={success.cupom} size={176} />
+            </div>
+
             <p style={{
               color          : "#4ade80",
               fontWeight     : 900,
