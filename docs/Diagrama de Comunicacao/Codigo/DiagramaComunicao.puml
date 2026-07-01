@@ -1,0 +1,62 @@
+@startuml
+title Sistema de Moeda Estudantil (CoinWise) - Diagrama de Comunicação
+
+actor Aluno
+actor Professor
+actor "Empresa Parceira" as Empresa
+
+rectangle "Frontend React\n(coinwise)" as Frontend
+rectangle "AlunoController" as AlunoCtrl
+rectangle "ProfessorController" as ProfessorCtrl
+rectangle "EmpresaController" as EmpresaCtrl
+rectangle "VantagemController" as VantagemCtrl
+
+rectangle "AlunoService" as AlunoSvc
+rectangle "ProfessorService" as ProfessorSvc
+rectangle "EmpresaService" as EmpresaSvc
+rectangle "VantagemService" as VantagemSvc
+rectangle "ViaCepService" as ViaCepSvc
+
+rectangle "EmailProducer" as EmailProd
+rectangle "EmailConsumer" as EmailCons
+rectangle "EmailService" as EmailSvc
+
+rectangle "SemestreScheduler" as Scheduler
+
+rectangle "Banco de Dados\n(PostgreSQL)" as DB
+rectangle "RabbitMQ" as MQ
+rectangle "ViaCEP API" as ViaCep
+rectangle "Servidor SMTP\n(Brevo)" as SMTP
+
+Aluno --> Frontend : 1 Cadastro/Login\nEnviar moedas
+Frontend --> AlunoCtrl : 2 HTTP REST
+AlunoCtrl --> AlunoSvc : 3 Regra de negócio
+AlunoSvc --> DB : 4 Persistir dados
+AlunoSvc --> EmailProd : 5 Solicitar e-mail
+
+Professor --> Frontend : 6 Login
+Frontend --> ProfessorCtrl : 7 HTTP REST
+ProfessorCtrl --> ProfessorSvc : 8 Regra de negócio
+ProfessorSvc --> DB : 9 Registrar transação
+ProfessorSvc --> EmailProd : 10 Solicitar e-mail
+
+Empresa --> Frontend : 11 Cadastro/Login
+Frontend --> EmpresaCtrl : 12 HTTP REST
+EmpresaCtrl --> EmpresaSvc : 13 Regra de negócio
+EmpresaSvc --> ViaCepSvc : 14 Consultar CEP
+ViaCepSvc --> ViaCep : 15 GET /ws/{cep}/json
+EmpresaSvc --> DB : 16 Persistir empresa
+
+Frontend --> VantagemCtrl : 17 Operações de vantagem
+VantagemCtrl --> VantagemSvc : 18 Regra de negócio
+VantagemSvc --> DB : 19 Persistir resgate
+
+EmailProd --> MQ : 20 Publicar mensagem
+MQ --> EmailCons : 21 Consumir mensagem
+EmailCons --> EmailSvc : 22 Solicitar envio
+EmailSvc --> SMTP : 23 Enviar e-mail
+
+Scheduler --> AlunoSvc : 24 Fechar semestre
+AlunoSvc --> DB : 25 Atualizar saldos
+
+@enduml

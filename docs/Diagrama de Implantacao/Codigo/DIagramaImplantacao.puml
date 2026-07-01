@@ -1,0 +1,60 @@
+@startuml
+title Sistema de Moeda Estudantil (CoinClass) - Diagrama de Implantação
+
+skinparam node {
+  BackgroundColor White
+  BorderColor Black
+}
+
+node "Dispositivo do Usuário\n<<device>>" as ClientDevice {
+  component "Navegador Web" as Browser
+}
+
+cloud "Vercel\n<<cloud platform>>" as Vercel {
+  node "Servidor Web / CDN" as WebServer {
+    artifact "coinwise-frontend\n(React + Vite)" as FrontendArtifact
+  }
+}
+
+cloud "Plataforma de Deploy\n(Render/Railway - Docker)\n<<cloud platform>>" as BackendCloud {
+  node "Container Docker\n<<container>>" as BackendContainer {
+    node "JVM (Java 17)" as JVM {
+      artifact "app.jar\n(Spring Boot - coinwise)" as BackendArtifact
+    }
+  }
+}
+
+cloud "Supabase\n<<cloud platform>>" as SupabaseCloud {
+  node "Servidor de Banco de Dados" as DBServer {
+    database "PostgreSQL\n(sistemaMoeda)" as PostgresDB
+  }
+}
+
+cloud "CloudAMQP\n<<cloud platform>>" as CloudAMQPCloud {
+  node "Servidor RabbitMQ" as MQServer {
+    queue "fila.email.transacao\nfila.email.resgate" as Queues
+  }
+}
+
+cloud "Brevo\n<<cloud platform>>" as BrevoCloud {
+  node "Servidor SMTP" as SMTPServer
+}
+
+cloud "ViaCEP\n<<cloud platform>>" as ViaCepCloud {
+  node "Servidor ViaCEP" as ViaCepServer {
+    artifact "API REST ViaCEP" as ViaCepAPI
+  }
+}
+
+Browser ..> FrontendArtifact : HTTPS
+
+FrontendArtifact ..> BackendArtifact : HTTPS / REST (JSON)\nVITE_API_URL
+
+FrontendArtifact ..> ViaCepAPI : HTTPS / REST (JSON)\n(consulta de CEP)
+
+BackendArtifact ..> PostgresDB : JDBC (5432)\nSSL
+BackendArtifact ..> Queues : AMQPS (5671)
+BackendArtifact ..> SMTPServer : SMTP (587)\nSTARTTLS
+BackendArtifact ..> ViaCepAPI : HTTPS / REST (JSON)
+
+@enduml
